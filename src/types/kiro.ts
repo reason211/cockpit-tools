@@ -729,7 +729,7 @@ type Translate = (key: string, options?: Record<string, unknown>) => string;
 
 export function formatKiroResetTime(resetAt: number | null | undefined, t: Translate): string {
   if (!resetAt || !Number.isFinite(resetAt)) {
-    return t('kiro.credits.planEndsUnknown', {
+    return t('common.shared.credits.planEndsUnknown', {
       defaultValue: '配额周期时间未知',
     });
   }
@@ -743,7 +743,7 @@ export function formatKiroResetTime(resetAt: number | null | undefined, t: Trans
   }
   const days = Math.floor(diff / 86400);
   if (days > 0) {
-    return t('kiro.credits.planEndsIn', {
+    return t('common.shared.credits.planEndsIn', {
       days,
       defaultValue: '配额周期剩余 {{days}} 天',
     });

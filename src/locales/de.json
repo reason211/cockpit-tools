@@ -18,9 +18,130 @@
     "enable": "Aktivieren",
     "disable": "Deaktivieren",
     "none": "Keine",
-    "detail": "Details",
+    "detail": "Einzelheiten",
     "editable": "Bearbeitbar",
-    "preview": "Vorschau"
+    "preview": "Vorschau",
+    "shared": {
+      "addAccount": "Konto hinzufügen",
+      "columns": {
+        "actions": "Aktionen",
+        "plan": "Planen",
+        "addOnPromptCredits": "Zusatz-Prompt-Credits",
+        "credits": "Credits",
+        "email": "E-Mail",
+        "promptCredits": "Prompt-Credits"
+      },
+      "empty": {
+        "title": "Keine Konten"
+      },
+      "export": "Exportieren",
+      "filter": {
+        "all": "Alle ({{count}})",
+        "enterprise": "UNTERNEHMEN ({{count}})",
+        "free": "KOSTENLOS ({{count}})",
+        "pro": "PRO ({{count}})",
+        "business": "GESCHÄFT ({{count}})",
+        "individual": "EINZEL ({{count}})"
+      },
+      "filterLabel": "Filter",
+      "import": {
+        "failedMsg": "Import fehlgeschlagen: {{error}}",
+        "label": "Importieren",
+        "importing": "Lokales Konto wird importiert...",
+        "pickFile": "JSON-Datei zum Import auswählen",
+        "orJson": "Oder aus einer JSON-Datei importieren"
+      },
+      "instances": {
+        "unsupported": {
+          "title": "Auf diesem System nicht unterstützt"
+        },
+        "quota": {
+          "chat": "Chat-Nachrichten",
+          "inline": "Inline-Vorschläge"
+        },
+        "subtitle": "Unabhängige Konfiguration pro Instanz, paralleler Betrieb mit mehreren Konten.",
+        "title": "Multi-Instanz"
+      },
+      "noMatch": {
+        "desc": "Versuchen Sie, Ihre Suche oder Filter anzupassen",
+        "title": "Keine passenden Konten"
+      },
+      "oauth": {
+        "failed": "Autorisierung fehlgeschlagen",
+        "hint": "Nach der Autorisierung wird dieses Fenster automatisch aktualisiert",
+        "openBrowser": "Im Browser öffnen",
+        "success": "Autorisierung erfolgreich",
+        "meta": "Läuft ab in: {{expires}}s; Abfrageintervall: {{interval}}s",
+        "preparing": "Autorisierungslink wird vorbereitet...",
+        "retry": "Autorisierungsinfos neu generieren",
+        "timeoutRetry": "Autorisierungslink aktualisieren",
+        "waiting": "Warte auf Autorisierung..."
+      },
+      "refreshAll": "Alle aktualisieren",
+      "refreshQuota": "Kontingent aktualisieren",
+      "search": "Konten suchen...",
+      "sort": {
+        "ascTooltip": "Aufsteigend (Klicken für Absteigend)",
+        "createdAt": "Erstelldatum",
+        "descTooltip": "Absteigend (Klicken für Aufsteigend)",
+        "toggleDirection": "Sortierrichtung ändern",
+        "credits": "Nach Restguthaben",
+        "planEnd": "Nach Zyklusendzeit"
+      },
+      "sortLabel": "Sortieren",
+      "token": {
+        "empty": "Bitte Token oder JSON eingeben",
+        "import": "Importieren",
+        "importFailedMsg": "Import fehlgeschlagen: {{error}}",
+        "importing": "Importiere...",
+        "importSuccessMsg": "{{count}} Konto/Konten importiert",
+        "placeholder": "JSON-Inhalt einfügen..."
+      },
+      "view": {
+        "grid": "Kartenansicht",
+        "list": "Listenansicht"
+      },
+      "addModal": {
+        "import": "Lokaler Import",
+        "oauth": "OAuth-Anmeldung",
+        "token": "JSON-Import"
+      },
+      "overview": {
+        "title": "Kontoübersicht"
+      },
+      "quota": {
+        "noData": "Keine Kontingentdaten",
+        "resetDone": "Zurückgesetzt",
+        "hourly": "5-Stunden-Kontingent",
+        "weekly": "Wöchentliches Kontingent"
+      },
+      "subtitle": "Verwalte deine GitHub Copilot-Konten",
+      "time": {
+        "lessThanMinute": "<1 Min",
+        "relativeDays": "{{days}} T",
+        "relativeDaysHours": "{{days}} T {{hours}} Std",
+        "relativeHours": "{{hours}} Std",
+        "relativeHoursMinutes": "{{hours}} Std {{minutes}} Min",
+        "relativeMinutes": "{{minutes}} Min",
+        "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      },
+      "credits": {
+        "leftInline": "{{left}} verbleibend",
+        "periodEndOnly": "Zyklusende: {{end}}",
+        "periodRange": "Zyklus: {{start}} - {{end}}",
+        "planEndsIn": "Zyklus wird in {{days}} Tagen zurückgesetzt",
+        "planEndsUnknown": "Zykluszeit nicht verfügbar",
+        "usedLine": "{{used}} / {{total}} verwendet"
+      },
+      "flowNotice": {
+        "alternative": "Alternative: Multi-Instanz-Isolierung verwenden (unterschiedliche --user-data-dir). Pro Instanz einmal anmelden und danach instanzweise starten, um schnell in die Zielkontoumgebung zu wechseln."
+      },
+      "injecting": "Wird injiziert...",
+      "usage": {
+        "resetLine": "Kontingent wird {{dateText}} zurückgesetzt.",
+        "resetUnknown": "Kontingent wird zurückgesetzt -"
+      }
+    }
   },
   "nav": {
     "overview": "Antigravity Konto",
@@ -29,10 +150,10 @@
     "fingerprints": "Fingerabdrücke",
     "settings": "Einstellungen",
     "codex": "Codex-Konten",
-    "dashboard": "Dashboard",
+    "dashboard": "Armaturenbrett",
     "instances": "Multi-Instanz",
-    "githubCopilot": "GitHub Copilot",
-    "windsurf": "Windsurf",
+    "githubCopilot": "GitHub-Copilot",
+    "windsurf": "Windsurfen",
     "morePlatforms": "Weitere Plattformen"
   },
   "settings": {
@@ -64,7 +185,7 @@
       "every1hour": "Jede Stunde",
       "minutes": "Min.",
       "refreshIntervalLimited": "Das Aufwachen beim Zurücksetzen des Kontingents ist aktiviert, daher beträgt das minimale Aktualisierungsintervall 2 Minuten.",
-      "storageTitle": "Directories & Storage",
+      "storageTitle": "Verzeichnisse und Speicher",
       "dataDir": "Datenverzeichnis",
       "dataDirDesc": "Speicherort für Konten und Konfigurationsdateien.",
       "fpDir": "Antigravity-Speicher",
@@ -110,17 +231,17 @@
       "windsurfAppPathPlaceholder": "Standardpfad",
       "windsurfPathSelect": "Auswählen",
       "windsurfPathReset": "Standard zurücksetzen",
-      "kiroSettingsTitle": "Kiro Settings",
-      "kiroAutoRefresh": "Kiro Auto Refresh Quota",
-      "kiroAutoRefreshDesc": "Background update frequency",
-      "kiroAppPath": "Kiro App Path",
-      "kiroAppPathDesc": "Leave empty to use default path",
-      "kiroAppPathPlaceholder": "Default path",
-      "kiroPathSelect": "Select",
-      "kiroPathReset": "Reset to default"
+      "kiroSettingsTitle": "Kiro-Einstellungen",
+      "kiroAutoRefresh": "Kiro Auto Refresh Kontingent",
+      "kiroAutoRefreshDesc": "Häufigkeit der Hintergrundaktualisierung",
+      "kiroAppPath": "Kiro-App-Pfad",
+      "kiroAppPathDesc": "Lassen Sie das Feld leer, um den Standardpfad zu verwenden",
+      "kiroAppPathPlaceholder": "Standardpfad",
+      "kiroPathSelect": "Wählen",
+      "kiroPathReset": "Auf Standard zurücksetzen"
     },
     "network": {
-      "apiTitle": "Antigravity Cockpit API",
+      "apiTitle": "Antigravity-Cockpit-API",
       "wsService": "WebSocket Service",
       "wsServiceDesc": "Externen Programmen (z. B. VS Code Erweiterung) die Verbindung erlauben",
       "preferredPort": "Bevorzugter Port",
@@ -134,17 +255,17 @@
       "saveFailed": "Speichern fehlgeschlagen: {{error}}"
     },
     "about": {
-      "appName": "Cockpit Tools",
+      "appName": "Cockpit-Tools",
       "slogan": "Professionelle Lösung zur Kontoverwaltung",
       "author": "Autor",
       "wechat": "WeChat",
       "github": "GitHub Repository",
       "alipay": "Alipay",
-      "wechatpay": "WeChat Pay",
+      "wechatpay": "WeChat-Bezahlung",
       "sponsor": "Sponsoren",
-      "sponsorDesc": "Support development",
-      "feedback": "Feedback",
-      "feedbackDesc": "Report issues/suggestions",
+      "sponsorDesc": "Unterstützen Sie die Entwicklung",
+      "feedback": "Rückmeldung",
+      "feedbackDesc": "Melden Sie Probleme/Vorschläge",
       "supportDev": "Entwicklung unterstützen",
       "checkUpdate": "Auf Updates prüfen",
       "checking": "Suche...",
@@ -180,8 +301,8 @@
     "status": {
       "current": "Aktuell",
       "disabled": "Deaktiviert",
-      "authInvalid": "Invalid credentials",
-      "refreshFailed": "Refresh failed",
+      "authInvalid": "Ungültige Anmeldeinformationen",
+      "refreshFailed": "Aktualisierung fehlgeschlagen",
       "normal": "Normal",
       "forbidden": "403",
       "forbidden_tooltip": "API gab 403 Forbidden zurück, Konto hat keinen Zugriff auf Gemini Code Assist",
@@ -211,7 +332,7 @@
       "all": "Alle ({{count}})",
       "pro": "PRO ({{count}})",
       "ultra": "ULTRA ({{count}})",
-      "free": "FREE ({{count}})"
+      "free": "KOSTENLOS ({{count}})"
     },
     "sortLabel": "Sortieren",
     "sort": {
@@ -234,7 +355,7 @@
     },
     "tabs": {
       "oauth": "OAuth",
-      "token": "Refresh Token",
+      "token": "Aktualisierungstoken",
       "import": "Importieren"
     },
     "oauth": {
@@ -260,7 +381,7 @@
     "confirmDeleteTag": "Tag \"{{tag}}\" löschen? Dieser Tag wird von {{count}} Konten entfernt.",
     "defaultGroup": "Standardgruppe",
     "filterTags": "Tags filtern",
-    "filterTagsCount": "Tags",
+    "filterTagsCount": "Schlagworte",
     "noAvailableTags": "Keine verfügbaren Tags",
     "clearFilter": "Filter löschen",
     "editTags": "Tags bearbeiten",
@@ -487,8 +608,8 @@
     "format": {
       "noReply": "(Keine Antwort)",
       "durationMs": "{{ms}}ms",
-      "tokens": "tokens={{prompt}}+{{completion}}={{total}}",
-      "traceId": "traceId={{traceId}}",
+      "tokens": "Token={{prompt}}+{{completion}}={{total}}",
+      "traceId": "TraceId={{traceId}}",
       "detailJoiner": ", ",
       "message": "[[{{model}}]]: {{reply}}{{suffix}}",
       "none": "--",
@@ -644,15 +765,11 @@
   "codex": {
     "title": "Codex-Konten verwalten",
     "subtitle": "Verwalte deine OpenAI Codex-Konten",
-    "addAccount": "Konto hinzufügen",
-    "refreshAll": "Alle aktualisieren",
-    "refreshQuota": "Kontingent aktualisieren",
     "switch": "Wechseln",
     "switched": "Gewechselt zu {{email}}",
     "switchFailed": "Wechsel fehlgeschlagen: {{error}}",
     "current": "Aktuell",
     "empty": {
-      "title": "Keine Konten",
       "description": "Klicke auf \"Konto hinzufügen\", um zu starten"
     },
     "addModal": {
@@ -664,11 +781,7 @@
     "oauth": {
       "desc": "Klicke unten und schließe die OpenAI-Autorisierung im Browser ab",
       "preparing": "Autorisierungslink wird vorbereitet...",
-      "openBrowser": "Im Browser öffnen",
-      "hint": "Nach der Autorisierung wird dieses Fenster automatisch aktualisiert",
       "exchanging": "Token wird ausgetauscht...",
-      "success": "Autorisierung erfolgreich",
-      "failed": "Autorisierung fehlgeschlagen",
       "portInUse": "Port {{port}} ist bereits belegt. Bitte schließen Sie die Anwendung, die ihn nutzt, und versuchen Sie es erneut.",
       "portInUseTitle": "Port belegt",
       "portInUseConfirm": "Port {{port}} ist belegt. Prozess schließen, der den Port verwendet?",
@@ -678,93 +791,56 @@
     },
     "token": {
       "desc": "auth.json-Inhalt oder Konto-JSON einfügen",
-      "placeholder": "JSON-Inhalt einfügen...",
-      "import": "Importieren",
-      "importing": "Importiere...",
-      "importSuccessMsg": "{{count}} Konto/Konten importiert",
-      "importFailedMsg": "Import fehlgeschlagen: {{error}}",
-      "empty": "Bitte Token oder JSON eingeben"
+      "placeholder": "JSON-Inhalt einfügen..."
     },
     "local": {
       "desc": "Aktuell eingeloggtes Konto aus ~/.codex/auth.json importieren",
       "import": "Lokales Konto abrufen"
     },
     "import": {
-      "label": "Importieren",
       "importing": "Lokales Konto wird importiert...",
       "successMsg": "Import erfolgreich: {{email}}",
-      "failedMsg": "Import fehlgeschlagen: {{error}}",
       "localDesc": "Codex-Konten aus lokal angemeldeten Sitzungen importieren."
     },
     "quota": {
       "hourly": "5-Stunden-Kontingent",
       "weekly": "Wöchentliches Kontingent",
-      "reset": "Zurücksetzen",
-      "noData": "Keine Kontingentdaten",
-      "resetDone": "Zurückgesetzt"
+      "reset": "Zurücksetzen"
     },
     "plan": {
-      "free": "FREE",
+      "free": "FREI",
       "plus": "PLUS",
       "pro": "PRO",
       "team": "TEAM",
-      "enterprise": "ENTERPRISE"
+      "enterprise": "UNTERNEHMEN"
     },
     "time": {
-      "relativeDays": "{{days}} T",
-      "relativeDaysHours": "{{days}} T {{hours}} Std",
-      "relativeHours": "{{hours}} Std",
-      "relativeHoursMinutes": "{{hours}} Std {{minutes}} Min",
-      "relativeMinutes": "{{minutes}} Min",
-      "lessThanMinute": "<1 Min",
       "today": "Heute {{time}}",
       "tomorrow": "Morgen {{time}}",
-      "dateTime": "{{date}} {{time}}",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      "dateTime": "{{date}} {{time}}"
     },
-    "search": "Konten suchen...",
     "view": {
-      "compact": "Kompaktansicht",
-      "list": "Listenansicht",
-      "grid": "Kartenansicht"
+      "compact": "Kompaktansicht"
     },
     "filter": {
-      "all": "Alle ({{count}})",
-      "free": "FREE ({{count}})",
       "plus": "PLUS ({{count}})",
-      "pro": "PRO ({{count}})",
-      "team": "TEAM ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
+      "team": "TEAM ({{count}})"
     },
-    "filterLabel": "Filter",
-    "sortLabel": "Sortieren",
     "sort": {
       "weekly": "Wöchentliches Kontingent",
       "hourly": "5-Stunden-Kontingent",
       "weeklyReset": "Wöchentliche Reset-Zeit",
-      "hourlyReset": "5-Stunden-Reset-Zeit",
-      "descTooltip": "Absteigend (Klicken für Aufsteigend)",
-      "ascTooltip": "Aufsteigend (Klicken für Absteigend)",
-      "toggleDirection": "Sortierrichtung ändern",
-      "createdAt": "Erstelldatum"
-    },
-    "export": "Exportieren",
-    "noMatch": {
-      "title": "Keine passenden Konten",
-      "desc": "Versuchen Sie, Ihre Suche oder Filter anzupassen"
+      "hourlyReset": "5-Stunden-Reset-Zeit"
     },
     "columns": {
-      "email": "Konto",
-      "plan": "Plan",
       "hourly": "5-Std-Quote",
-      "weekly": "Wochenquote",
-      "actions": "Aktionen"
+      "weekly": "Wochenquote"
     },
     "opencodeSwitch": "OpenCode-Schalter",
     "opencodeSwitchDesc": "Wechsel des Codex-Kontos in OpenCode synchronisieren",
     "opencodeSwitchFailed": "OpenCode-Schalter konnte nicht aktualisiert werden: {{error}}",
     "filterTags": "Tags filtern",
-    "filterTagsCount": "Tags",
+    "filterTagsCount": "Schlagworte",
     "noAvailableTags": "Keine verfügbaren Tags",
     "clearFilter": "Filter löschen",
     "editTags": "Tags bearbeiten",
@@ -773,7 +849,6 @@
       "comingSoon": "Multi-Instanz kommt bald",
       "comingSoonDesc": "Führen Sie mehrere Codex.app-Instanzen mit verschiedenen Konten gleichzeitig aus.",
       "unsupported": {
-        "title": "Auf diesem System nicht unterstützt",
         "desc": "Codex Multi-Instanz ist derzeit nur auf macOS verfügbar."
       },
       "quota": {
@@ -819,9 +894,9 @@
       "totalAccounts": "Gesamtanzahl"
     },
     "panels": {
-      "antigravity": "Antigravity",
-      "codex": "Codex",
-      "githubCopilot": "GitHub Copilot",
+      "antigravity": "Antigravitation",
+      "codex": "Kodex",
+      "githubCopilot": "GitHub-Copilot",
       "planDistribution": "Planverteilung",
       "current": "Aktuelles Konto",
       "recommended": "Empfohlenes Konto",
@@ -892,7 +967,7 @@
       "running": "Laufend",
       "stopped": "Gestoppt",
       "restarting": "Neu startend",
-      "starting": "Starting"
+      "starting": "Beginnt"
     },
     "labels": {
       "path": "Verzeichnis",
@@ -900,7 +975,7 @@
       "argsEmpty": "Keine",
       "bindAccount": "Gekoppeltes Konto",
       "unbound": "Nicht gekoppelt",
-      "quota": "Quota",
+      "quota": "Quote",
       "lastLaunched": "Zuletzt gestartet",
       "pendingInit": "Warten auf Initialisierung (zuerst einmal starten)"
     },
@@ -1036,129 +1111,44 @@
   },
   "githubCopilot": {
     "title": "GitHub Copilot-Konten verwalten",
-    "subtitle": "Verwalte deine GitHub Copilot-Konten",
-    "overview": {
-      "title": "Kontoübersicht"
-    },
     "instances": {
-      "title": "Multi-Instanz",
-      "subtitle": "Unabhängige Konfiguration pro Instanz, paralleler Betrieb mit mehreren Konten.",
       "unsupported": {
-        "title": "Auf diesem System nicht unterstützt",
         "desc": "GitHub Copilot Multi-Instanz ist derzeit nur auf macOS verfügbar."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "Konto hinzufügen",
-    "refreshAll": "Alle aktualisieren",
-    "refreshQuota": "Kontingent aktualisieren",
     "empty": {
-      "title": "Keine Konten",
       "description": "Klicke auf \"Konto hinzufügen\", um zu starten"
     },
-    "noMatch": {
-      "title": "Keine passenden Konten",
-      "desc": "Versuchen Sie, Ihre Suche oder Filter anzupassen"
-    },
     "addModal": {
-      "title": "GitHub Copilot-Konto hinzufügen",
-      "oauth": "OAuth-Anmeldung",
-      "token": "JSON-Import",
-      "import": "Lokaler Import"
+      "title": "GitHub Copilot-Konto hinzufügen"
     },
     "oauth": {
-      "desc": "Klicke unten und schließe die GitHub-Copilot-Autorisierung im Browser ab.",
-      "preparing": "Autorisierungslink wird vorbereitet...",
-      "openBrowser": "Im Browser öffnen",
-      "hint": "Nach der Autorisierung wird dieses Fenster automatisch aktualisiert",
-      "success": "Autorisierung erfolgreich",
-      "failed": "Autorisierung fehlgeschlagen",
-      "retry": "Autorisierungsinfos neu generieren",
-      "timeoutRetry": "Autorisierungslink aktualisieren",
-      "waiting": "Warte auf Autorisierung...",
-      "meta": "Läuft ab in: {{expires}}s; Abfrageintervall: {{interval}}s"
+      "desc": "Klicke unten und schließe die GitHub-Copilot-Autorisierung im Browser ab."
     },
     "token": {
-      "desc": "Fügen Sie Ihr GitHub-Copilot-Access-Token oder exportierte JSON-Daten ein.",
-      "placeholder": "JSON-Inhalt einfügen...",
-      "import": "Importieren",
-      "importing": "Importiere...",
-      "importSuccessMsg": "{{count}} Konto/Konten importiert",
-      "importFailedMsg": "Import fehlgeschlagen: {{error}}",
-      "empty": "Bitte Token oder JSON eingeben"
+      "desc": "Fügen Sie Ihr GitHub-Copilot-Access-Token oder exportierte JSON-Daten ein."
     },
     "import": {
-      "label": "Importieren",
-      "localDesc": "GitHub Copilot-Konten aus lokal angemeldeten Sitzungen importieren.",
-      "importing": "Lokales Konto wird importiert...",
-      "failedMsg": "Import fehlgeschlagen: {{error}}",
-      "pickFile": "JSON-Datei zum Import auswählen"
+      "localDesc": "GitHub Copilot-Konten aus lokal angemeldeten Sitzungen importieren."
     },
-    "quota": {
-      "hourly": "5-Stunden-Kontingent",
-      "weekly": "Wöchentliches Kontingent",
-      "noData": "Keine Kontingentdaten",
-      "resetDone": "Zurückgesetzt"
-    },
-    "usage": {
-      "resetUnknown": "Kontingent wird zurückgesetzt -",
-      "resetLine": "Kontingent wird {{dateText}} zurückgesetzt."
-    },
-    "time": {
-      "relativeDays": "{{days}} T",
-      "relativeDaysHours": "{{days}} T {{hours}} Std",
-      "relativeHours": "{{hours}} Std",
-      "relativeHoursMinutes": "{{hours}} Std {{minutes}} Min",
-      "relativeMinutes": "{{minutes}} Min",
-      "lessThanMinute": "<1 Min",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "Konten suchen...",
-    "view": {
-      "list": "Listenansicht",
-      "grid": "Kartenansicht"
-    },
-    "filter": {
-      "all": "Alle ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Filtern",
-    "sortLabel": "Sortieren",
     "sort": {
-      "createdAt": "Erstelldatum",
       "weekly": "Wöchentliches Kontingent",
       "hourly": "5-Stunden-Kontingent",
       "weeklyReset": "Wöchentliche Reset-Zeit",
-      "hourlyReset": "5-Stunden-Reset-Zeit",
-      "descTooltip": "Absteigend (Klicken für Aufsteigend)",
-      "ascTooltip": "Aufsteigend (Klicken für Absteigend)",
-      "toggleDirection": "Sortierrichtung ändern"
+      "hourlyReset": "5-Stunden-Reset-Zeit"
     },
     "columns": {
-      "email": "Konto",
-      "plan": "Tarif",
       "hourly": "5-Std-Quote",
-      "weekly": "Wochenquote",
-      "actions": "Aktionen"
+      "weekly": "Wochenquote"
     },
-    "export": "Exportieren",
     "flowNotice": {
       "title": "GitHub-Copilot-Kontoleitfaden (zum Auf-/Zuklappen klicken)",
       "desc": "Für den Kontowechsel muss der lokale VS-Code-Auth-Speicher gelesen und der System-Anmeldedienst zum Entschlüsseln und Zurückschreiben verwendet werden; die Datenverarbeitung erfolgt nur lokal.",
       "reason": "Berechtigungsumfang: Lesen der VS-Code-Auth-Datenbank (state.vscdb) und Aufruf der System-Verschlüsselung (Windows DPAPI / macOS Keychain / Linux Secret Service) zum Entschlüsseln und Zurückschreiben.",
       "storage": "Lesebereich: Es werden nur GitHub-Login-Sitzungsdaten verarbeitet; alle Prozesse werden lokal ausgeführt.",
-      "alternative": "Alternative: Multi-Instanz-Isolierung verwenden (unterschiedliche --user-data-dir). Pro Instanz einmal anmelden und danach instanzweise starten, um schnell in die Zielkontoumgebung zu wechseln.",
       "inject": "Ein-Klick-Wechsel: Dieses Tool liest das lokale Verschlüsselungsmaterial von VS Code (DPAPI/Keychain/Secret Service), entschlüsselt die Auth-Sitzung in state.vscdb, ersetzt das GitHub-Copilot-Token und verschlüsselt sie erneut – alles lokal auf deinem Gerät."
     },
     "injectToVSCode": "Zu VS Code wechseln",
-    "injecting": "Wird injiziert...",
     "injectSuccess": "Das Token wurde erfolgreich in VS Code eingefügt. VS Code wird gestartet.",
     "injectRequireClose": "Bitte schließen Sie VS Code vor dem Injizieren."
   },
@@ -1202,10 +1192,10 @@
     },
     "windsurfRefreshInterval": "Kontingent automatisch aktualisieren",
     "kiro": {
-      "title": "Kiro Settings",
-      "appPath": "Kiro Path"
+      "title": "Kiro-Einstellungen",
+      "appPath": "Kiro-Pfad"
     },
-    "kiroRefreshInterval": "Auto refresh quota"
+    "kiroRefreshInterval": "Kontingent für automatische Aktualisierung"
   },
   "quotaAlert": {
     "bannerText": "Kontingentwarnung für {{email}} (Schwelle {{threshold}} %, Minimum {{lowest}} %, Modelle: {{models}})",
@@ -1236,145 +1226,47 @@
   },
   "windsurf": {
     "title": "Windsurf-Konten verwalten",
-    "subtitle": "Verwalte deine Windsurf-Konten",
-    "overview": {
-      "title": "Kontoübersicht"
-    },
     "instances": {
-      "title": "Multi-Instanz",
-      "subtitle": "Unabhängige Konfiguration pro Instanz, paralleler Betrieb mit mehreren Konten.",
       "unsupported": {
-        "title": "Auf diesem System nicht unterstützt",
         "desc": "Windsurf Multi-Instanz ist derzeit nur auf macOS verfügbar."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "Konto hinzufügen",
-    "refreshAll": "Alle aktualisieren",
-    "refreshQuota": "Kontingent aktualisieren",
     "empty": {
-      "title": "Keine Konten",
       "description": "Klicke auf \"Konto hinzufügen\", um zu starten"
     },
-    "noMatch": {
-      "title": "Keine passenden Konten",
-      "desc": "Versuchen Sie, Ihre Suche oder Filter anzupassen"
-    },
     "addModal": {
-      "title": "Windsurf-Konto hinzufügen",
-      "oauth": "OAuth-Anmeldung",
-      "token": "JSON-Import",
-      "import": "Lokaler Import"
+      "title": "Windsurf-Konto hinzufügen"
     },
     "oauth": {
-      "desc": "Klicke unten und schließe die Windsurf-Windsurf-Autorisierung im Browser ab.",
-      "preparing": "Autorisierungslink wird vorbereitet...",
-      "openBrowser": "Im Browser öffnen",
-      "hint": "Nach der Autorisierung wird dieses Fenster automatisch aktualisiert",
-      "success": "Autorisierung erfolgreich",
-      "failed": "Autorisierung fehlgeschlagen",
-      "retry": "Autorisierungsinfos neu generieren",
-      "timeoutRetry": "Autorisierungslink aktualisieren",
-      "waiting": "Warte auf Autorisierung...",
-      "meta": "Läuft ab in: {{expires}}s; Abfrageintervall: {{interval}}s"
+      "desc": "Klicke unten und schließe die Windsurf-Windsurf-Autorisierung im Browser ab."
     },
     "token": {
-      "desc": "Fügen Sie Ihr Windsurf-Windsurf-Access-Token oder exportierte JSON-Daten ein.",
-      "placeholder": "JSON-Inhalt einfügen...",
-      "import": "Importieren",
-      "importing": "Importiere...",
-      "importSuccessMsg": "{{count}} Konto/Konten importiert",
-      "importFailedMsg": "Import fehlgeschlagen: {{error}}",
-      "empty": "Bitte Token oder JSON eingeben"
+      "desc": "Fügen Sie Ihr Windsurf-Windsurf-Access-Token oder exportierte JSON-Daten ein."
     },
     "import": {
-      "label": "Importieren",
       "localDesc": "Windsurf-Konten aus lokal angemeldeten Sitzungen importieren.",
-      "localClient": "Aus lokalem Windsurf importieren",
-      "orJson": "Oder aus JSON-Datei importieren",
-      "importing": "Lokales Konto wird importiert...",
-      "failedMsg": "Import fehlgeschlagen: {{error}}",
-      "pickFile": "JSON-Datei zum Import auswählen"
-    },
-    "quota": {
-      "hourly": "5-Stunden-Kontingent",
-      "weekly": "Wöchentliches Kontingent",
-      "noData": "Keine Kontingentdaten",
-      "resetDone": "Zurückgesetzt"
+      "localClient": "Aus lokalem Windsurf importieren"
     },
     "credits": {
       "title": "Tarif",
       "renewMonthly": "Credits werden jeden Monat erneuert",
-      "planEndsIn": "Zyklus wird in {{days}} Tagen zurückgesetzt",
-      "planEndsUnknown": "Zykluszeit nicht verfügbar",
-      "periodRange": "Zyklus: {{start}} - {{end}}",
-      "periodEndOnly": "Zyklusende: {{end}}",
       "left": "{{count}} Credits verbleibend",
       "leftUnknown": "Verbleibende Credits -",
       "promptLeft": "{{remaining}}/{{total}} Prompt-Credits verbleibend",
       "promptLeftNoTotal": "{{remaining}} Prompt-Credits verbleibend",
       "promptLeftUnknown": "Verbleibende Prompt-Credits -",
-      "addOnAvailable": "{{count}} Zusatz-Credits verfügbar",
-      "usedLine": "{{used}} / {{total}} verwendet",
-      "leftInline": "{{left}} verbleibend"
-    },
-    "usage": {
-      "resetUnknown": "Kontingent wird zurückgesetzt -",
-      "resetLine": "Kontingent wird {{dateText}} zurückgesetzt."
-    },
-    "time": {
-      "relativeDays": "{{days}} T",
-      "relativeDaysHours": "{{days}} T {{hours}} Std",
-      "relativeHours": "{{hours}} Std",
-      "relativeHoursMinutes": "{{hours}} Std {{minutes}} Min",
-      "relativeMinutes": "{{minutes}} Min",
-      "lessThanMinute": "<1 Min",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "Konten suchen...",
-    "view": {
-      "list": "Listenansicht",
-      "grid": "Kartenansicht"
-    },
-    "filter": {
-      "all": "Alle ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Filtern",
-    "sortLabel": "Sortieren",
-    "sort": {
-      "createdAt": "Erstelldatum",
-      "credits": "Nach verbleibenden Credits",
-      "planEnd": "Nach Zyklusende",
-      "descTooltip": "Absteigend (Klicken für Aufsteigend)",
-      "ascTooltip": "Aufsteigend (Klicken für Absteigend)",
-      "toggleDirection": "Sortierrichtung ändern"
+      "addOnAvailable": "{{count}} Zusatz-Credits verfügbar"
     },
     "columns": {
-      "email": "E-Mail",
-      "plan": "Tag",
-      "promptCredits": "Prompt-Credits",
-      "addOnPromptCredits": "Zusatz-Prompt-Credits",
-      "credits": "Credits",
-      "actions": "Aktionen"
+      "plan": "Tag"
     },
-    "export": "Exportieren",
     "injectToVSCode": "Zu Windsurf wechseln",
-    "injecting": "Wird injiziert...",
     "injectSuccess": "Wechsel abgeschlossen. Windsurf wird gestartet.",
     "injectRequireClose": "Bitte schließen Sie Windsurf vor dem Wechsel.",
     "flowNotice": {
       "title": "Windsurf-Windsurf-Kontoleitfaden (zum Auf-/Zuklappen klicken)",
       "desc": "Für den Kontowechsel muss der lokale VS-Code-Auth-Speicher gelesen und der System-Anmeldedienst zum Entschlüsseln und Zurückschreiben verwendet werden; die Datenverarbeitung erfolgt nur lokal.",
       "inject": "Ein-Klick-Wechsel: Dieses Tool liest das lokale Verschlüsselungsmaterial von Windsurf (DPAPI/Keychain/Secret Service), entschlüsselt die Auth-Sitzung in state.vscdb, ersetzt das Windsurf-Windsurf-Token und verschlüsselt sie erneut – alles lokal auf deinem Gerät.",
-      "alternative": "Alternative: Multi-Instanz-Isolierung verwenden (unterschiedliche --user-data-dir). Pro Instanz einmal anmelden und danach instanzweise starten, um schnell in die Zielkontoumgebung zu wechseln.",
       "reason": "Berechtigungsumfang: Lesen der VS-Code-Auth-Datenbank (state.vscdb) und Aufruf der System-Verschlüsselung (Windows DPAPI / macOS Keychain / Linux Secret Service) zum Entschlüsseln und Zurückschreiben.",
       "storage": "Lesebereich: Es werden nur Windsurf-Login-Sitzungsdaten verarbeitet; alle Prozesse werden lokal ausgeführt."
     }
@@ -1425,140 +1317,62 @@
   },
   "kiro": {
     "account": {
-      "signedInWith": "Signed in with {{provider}}",
-      "providerUnknown": "Unknown",
-      "userId": "User ID"
+      "signedInWith": "Angemeldet mit {{provider}}",
+      "providerUnknown": "Unbekannt",
+      "userId": "Benutzer-ID"
     },
     "credits": {
-      "planEndsIn": "Zyklus wird in {{days}} Tagen zurückgesetzt",
-      "planEndsUnknown": "Zykluszeit nicht verfügbar",
-      "periodRange": "Zyklus: {{start}} - {{end}}",
-      "periodEndOnly": "Zyklusende: {{end}}",
-      "estimatedResetOn": "Estimated Usage resets on {{date}}",
-      "bonusUsageLine": "{{used}} used / {{total}} total",
-      "planUsageCoveredLine": "{{used}} used / {{total}} covered in plan",
-      "usedLine": "{{used}} / {{total}} verwendet",
-      "leftInline": "{{left}} verbleibend",
-      "expiryDays": "{{days}} days",
+      "estimatedResetOn": "Geschätzte Nutzung wird am {{date}} zurückgesetzt",
+      "bonusUsageLine": "{{used}} verwendet / {{total}} insgesamt",
+      "planUsageCoveredLine": "{{used}} verwendet / {{total}} im Plan abgedeckt",
+      "expiryDays": "{{days}} Tage",
       "expiryUnknown": "—",
-      "resetNow": "Reset soon",
-      "resetInHours": "Resets in {{hours}}h",
-      "resetInMinutes": "Resets in {{minutes}}m"
+      "resetNow": "Bald zurücksetzen",
+      "resetInHours": "Wird in {{hours}}h zurückgesetzt",
+      "resetInMinutes": "Wird in {{minutes}}m zurückgesetzt"
     },
     "columns": {
-      "email": "E-Mail",
-      "plan": "Tag",
-      "credits": "Credits",
-      "promptCredits": "Prompt-Credits",
-      "addOnPromptCredits": "Zusatz-Prompt-Credits",
-      "bonusCredits": "Bonus Credits",
-      "estimatedUsage": "Estimated Usage",
-      "expiry": "Expiry",
-      "estUsage": "Est. Usage",
-      "actions": "Aktionen"
+      "bonusCredits": "Bonus-Credits",
+      "estimatedUsage": "Geschätzte Nutzung",
+      "expiry": "Ablauf",
+      "estUsage": "Schätzung: Verwendung"
     },
     "plan": {
       "free": "Kiro Free",
-      "individual": "Kiro Individual",
+      "individual": "Kiro Einzelperson",
       "pro": "Kiro Pro",
-      "business": "Kiro Business",
+      "business": "Kiro-Geschäft",
       "enterprise": "Kiro Enterprise",
-      "unknown": "Unknown"
+      "unknown": "Unbekannt"
     },
     "flowNotice": {
-      "title": "Kiro-Kiro-Kontoleitfaden (zum Auf-/Zuklappen klicken)",
-      "desc": "Für den Kontowechsel muss der lokale VS-Code-Auth-Speicher gelesen und der System-Anmeldedienst zum Entschlüsseln und Zurückschreiben verwendet werden; die Datenverarbeitung erfolgt nur lokal.",
-      "reason": "Berechtigungsumfang: Lesen der VS-Code-Auth-Datenbank (state.vscdb) und Aufruf der System-Verschlüsselung (Windows DPAPI / macOS Keychain / Linux Secret Service) zum Entschlüsseln und Zurückschreiben.",
-      "storage": "Lesebereich: Es werden nur Kiro-Login-Sitzungsdaten verarbeitet; alle Prozesse werden lokal ausgeführt."
+      "title": "Kiro-Kontoverwaltung (zum Ausklappen/Einklappen klicken)",
+      "desc": "Beim Kontowechsel werden lokale Kiro-Auth-Dateien und Instanzeinstellungen auf diesem Gerät gelesen und geschrieben; bei OAuth-Anmeldung und Quotenaktualisierung werden offizielle Kiro-APIs aufgerufen.",
+      "reason": "Verarbeitete Pfade umfassen ~/.aws/sso/cache/kiro-auth-token.json, die Instanzdatei profile.json sowie den Eintrag kiro.kiroAgent in state.vscdb.",
+      "storage": "Verarbeitete Daten umfassen Kiro-Sitzungs- und Quoteninformationen; bei Aufrufen der offiziellen Kiro-APIs werden erforderliche Auth-Felder gesendet (z. B. code, refreshToken, accessToken und profileArn)."
     },
-    "title": "Kiro Account Management",
-    "subtitle": "Monitor quota status for all accounts in real time.",
-    "overview": {
-      "title": "Account Overview"
-    },
+    "title": "Kiro-Kontoverwaltung",
     "instances": {
-      "title": "Multi-Instance",
-      "subtitle": "Independent configs per instance for parallel multi-account runs.",
       "unsupported": {
-        "title": "Unsupported on this system",
-        "descPlatform": "Kiro multi-instance is available only on macOS, Windows and Linux."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
+        "descPlatform": "Die Multiinstanz von Kiro ist nur auf macOS, Windows und Linux verfügbar."
       }
     },
-    "addAccount": "Add Account",
-    "refreshAll": "Refresh All",
-    "refreshQuota": "Refresh Quota",
     "empty": {
-      "title": "No Accounts",
-      "description": "Click \"Add Account\" to start managing your Kiro accounts"
-    },
-    "noMatch": {
-      "title": "No matching accounts",
-      "desc": "Try adjusting your search or filters"
+      "description": "Klicken Sie auf „Konto hinzufügen“, um mit der Verwaltung Ihrer Kiro-Konten zu beginnen"
     },
     "addModal": {
-      "title": "Add Kiro Account",
-      "oauth": "OAuth",
-      "token": "Token / JSON",
-      "import": "Local Import"
+      "title": "Kiro-Konto hinzufügen"
     },
     "oauth": {
-      "desc": "Click the button below and complete Kiro authorization in your browser.",
-      "preparing": "Preparing authorization info...",
-      "openBrowser": "Open in Browser",
-      "hint": "Once authorized, this window will update automatically",
-      "success": "Authorization successful",
-      "failed": "Authorization failed",
-      "retry": "Regenerate authorization info",
-      "timeoutRetry": "Refresh authorization link",
-      "waiting": "Waiting for authorization...",
-      "meta": "Expires in: {{expires}}s; Poll interval: {{interval}}s"
+      "desc": "Klicken Sie auf die Schaltfläche unten und schließen Sie die Kiro-Autorisierung in Ihrem Browser ab."
     },
     "token": {
-      "desc": "Paste your Kiro access token or exported JSON data.",
-      "placeholder": "Paste token or JSON...",
-      "import": "Import",
-      "importing": "Importing...",
-      "importSuccessMsg": "Imported {{count}} account(s) successfully",
-      "importFailedMsg": "Import failed: {{error}}",
-      "empty": "Please enter a token or JSON"
+      "desc": "Fügen Sie Ihr Kiro-Zugriffstoken oder exportierte JSON-Daten ein."
     },
     "import": {
-      "label": "Import",
-      "localDesc": "Import Kiro account data from local Kiro client or a JSON file.",
-      "localClient": "Import from local Kiro",
-      "orJson": "Or import from JSON file",
-      "importing": "Importing...",
-      "failedMsg": "Import failed: {{error}}",
-      "pickFile": "Select JSON file to import"
+      "localDesc": "Importieren Sie Kiro-Kontodaten vom lokalen Kiro-Client oder einer JSON-Datei.",
+      "localClient": "Import aus lokalem Kiro"
     },
-    "search": "Search accounts...",
-    "view": {
-      "list": "List view",
-      "grid": "Card view"
-    },
-    "filter": {
-      "all": "All ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Filter",
-    "sortLabel": "Sort",
-    "sort": {
-      "createdAt": "Created time",
-      "credits": "By remaining credits",
-      "planEnd": "By cycle end time",
-      "descTooltip": "Current: Descending. Click to switch to ascending",
-      "ascTooltip": "Current: Ascending. Click to switch to descending",
-      "toggleDirection": "Toggle sort direction"
-    },
-    "export": "Export",
-    "injectToVSCode": "Switch to Kiro"
+    "injectToVSCode": "Wechseln Sie zu Kiro"
   }
 }

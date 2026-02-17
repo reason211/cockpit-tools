@@ -54,7 +54,7 @@ export function CodexInstancesContent() {
       getAccountSearchText={(account) => account.email}
       appType="codex"
       isSupported={isSupportedPlatform}
-      unsupportedTitleKey="codex.instances.unsupported.title"
+      unsupportedTitleKey="common.shared.instances.unsupported.title"
       unsupportedTitleDefault="暂不支持当前系统"
       unsupportedDescKey="codex.instances.unsupported.desc"
       unsupportedDescDefault="Codex 多开实例仅支持 macOS。"

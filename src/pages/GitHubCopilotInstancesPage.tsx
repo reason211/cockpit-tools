@@ -40,13 +40,13 @@ export function GitHubCopilotInstancesContent() {
         <span className="account-quota-item">
           <span className={`quota-dot ${resolveQuotaClass(inlinePct ?? 0)}`} />
           <span className={`quota-text ${resolveQuotaClass(inlinePct ?? 0)}`}>
-            {t('githubCopilot.instances.quota.inline', 'Inline Suggestions')} {inlinePct ?? '-'}%
+            {t('common.shared.instances.quota.inline', 'Inline Suggestions')} {inlinePct ?? '-'}%
           </span>
         </span>
         <span className="account-quota-item">
           <span className={`quota-dot ${resolveQuotaClass(chatPct ?? 0)}`} />
           <span className={`quota-text ${resolveQuotaClass(chatPct ?? 0)}`}>
-            {t('githubCopilot.instances.quota.chat', 'Chat messages')} {chatPct ?? '-'}%
+            {t('common.shared.instances.quota.chat', 'Chat messages')} {chatPct ?? '-'}%
           </span>
         </span>
       </div>
@@ -62,7 +62,7 @@ export function GitHubCopilotInstancesContent() {
       getAccountSearchText={(account) => account.email}
       appType="vscode"
       isSupported={isSupportedPlatform}
-      unsupportedTitleKey="githubCopilot.instances.unsupported.title"
+      unsupportedTitleKey="common.shared.instances.unsupported.title"
       unsupportedTitleDefault="暂不支持当前系统"
       unsupportedDescKey="githubCopilot.instances.unsupported.descPlatform"
       unsupportedDescDefault="GitHub Copilot 多开实例仅支持 macOS、Windows 和 Linux。"

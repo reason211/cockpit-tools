@@ -20,7 +20,128 @@
     "none": "없음",
     "detail": "상세",
     "editable": "편집 가능",
-    "preview": "미리보기"
+    "preview": "미리보기",
+    "shared": {
+      "addAccount": "계정 추가",
+      "columns": {
+        "actions": "작업",
+        "plan": "플랜",
+        "addOnPromptCredits": "추가 프롬프트 크레딧",
+        "credits": "크레딧",
+        "email": "이메일",
+        "promptCredits": "프롬프트 크레딧"
+      },
+      "empty": {
+        "title": "계정 없음"
+      },
+      "export": "내보내기",
+      "filter": {
+        "all": "전체 ({{count}})",
+        "enterprise": "기업({{count}})",
+        "free": "무료({{count}})",
+        "pro": "프로({{count}})",
+        "business": "비즈니스({{count}})",
+        "individual": "개인({{count}})"
+      },
+      "filterLabel": "필터",
+      "import": {
+        "failedMsg": "가져오기 실패: {{error}}",
+        "label": "가져오기",
+        "importing": "로컬 계정 가져오는 중...",
+        "pickFile": "가져올 JSON 파일 선택",
+        "orJson": "또는 JSON 파일에서 가져오기"
+      },
+      "instances": {
+        "unsupported": {
+          "title": "이 시스템에서 지원되지 않음"
+        },
+        "quota": {
+          "chat": "채팅 메시지",
+          "inline": "인라인 제안"
+        },
+        "subtitle": "인스턴스별 독립 구성, 여러 계정으로 병렬 운영.",
+        "title": "멀티 인스턴스"
+      },
+      "noMatch": {
+        "desc": "검색어 또는 필터를 조정해 보세요",
+        "title": "일치하는 계정 없음"
+      },
+      "oauth": {
+        "failed": "인증 실패",
+        "hint": "인증이 완료되면 이 창이 자동으로 업데이트됩니다",
+        "openBrowser": "브라우저에서 열기",
+        "success": "인증 성공",
+        "meta": "만료까지: {{expires}}s; 폴링 간격: {{interval}}s",
+        "preparing": "인증 링크 준비 중...",
+        "retry": "인증 정보 다시 생성",
+        "timeoutRetry": "인증 링크 새로고침",
+        "waiting": "인증 대기 중..."
+      },
+      "refreshAll": "전체 새로고침",
+      "refreshQuota": "쿼터 새로고침",
+      "search": "계정 검색...",
+      "sort": {
+        "ascTooltip": "오름차순 (클릭하여 내림차순으로 전환)",
+        "createdAt": "생성일",
+        "descTooltip": "내림차순 (클릭하여 오름차순으로 전환)",
+        "toggleDirection": "정렬 방향 전환",
+        "credits": "남은 크레딧으로",
+        "planEnd": "사이클 종료 시간별"
+      },
+      "sortLabel": "정렬",
+      "token": {
+        "empty": "Token 또는 JSON을 입력하세요",
+        "import": "가져오기",
+        "importFailedMsg": "가져오기 실패: {{error}}",
+        "importing": "가져오는 중...",
+        "importSuccessMsg": "{{count}}개 계정을 가져왔습니다",
+        "placeholder": "JSON 내용 붙여넣기..."
+      },
+      "view": {
+        "grid": "카드 보기",
+        "list": "목록 보기"
+      },
+      "addModal": {
+        "import": "로컬 가져오기",
+        "oauth": "OAuth 로그인",
+        "token": "JSON 가져오기"
+      },
+      "overview": {
+        "title": "계정 개요"
+      },
+      "quota": {
+        "noData": "쿼터 데이터 없음",
+        "resetDone": "재설정됨",
+        "hourly": "5시간 쿼터",
+        "weekly": "주간 쿼터"
+      },
+      "subtitle": "GitHub Copilot 계정을 관리합니다",
+      "time": {
+        "lessThanMinute": "<1분",
+        "relativeDays": "{{days}}일",
+        "relativeDaysHours": "{{days}}일 {{hours}}시간",
+        "relativeHours": "{{hours}}시간",
+        "relativeHoursMinutes": "{{hours}}시간 {{minutes}}분",
+        "relativeMinutes": "{{minutes}}분",
+        "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      },
+      "credits": {
+        "leftInline": "{{left}} 남음",
+        "periodEndOnly": "주기 종료: {{end}}",
+        "periodRange": "주기: {{start}} - {{end}}",
+        "planEndsIn": "{{days}}일 후 주기가 재설정됩니다",
+        "planEndsUnknown": "주기 정보를 사용할 수 없습니다",
+        "usedLine": "{{used}} / {{total}} 사용됨"
+      },
+      "flowNotice": {
+        "alternative": "대안: 멀티 인스턴스 격리(서로 다른 --user-data-dir)를 사용하세요. 인스턴스별로 한 번만 로그인하면 이후에는 인스턴스 단위 실행으로 원하는 계정 환경으로 빠르게 전환할 수 있습니다."
+      },
+      "injecting": "주입 중...",
+      "usage": {
+        "resetLine": "할당량은 {{dateText}}에 재설정됩니다.",
+        "resetUnknown": "할당량 재설정까지 -"
+      }
+    }
   },
   "nav": {
     "overview": "Antigravity 계정",
@@ -31,8 +152,8 @@
     "codex": "Codex 계정",
     "dashboard": "대시보드",
     "instances": "멀티 인스턴스",
-    "githubCopilot": "GitHub Copilot",
-    "windsurf": "Windsurf",
+    "githubCopilot": "GitHub 코파일럿",
+    "windsurf": "윈드서핑",
     "morePlatforms": "더 많은 플랫폼"
   },
   "settings": {
@@ -110,17 +231,17 @@
       "windsurfAppPathPlaceholder": "기본 경로",
       "windsurfPathSelect": "선택",
       "windsurfPathReset": "기본값으로 재설정",
-      "kiroSettingsTitle": "Kiro Settings",
-      "kiroAutoRefresh": "Kiro Auto Refresh Quota",
-      "kiroAutoRefreshDesc": "Background update frequency",
-      "kiroAppPath": "Kiro App Path",
-      "kiroAppPathDesc": "Leave empty to use default path",
-      "kiroAppPathPlaceholder": "Default path",
-      "kiroPathSelect": "Select",
-      "kiroPathReset": "Reset to default"
+      "kiroSettingsTitle": "키로 설정",
+      "kiroAutoRefresh": "Kiro 자동 새로 고침 할당량",
+      "kiroAutoRefreshDesc": "백그라운드 업데이트 빈도",
+      "kiroAppPath": "키로 앱 경로",
+      "kiroAppPathDesc": "기본 경로를 사용하려면 비워 두세요.",
+      "kiroAppPathPlaceholder": "기본 경로",
+      "kiroPathSelect": "선택하다",
+      "kiroPathReset": "기본값으로 재설정"
     },
     "network": {
-      "apiTitle": "Antigravity Cockpit API",
+      "apiTitle": "반중력 조종석 API",
       "wsService": "WebSocket 서비스",
       "wsServiceDesc": "외부 프로그램(예: VS Code 확장 프로그램)의 연결을 허용합니다",
       "preferredPort": "기본 포트",
@@ -134,17 +255,17 @@
       "saveFailed": "저장 실패: {{error}}"
     },
     "about": {
-      "appName": "Cockpit Tools",
+      "appName": "조종석 도구",
       "slogan": "전문적인 계정 관리 솔루션",
       "author": "제작자",
       "wechat": "WeChat 플러스",
       "github": "GitHub 저장소",
-      "alipay": "Alipay",
-      "wechatpay": "WeChat Pay",
+      "alipay": "알리페이",
+      "wechatpay": "위챗페이",
       "sponsor": "후원",
-      "sponsorDesc": "Support development",
+      "sponsorDesc": "개발 지원",
       "feedback": "피드백",
-      "feedbackDesc": "Report issues/suggestions",
+      "feedbackDesc": "문제/제안사항 보고",
       "supportDev": "개발 지원",
       "checkUpdate": "업데이트 확인",
       "checking": "확인 중...",
@@ -180,17 +301,17 @@
     "status": {
       "current": "현재",
       "disabled": "비활성화됨",
-      "authInvalid": "Invalid credentials",
-      "refreshFailed": "Refresh failed",
+      "authInvalid": "잘못된 자격 증명",
+      "refreshFailed": "새로고침 실패",
       "normal": "정상",
       "forbidden": "403",
       "forbidden_tooltip": "API가 403 Forbidden을 반환했습니다. 계정이 Gemini Code Assist에 접근할 수 없습니다",
       "forbidden_msg": "계정 금지됨, 자동 새로고침 건너뜀"
     },
     "tier": {
-      "pro": "PRO",
-      "ultra": "ULTRA",
-      "free": "FREE"
+      "pro": "찬성",
+      "ultra": "극단론자",
+      "free": "무료"
     },
     "empty": {
       "title": "계정 없음",
@@ -209,9 +330,9 @@
     "filterLabel": "계정 필터",
     "filter": {
       "all": "전체 ({{count}})",
-      "pro": "PRO ({{count}})",
-      "ultra": "ULTRA ({{count}})",
-      "free": "FREE ({{count}})"
+      "pro": "프로({{count}})",
+      "ultra": "울트라({{count}})",
+      "free": "무료({{count}})"
     },
     "sortLabel": "정렬",
     "sort": {
@@ -487,8 +608,8 @@
     "format": {
       "noReply": "(응답 없음)",
       "durationMs": "{{ms}}ms",
-      "tokens": "tokens={{prompt}}+{{completion}}={{total}}",
-      "traceId": "traceId={{traceId}}",
+      "tokens": "토큰={{prompt}}+{{completion}}={{total}}",
+      "traceId": "추적 ID={{traceId}}",
       "detailJoiner": ", ",
       "message": "[[{{model}}]]: {{reply}}{{suffix}}",
       "none": "--",
@@ -499,7 +620,7 @@
       "joiner": ", ",
       "moreItems": "{{items}} ({{total}}개)",
       "quotaReset": "할당량 재설정 자동 깨우기",
-      "crontab": "Crontab: {{expr}}",
+      "crontab": "크론탭: {{expr}}",
       "daily": "매일 {{times}}{{suffix}}",
       "weekly": "매주 {{days}} {{times}}{{suffix}}",
       "interval": "{{hours}}시간마다 ({{start}}-{{end}})",
@@ -540,7 +661,7 @@
     },
     "triggerSource": {
       "scheduled": "예약",
-      "crontab": "Crontab",
+      "crontab": "크론탭",
       "quotaReset": "할당량 재설정",
       "manual": "즉시 테스트",
       "unknown": "알 수 없음"
@@ -568,7 +689,7 @@
       "triggerMode": "트리거 방식",
       "triggerModeHint": "1. 예약: 설정된 시간에 트리거됩니다.\\n2. Crontab: 표현식으로 정의합니다.\\n3. 할당량 재설정: 할당량이 가득 찼을 때 한 번 실행됩니다.",
       "modeScheduled": "📅 예약",
-      "modeCrontab": "🧩 Crontab",
+      "modeCrontab": "🧩 크론탭",
       "modeQuotaReset": "🔄 할당량 재설정",
       "modelSelect": "모델 선택",
       "modelHint": "같은 할당량 그룹에서는 하나의 모델을 추천합니다. 여러 모델은 순차 실행됩니다.",
@@ -644,15 +765,11 @@
   "codex": {
     "title": "Codex 계정 관리",
     "subtitle": "OpenAI Codex 계정을 관리합니다",
-    "addAccount": "계정 추가",
-    "refreshAll": "전체 새로고침",
-    "refreshQuota": "쿼터 새로고침",
     "switch": "전환",
     "switched": "{{email}}(으)로 전환했습니다",
     "switchFailed": "전환 실패: {{error}}",
     "current": "현재",
     "empty": {
-      "title": "계정 없음",
       "description": "\"계정 추가\"를 눌러 Codex 계정을 관리하세요"
     },
     "addModal": {
@@ -664,11 +781,7 @@
     "oauth": {
       "desc": "아래 버튼을 클릭해 브라우저에서 OpenAI 인증을 완료하세요",
       "preparing": "인증 링크 준비 중...",
-      "openBrowser": "브라우저에서 열기",
-      "hint": "인증이 완료되면 이 창이 자동으로 업데이트됩니다",
       "exchanging": "토큰 교환 중...",
-      "success": "인증 성공",
-      "failed": "인증 실패",
       "portInUse": "포트 {{port}}가 이미 사용 중입니다. 해당 포트를 사용하는 앱을 종료한 뒤 다시 시도해 주세요.",
       "portInUseTitle": "포트 사용 중",
       "portInUseConfirm": "포트 {{port}}가 사용 중입니다. 이 포트를 사용하는 프로세스를 종료할까요?",
@@ -678,87 +791,50 @@
     },
     "token": {
       "desc": "auth.json 내용 또는 계정 JSON 데이터를 붙여넣으세요",
-      "placeholder": "JSON 내용 붙여넣기...",
-      "import": "가져오기",
-      "importing": "가져오는 중...",
-      "importSuccessMsg": "{{count}}개 계정을 가져왔습니다",
-      "importFailedMsg": "가져오기 실패: {{error}}",
-      "empty": "Token 또는 JSON을 입력하세요"
+      "placeholder": "JSON 내용 붙여넣기..."
     },
     "local": {
       "desc": "~/.codex/auth.json에서 현재 로그인된 계정 가져오기",
       "import": "로컬 계정 가져오기"
     },
     "import": {
-      "label": "가져오기",
       "importing": "로컬 계정 가져오는 중...",
       "successMsg": "가져오기 성공: {{email}}",
-      "failedMsg": "가져오기 실패: {{error}}",
       "localDesc": "로컬에 로그인된 세션에서 Codex 계정을 가져오기."
     },
     "quota": {
       "hourly": "5시간 쿼터",
       "weekly": "주간 쿼터",
-      "reset": "재설정",
-      "noData": "쿼터 데이터 없음",
-      "resetDone": "재설정됨"
+      "reset": "재설정"
     },
     "plan": {
-      "free": "FREE",
-      "plus": "PLUS",
-      "pro": "PRO",
-      "team": "TEAM",
-      "enterprise": "ENTERPRISE"
+      "free": "무료",
+      "plus": "을 더한",
+      "pro": "찬성",
+      "team": "팀",
+      "enterprise": "기업"
     },
     "time": {
-      "relativeDays": "{{days}}일",
-      "relativeDaysHours": "{{days}}일 {{hours}}시간",
-      "relativeHours": "{{hours}}시간",
-      "relativeHoursMinutes": "{{hours}}시간 {{minutes}}분",
-      "relativeMinutes": "{{minutes}}분",
-      "lessThanMinute": "<1분",
       "today": "오늘 {{time}}",
       "tomorrow": "내일 {{time}}",
-      "dateTime": "{{date}} {{time}}",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      "dateTime": "{{date}} {{time}}"
     },
-    "search": "계정 검색...",
     "view": {
-      "compact": "간결 보기",
-      "list": "목록 보기",
-      "grid": "카드 보기"
+      "compact": "간결 보기"
     },
     "filter": {
-      "all": "전체 ({{count}})",
-      "free": "FREE ({{count}})",
-      "plus": "PLUS ({{count}})",
-      "pro": "PRO ({{count}})",
-      "team": "TEAM ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
+      "plus": "플러스({{count}})",
+      "team": "팀({{count}})"
     },
-    "filterLabel": "필터",
-    "sortLabel": "정렬",
     "sort": {
       "weekly": "주간 할당량",
       "hourly": "5시간 할당량",
       "weeklyReset": "주간 할당량 재설정 시간",
-      "hourlyReset": "5시간 할당량 재설정 시간",
-      "descTooltip": "내림차순 (클릭하여 오름차순으로 전환)",
-      "ascTooltip": "오름차순 (클릭하여 내림차순으로 전환)",
-      "toggleDirection": "정렬 방향 전환",
-      "createdAt": "생성일"
-    },
-    "export": "내보내기",
-    "noMatch": {
-      "title": "일치하는 계정 없음",
-      "desc": "검색어 또는 필터를 조정해 보세요"
+      "hourlyReset": "5시간 할당량 재설정 시간"
     },
     "columns": {
-      "email": "계정",
-      "plan": "플랜",
       "hourly": "5시간 쿼터",
-      "weekly": "주간 쿼터",
-      "actions": "작업"
+      "weekly": "주간 쿼터"
     },
     "opencodeSwitch": "OpenCode 전환 스위치",
     "opencodeSwitchDesc": "OpenCode에서 Codex 계정 정보를 동기화하여 전환",
@@ -773,7 +849,6 @@
       "comingSoon": "멀티 인스턴스 곧 출시",
       "comingSoonDesc": "다른 계정으로 여러 Codex.app 인스턴스를 동시에 실행할 수 있습니다.",
       "unsupported": {
-        "title": "이 시스템에서 지원되지 않음",
         "desc": "Codex 멀티 인스턴스는 현재 macOS에서만 사용 가능합니다."
       },
       "quota": {
@@ -819,9 +894,9 @@
       "totalAccounts": "전체 계정 수"
     },
     "panels": {
-      "antigravity": "Antigravity",
-      "codex": "Codex",
-      "githubCopilot": "GitHub Copilot",
+      "antigravity": "반중력",
+      "codex": "사본",
+      "githubCopilot": "GitHub 코파일럿",
       "planDistribution": "플랜 분포",
       "current": "현재 계정",
       "recommended": "추천 계정",
@@ -892,7 +967,7 @@
       "running": "실행 중",
       "stopped": "정지됨",
       "restarting": "재시작 중",
-      "starting": "Starting"
+      "starting": "시작"
     },
     "labels": {
       "path": "디렉토리",
@@ -1036,129 +1111,44 @@
   },
   "githubCopilot": {
     "title": "GitHub Copilot 계정 관리",
-    "subtitle": "GitHub Copilot 계정을 관리합니다",
-    "overview": {
-      "title": "계정 개요"
-    },
     "instances": {
-      "title": "멀티 인스턴스",
-      "subtitle": "인스턴스별 독립 구성, 여러 계정으로 병렬 운영.",
       "unsupported": {
-        "title": "이 시스템에서 지원되지 않음",
         "desc": "GitHub Copilot 멀티 인스턴스는 현재 macOS에서만 사용 가능합니다."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "계정 추가",
-    "refreshAll": "전체 새로고침",
-    "refreshQuota": "쿼터 새로고침",
     "empty": {
-      "title": "계정 없음",
       "description": "\"계정 추가\"를 눌러 GitHub Copilot 계정을 관리하세요"
     },
-    "noMatch": {
-      "title": "일치하는 계정 없음",
-      "desc": "검색어 또는 필터를 조정해 보세요"
-    },
     "addModal": {
-      "title": "GitHub Copilot 계정 추가",
-      "oauth": "OAuth 로그인",
-      "token": "JSON 가져오기",
-      "import": "로컬 가져오기"
+      "title": "GitHub Copilot 계정 추가"
     },
     "oauth": {
-      "desc": "아래 버튼을 클릭해 브라우저에서 GitHub Copilot 인증을 완료하세요.",
-      "preparing": "인증 링크 준비 중...",
-      "openBrowser": "브라우저에서 열기",
-      "hint": "인증이 완료되면 이 창이 자동으로 업데이트됩니다",
-      "success": "인증 성공",
-      "failed": "인증 실패",
-      "retry": "인증 정보 다시 생성",
-      "timeoutRetry": "인증 링크 새로고침",
-      "waiting": "인증 대기 중...",
-      "meta": "만료까지: {{expires}}s; 폴링 간격: {{interval}}s"
+      "desc": "아래 버튼을 클릭해 브라우저에서 GitHub Copilot 인증을 완료하세요."
     },
     "token": {
-      "desc": "GitHub Copilot 액세스 토큰 또는 내보낸 JSON 데이터를 붙여넣으세요.",
-      "placeholder": "JSON 내용 붙여넣기...",
-      "import": "가져오기",
-      "importing": "가져오는 중...",
-      "importSuccessMsg": "{{count}}개 계정을 가져왔습니다",
-      "importFailedMsg": "가져오기 실패: {{error}}",
-      "empty": "Token 또는 JSON을 입력하세요"
+      "desc": "GitHub Copilot 액세스 토큰 또는 내보낸 JSON 데이터를 붙여넣으세요."
     },
     "import": {
-      "label": "가져오기",
-      "localDesc": "로컬에 로그인된 세션에서 GitHub Copilot 계정을 가져오기.",
-      "importing": "로컬 계정 가져오는 중...",
-      "failedMsg": "가져오기 실패: {{error}}",
-      "pickFile": "가져올 JSON 파일 선택"
+      "localDesc": "로컬에 로그인된 세션에서 GitHub Copilot 계정을 가져오기."
     },
-    "quota": {
-      "hourly": "5시간 쿼터",
-      "weekly": "주간 쿼터",
-      "noData": "쿼터 데이터 없음",
-      "resetDone": "재설정됨"
-    },
-    "usage": {
-      "resetUnknown": "할당량 재설정까지 -",
-      "resetLine": "할당량은 {{dateText}}에 재설정됩니다."
-    },
-    "time": {
-      "relativeDays": "{{days}}일",
-      "relativeDaysHours": "{{days}}일 {{hours}}시간",
-      "relativeHours": "{{hours}}시간",
-      "relativeHoursMinutes": "{{hours}}시간 {{minutes}}분",
-      "relativeMinutes": "{{minutes}}분",
-      "lessThanMinute": "<1분",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "계정 검색...",
-    "view": {
-      "list": "목록 보기",
-      "grid": "카드 보기"
-    },
-    "filter": {
-      "all": "전체 ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "필터",
-    "sortLabel": "정렬",
     "sort": {
-      "createdAt": "생성일",
       "weekly": "주간 할당량",
       "hourly": "5시간 할당량",
       "weeklyReset": "주간 할당량 재설정 시간",
-      "hourlyReset": "5시간 할당량 재설정 시간",
-      "descTooltip": "내림차순 (클릭하여 오름차순으로 전환)",
-      "ascTooltip": "오름차순 (클릭하여 내림차순으로 전환)",
-      "toggleDirection": "정렬 방향 전환"
+      "hourlyReset": "5시간 할당량 재설정 시간"
     },
     "columns": {
-      "email": "계정",
-      "plan": "플랜",
       "hourly": "5시간 쿼터",
-      "weekly": "주간 쿼터",
-      "actions": "작업"
+      "weekly": "주간 쿼터"
     },
-    "export": "내보내기",
     "flowNotice": {
       "title": "GitHub Copilot 계정 안내(클릭하여 펼치기/접기)",
       "desc": "계정 전환 시 VS Code 로컬 인증 저장소를 읽고 시스템 자격 증명 서비스를 사용해 복호화 및 재기록이 필요하며, 데이터는 로컬에서만 처리됩니다.",
       "reason": "권한 범위: VS Code 인증 데이터베이스(state.vscdb)를 읽고 시스템 암호화 기능(Windows DPAPI / macOS Keychain / Linux Secret Service)을 호출해 복호화 및 재기록을 수행합니다.",
       "storage": "읽기 범위: GitHub 로그인 세션 관련 데이터만 처리하며, 모든 과정은 로컬에서 실행됩니다.",
-      "alternative": "대안: 멀티 인스턴스 격리(서로 다른 --user-data-dir)를 사용하세요. 인스턴스별로 한 번만 로그인하면 이후에는 인스턴스 단위 실행으로 원하는 계정 환경으로 빠르게 전환할 수 있습니다.",
       "inject": "원클릭 전환: 이 도구는 로컬 VS Code 암호화 자료(DPAPI/Keychain/Secret Service)를 읽어 state.vscdb의 인증 세션을 복호화한 뒤 GitHub Copilot 토큰을 교체하고 다시 암호화합니다. 모든 처리는 로컬 장치에서만 수행됩니다."
     },
     "injectToVSCode": "VS Code로 전환",
-    "injecting": "주입 중...",
     "injectSuccess": "토큰을 VS Code에 성공적으로 주입했습니다. VS Code를 실행하는 중입니다.",
     "injectRequireClose": "주입하기 전에 VS Code를 종료해 주세요."
   },
@@ -1202,10 +1192,10 @@
     },
     "windsurfRefreshInterval": "할당량 자동 새로고침",
     "kiro": {
-      "title": "Kiro Settings",
-      "appPath": "Kiro Path"
+      "title": "키로 설정",
+      "appPath": "기로의 길"
     },
-    "kiroRefreshInterval": "Auto refresh quota"
+    "kiroRefreshInterval": "자동 새로고침 할당량"
   },
   "quotaAlert": {
     "bannerText": "{{email}} 할당량 경고 (임계값 {{threshold}}%, 최저 {{lowest}}%, 모델: {{models}})",
@@ -1236,145 +1226,47 @@
   },
   "windsurf": {
     "title": "Windsurf 계정 관리",
-    "subtitle": "Windsurf 계정을 관리합니다",
-    "overview": {
-      "title": "계정 개요"
-    },
     "instances": {
-      "title": "멀티 인스턴스",
-      "subtitle": "인스턴스별 독립 구성, 여러 계정으로 병렬 운영.",
       "unsupported": {
-        "title": "이 시스템에서 지원되지 않음",
         "desc": "Windsurf 멀티 인스턴스는 현재 macOS에서만 사용 가능합니다."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "계정 추가",
-    "refreshAll": "전체 새로고침",
-    "refreshQuota": "쿼터 새로고침",
     "empty": {
-      "title": "계정 없음",
       "description": "\"계정 추가\"를 눌러 Windsurf 계정을 관리하세요"
     },
-    "noMatch": {
-      "title": "일치하는 계정 없음",
-      "desc": "검색어 또는 필터를 조정해 보세요"
-    },
     "addModal": {
-      "title": "Windsurf 계정 추가",
-      "oauth": "OAuth 로그인",
-      "token": "JSON 가져오기",
-      "import": "로컬 가져오기"
+      "title": "Windsurf 계정 추가"
     },
     "oauth": {
-      "desc": "아래 버튼을 클릭해 브라우저에서 Windsurf 인증을 완료하세요.",
-      "preparing": "인증 링크 준비 중...",
-      "openBrowser": "브라우저에서 열기",
-      "hint": "인증이 완료되면 이 창이 자동으로 업데이트됩니다",
-      "success": "인증 성공",
-      "failed": "인증 실패",
-      "retry": "인증 정보 다시 생성",
-      "timeoutRetry": "인증 링크 새로고침",
-      "waiting": "인증 대기 중...",
-      "meta": "만료까지: {{expires}}s; 폴링 간격: {{interval}}s"
+      "desc": "아래 버튼을 클릭해 브라우저에서 Windsurf 인증을 완료하세요."
     },
     "token": {
-      "desc": "Windsurf 액세스 토큰 또는 내보낸 JSON 데이터를 붙여넣으세요.",
-      "placeholder": "JSON 내용 붙여넣기...",
-      "import": "가져오기",
-      "importing": "가져오는 중...",
-      "importSuccessMsg": "{{count}}개 계정을 가져왔습니다",
-      "importFailedMsg": "가져오기 실패: {{error}}",
-      "empty": "Token 또는 JSON을 입력하세요"
+      "desc": "Windsurf 액세스 토큰 또는 내보낸 JSON 데이터를 붙여넣으세요."
     },
     "import": {
-      "label": "가져오기",
       "localDesc": "로컬에 로그인된 세션에서 Windsurf 계정을 가져오기.",
-      "localClient": "로컬 Windsurf에서 가져오기",
-      "orJson": "또는 JSON 파일에서 가져오기",
-      "importing": "로컬 계정 가져오는 중...",
-      "failedMsg": "가져오기 실패: {{error}}",
-      "pickFile": "가져올 JSON 파일 선택"
-    },
-    "quota": {
-      "hourly": "5시간 쿼터",
-      "weekly": "주간 쿼터",
-      "noData": "쿼터 데이터 없음",
-      "resetDone": "재설정됨"
+      "localClient": "로컬 Windsurf에서 가져오기"
     },
     "credits": {
       "title": "플랜",
       "renewMonthly": "크레딧은 매월 갱신됩니다",
-      "planEndsIn": "{{days}}일 후 주기가 재설정됩니다",
-      "planEndsUnknown": "주기 정보를 사용할 수 없습니다",
-      "periodRange": "주기: {{start}} - {{end}}",
-      "periodEndOnly": "주기 종료: {{end}}",
       "left": "{{count}} 크레딧 남음",
       "leftUnknown": "남은 크레딧 -",
       "promptLeft": "{{remaining}}/{{total}} 프롬프트 크레딧 남음",
       "promptLeftNoTotal": "{{remaining}} 프롬프트 크레딧 남음",
       "promptLeftUnknown": "남은 프롬프트 크레딧 -",
-      "addOnAvailable": "추가 크레딧 {{count}} 사용 가능",
-      "usedLine": "{{used}} / {{total}} 사용됨",
-      "leftInline": "{{left}} 남음"
-    },
-    "usage": {
-      "resetUnknown": "할당량 재설정까지 -",
-      "resetLine": "할당량은 {{dateText}}에 재설정됩니다."
-    },
-    "time": {
-      "relativeDays": "{{days}}일",
-      "relativeDaysHours": "{{days}}일 {{hours}}시간",
-      "relativeHours": "{{hours}}시간",
-      "relativeHoursMinutes": "{{hours}}시간 {{minutes}}분",
-      "relativeMinutes": "{{minutes}}분",
-      "lessThanMinute": "<1분",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "계정 검색...",
-    "view": {
-      "list": "목록 보기",
-      "grid": "카드 보기"
-    },
-    "filter": {
-      "all": "전체 ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "필터",
-    "sortLabel": "정렬",
-    "sort": {
-      "createdAt": "생성일",
-      "credits": "남은 크레딧순",
-      "planEnd": "주기 종료순",
-      "descTooltip": "내림차순 (클릭하여 오름차순으로 전환)",
-      "ascTooltip": "오름차순 (클릭하여 내림차순으로 전환)",
-      "toggleDirection": "정렬 방향 전환"
+      "addOnAvailable": "추가 크레딧 {{count}} 사용 가능"
     },
     "columns": {
-      "email": "이메일",
-      "plan": "태그",
-      "promptCredits": "프롬프트 크레딧",
-      "addOnPromptCredits": "추가 프롬프트 크레딧",
-      "credits": "크레딧",
-      "actions": "작업"
+      "plan": "태그"
     },
-    "export": "내보내기",
     "injectToVSCode": "Windsurf로 전환",
-    "injecting": "주입 중...",
     "injectSuccess": "전환이 완료되었습니다. Windsurf를 시작하는 중입니다.",
     "injectRequireClose": "전환 전에 Windsurf를 닫아 주세요.",
     "flowNotice": {
       "title": "Windsurf 계정 안내(클릭하여 펼치기/접기)",
       "desc": "계정 전환 시 Windsurf 로컬 인증 저장소를 읽고 시스템 자격 증명 서비스를 사용해 복호화 및 재기록이 필요하며, 데이터는 로컬에서만 처리됩니다.",
       "inject": "원클릭 전환: 이 도구는 로컬 Windsurf 암호화 자료(DPAPI/Keychain/Secret Service)를 읽어 state.vscdb의 인증 세션을 복호화한 뒤 Windsurf 토큰을 교체하고 다시 암호화합니다. 모든 처리는 로컬 장치에서만 수행됩니다.",
-      "alternative": "대안: 멀티 인스턴스 격리(서로 다른 --user-data-dir)를 사용하세요. 인스턴스별로 한 번만 로그인하면 이후에는 인스턴스 단위 실행으로 원하는 계정 환경으로 빠르게 전환할 수 있습니다.",
       "reason": "권한 범위: Windsurf 인증 데이터베이스(state.vscdb)를 읽고 시스템 암호화 기능(Windows DPAPI / macOS Keychain / Linux Secret Service)을 호출해 복호화 및 재기록을 수행합니다.",
       "storage": "읽기 범위: Windsurf 로그인 세션 관련 데이터만 처리하며, 모든 과정은 로컬에서 실행됩니다."
     }
@@ -1412,7 +1304,7 @@
     "historyEmpty": "기록이 없습니다",
     "historyClear": "지우기",
     "historyScoreShort": "점수 {{score}}",
-    "historyLevelShort": "Lv {{level}}",
+    "historyLevelShort": "레벨 {{level}}",
     "historyDurationShort": "시간 {{duration}}",
     "historyReasonGameOver": "게임 종료",
     "historyReasonManualExit": "수동 종료",
@@ -1425,140 +1317,62 @@
   },
   "kiro": {
     "account": {
-      "signedInWith": "Signed in with {{provider}}",
-      "providerUnknown": "Unknown",
-      "userId": "User ID"
+      "signedInWith": "{{provider}}(으)로 로그인됨",
+      "providerUnknown": "알려지지 않은",
+      "userId": "사용자 ID"
     },
     "credits": {
-      "planEndsIn": "{{days}}일 후 주기가 재설정됩니다",
-      "planEndsUnknown": "주기 정보를 사용할 수 없습니다",
-      "periodRange": "주기: {{start}} - {{end}}",
-      "periodEndOnly": "주기 종료: {{end}}",
-      "estimatedResetOn": "Estimated Usage resets on {{date}}",
-      "bonusUsageLine": "{{used}} used / {{total}} total",
-      "planUsageCoveredLine": "{{used}} used / {{total}} covered in plan",
-      "usedLine": "{{used}} / {{total}} 사용됨",
-      "leftInline": "{{left}} 남음",
-      "expiryDays": "{{days}} days",
+      "estimatedResetOn": "{{date}}에서 예상 사용량이 재설정됩니다.",
+      "bonusUsageLine": "{{used}} 사용 / {{total}} 총",
+      "planUsageCoveredLine": "{{used}} 사용됨 / {{total}} 계획에 포함됨",
+      "expiryDays": "{{days}}일",
       "expiryUnknown": "—",
-      "resetNow": "Reset soon",
-      "resetInHours": "Resets in {{hours}}h",
-      "resetInMinutes": "Resets in {{minutes}}m"
+      "resetNow": "곧 재설정",
+      "resetInHours": "{{hours}}h 후에 재설정됩니다.",
+      "resetInMinutes": "{{minutes}}m 후에 재설정됩니다."
     },
     "columns": {
-      "email": "이메일",
-      "plan": "태그",
-      "credits": "크레딧",
-      "promptCredits": "프롬프트 크레딧",
-      "addOnPromptCredits": "추가 프롬프트 크레딧",
-      "bonusCredits": "Bonus Credits",
-      "estimatedUsage": "Estimated Usage",
-      "expiry": "Expiry",
-      "estUsage": "Est. Usage",
-      "actions": "작업"
+      "bonusCredits": "보너스 크레딧",
+      "estimatedUsage": "예상 사용량",
+      "expiry": "만료",
+      "estUsage": "예상 용법"
     },
     "plan": {
-      "free": "Kiro Free",
-      "individual": "Kiro Individual",
-      "pro": "Kiro Pro",
-      "business": "Kiro Business",
-      "enterprise": "Kiro Enterprise",
-      "unknown": "Unknown"
+      "free": "키로 프리",
+      "individual": "키로 개인",
+      "pro": "키로 프로",
+      "business": "키로비즈니스",
+      "enterprise": "키로엔터프라이즈",
+      "unknown": "알려지지 않은"
     },
     "flowNotice": {
-      "title": "Kiro 계정 안내(클릭하여 펼치기/접기)",
-      "desc": "계정 전환 시 Kiro 로컬 인증 저장소를 읽고 시스템 자격 증명 서비스를 사용해 복호화 및 재기록이 필요하며, 데이터는 로컬에서만 처리됩니다.",
-      "reason": "권한 범위: Kiro 인증 데이터베이스(state.vscdb)를 읽고 시스템 암호화 기능(Windows DPAPI / macOS Keychain / Linux Secret Service)을 호출해 복호화 및 재기록을 수행합니다.",
-      "storage": "읽기 범위: Kiro 로그인 세션 관련 데이터만 처리하며, 모든 과정은 로컬에서 실행됩니다."
+      "title": "Kiro 계정 안내 (클릭하여 펼치기/접기)",
+      "desc": "계정 전환 시 이 기기에서 Kiro 로컬 인증 파일과 인스턴스 설정을 읽고 씁니다. OAuth 로그인 및 할당량 새로고침 시 Kiro 공식 API를 호출합니다.",
+      "reason": "처리 경로에는 ~/.aws/sso/cache/kiro-auth-token.json, 인스턴스 profile.json, state.vscdb의 kiro.kiroAgent 항목이 포함됩니다.",
+      "storage": "처리 데이터에는 Kiro 세션 및 할당량 정보가 포함됩니다. Kiro 공식 API 요청 시 필요한 인증 필드(code, refreshToken, accessToken, profileArn 등)가 전송됩니다."
     },
-    "title": "Kiro Account Management",
-    "subtitle": "Monitor quota status for all accounts in real time.",
-    "overview": {
-      "title": "Account Overview"
-    },
+    "title": "키로 계정 관리",
     "instances": {
-      "title": "Multi-Instance",
-      "subtitle": "Independent configs per instance for parallel multi-account runs.",
       "unsupported": {
-        "title": "Unsupported on this system",
-        "descPlatform": "Kiro multi-instance is available only on macOS, Windows and Linux."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
+        "descPlatform": "Kiro 다중 인스턴스는 macOS, Windows 및 Linux에서만 사용할 수 있습니다."
       }
     },
-    "addAccount": "Add Account",
-    "refreshAll": "Refresh All",
-    "refreshQuota": "Refresh Quota",
     "empty": {
-      "title": "No Accounts",
-      "description": "Click \"Add Account\" to start managing your Kiro accounts"
-    },
-    "noMatch": {
-      "title": "No matching accounts",
-      "desc": "Try adjusting your search or filters"
+      "description": "Kiro 계정 관리를 시작하려면 \"계정 추가\"를 클릭하세요."
     },
     "addModal": {
-      "title": "Add Kiro Account",
-      "oauth": "OAuth",
-      "token": "Token / JSON",
-      "import": "Local Import"
+      "title": "키로 계정 추가"
     },
     "oauth": {
-      "desc": "Click the button below and complete Kiro authorization in your browser.",
-      "preparing": "Preparing authorization info...",
-      "openBrowser": "Open in Browser",
-      "hint": "Once authorized, this window will update automatically",
-      "success": "Authorization successful",
-      "failed": "Authorization failed",
-      "retry": "Regenerate authorization info",
-      "timeoutRetry": "Refresh authorization link",
-      "waiting": "Waiting for authorization...",
-      "meta": "Expires in: {{expires}}s; Poll interval: {{interval}}s"
+      "desc": "아래 버튼을 클릭하고 브라우저에서 Kiro 인증을 완료하세요."
     },
     "token": {
-      "desc": "Paste your Kiro access token or exported JSON data.",
-      "placeholder": "Paste token or JSON...",
-      "import": "Import",
-      "importing": "Importing...",
-      "importSuccessMsg": "Imported {{count}} account(s) successfully",
-      "importFailedMsg": "Import failed: {{error}}",
-      "empty": "Please enter a token or JSON"
+      "desc": "Kiro 액세스 토큰이나 내보낸 JSON 데이터를 붙여넣으세요."
     },
     "import": {
-      "label": "Import",
-      "localDesc": "Import Kiro account data from local Kiro client or a JSON file.",
-      "localClient": "Import from local Kiro",
-      "orJson": "Or import from JSON file",
-      "importing": "Importing...",
-      "failedMsg": "Import failed: {{error}}",
-      "pickFile": "Select JSON file to import"
+      "localDesc": "로컬 Kiro 클라이언트 또는 JSON 파일에서 Kiro 계정 데이터를 가져옵니다.",
+      "localClient": "현지 키로에서 수입"
     },
-    "search": "Search accounts...",
-    "view": {
-      "list": "List view",
-      "grid": "Card view"
-    },
-    "filter": {
-      "all": "All ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Filter",
-    "sortLabel": "Sort",
-    "sort": {
-      "createdAt": "Created time",
-      "credits": "By remaining credits",
-      "planEnd": "By cycle end time",
-      "descTooltip": "Current: Descending. Click to switch to ascending",
-      "ascTooltip": "Current: Ascending. Click to switch to descending",
-      "toggleDirection": "Toggle sort direction"
-    },
-    "export": "Export",
-    "injectToVSCode": "Switch to Kiro"
+    "injectToVSCode": "키로로 전환"
   }
 }

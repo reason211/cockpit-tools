@@ -35,7 +35,7 @@ export function formatResetTime(resetTime: string, t: Translate): string {
     if (Number.isNaN(reset.getTime())) return '';
     const now = new Date();
     const diffMs = reset.getTime() - now.getTime();
-    if (diffMs <= 0) return t('codex.quota.resetDone');
+    if (diffMs <= 0) return t('common.shared.quota.resetDone');
 
     const totalMinutes = Math.floor(diffMs / (1000 * 60));
     const days = Math.floor(totalMinutes / (60 * 24));
@@ -69,7 +69,7 @@ export function formatResetTimeAbsolute(resetTime: string): string {
 }
 
 export function formatResetTimeDisplay(resetTime: string, t: Translate): string {
-  const resetDone = t('codex.quota.resetDone');
+  const resetDone = t('common.shared.quota.resetDone');
   const relative = formatResetTime(resetTime, t);
   const absolute = formatResetTimeAbsolute(resetTime);
   if (!relative && !absolute) return '';

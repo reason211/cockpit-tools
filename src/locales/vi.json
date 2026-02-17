@@ -18,9 +18,130 @@
     "enable": "Enable",
     "disable": "Disable",
     "none": "None",
-    "detail": "Details",
-    "editable": "Editable",
-    "preview": "Preview"
+    "detail": "Chi tiết",
+    "editable": "Có thể chỉnh sửa",
+    "preview": "Preview",
+    "shared": {
+      "addAccount": "Thêm tài khoản",
+      "columns": {
+        "actions": "Hành động",
+        "plan": "Gói",
+        "addOnPromptCredits": "Tín dụng prompt bổ sung",
+        "credits": "Tín dụng",
+        "email": "E-mail",
+        "promptCredits": "Tín dụng prompt"
+      },
+      "empty": {
+        "title": "Chưa có tài khoản"
+      },
+      "export": "Xuất",
+      "filter": {
+        "all": "Tất cả ({{count}})",
+        "enterprise": "DOANH NGHIỆP ({{count}})",
+        "free": "MIỄN PHÍ ({{count}})",
+        "pro": "CHUYÊN NGHIỆP ({{count}})",
+        "business": "KINH DOANH ({{count}})",
+        "individual": "CÁ NHÂN ({{count}})"
+      },
+      "filterLabel": "Bộ lọc",
+      "import": {
+        "failedMsg": "Nhập thất bại: {{error}}",
+        "label": "Nhập",
+        "importing": "Đang nhập tài khoản cục bộ...",
+        "pickFile": "Chọn tệp JSON để nhập",
+        "orJson": "Hoặc nhập từ tệp JSON"
+      },
+      "instances": {
+        "unsupported": {
+          "title": "Không hỗ trợ trên hệ thống này"
+        },
+        "quota": {
+          "chat": "Tin nhắn trò chuyện",
+          "inline": "Đề xuất nội tuyến"
+        },
+        "subtitle": "Cấu hình độc lập cho mỗi phiên bản, vận hành song song với nhiều tài khoản.",
+        "title": "Đa Phiên Bản"
+      },
+      "noMatch": {
+        "desc": "Thử điều chỉnh tìm kiếm hoặc bộ lọc",
+        "title": "Không có tài khoản phù hợp"
+      },
+      "oauth": {
+        "failed": "Ủy quyền thất bại",
+        "hint": "Sau khi ủy quyền, cửa sổ này sẽ tự cập nhật",
+        "openBrowser": "Mở trong trình duyệt",
+        "success": "Ủy quyền thành công",
+        "meta": "Hết hạn sau: {{expires}}s; chu kỳ thăm dò: {{interval}}s",
+        "preparing": "Đang chuẩn bị liên kết ủy quyền...",
+        "retry": "Tạo lại thông tin ủy quyền",
+        "timeoutRetry": "Làm mới liên kết ủy quyền",
+        "waiting": "Đang chờ ủy quyền..."
+      },
+      "refreshAll": "Làm mới tất cả",
+      "refreshQuota": "Làm mới hạn mức",
+      "search": "Tìm kiếm tài khoản...",
+      "sort": {
+        "ascTooltip": "Tăng dần (nhấn để chuyển Giảm dần)",
+        "createdAt": "Thời gian tạo",
+        "descTooltip": "Giảm dần (nhấn để chuyển Tăng dần)",
+        "toggleDirection": "Đổi hướng sắp xếp",
+        "credits": "Bằng số tín chỉ còn lại",
+        "planEnd": "Theo thời gian kết thúc chu kỳ"
+      },
+      "sortLabel": "Sắp xếp",
+      "token": {
+        "empty": "Vui lòng nhập Token hoặc JSON",
+        "import": "Nhập",
+        "importFailedMsg": "Nhập thất bại: {{error}}",
+        "importing": "Đang nhập...",
+        "importSuccessMsg": "Đã nhập {{count}} tài khoản",
+        "placeholder": "Dán nội dung JSON..."
+      },
+      "view": {
+        "grid": "Dạng thẻ",
+        "list": "Dạng danh sách"
+      },
+      "addModal": {
+        "import": "Nhập từ máy",
+        "oauth": "Đăng nhập OAuth",
+        "token": "Nhập JSON"
+      },
+      "overview": {
+        "title": "Tổng quan tài khoản"
+      },
+      "quota": {
+        "noData": "Không có dữ liệu hạn mức",
+        "resetDone": "Đã đặt lại",
+        "hourly": "Hạn mức 5 giờ",
+        "weekly": "Hạn mức tuần"
+      },
+      "subtitle": "Quản lý các tài khoản GitHub Copilot",
+      "time": {
+        "lessThanMinute": "<1 phút",
+        "relativeDays": "{{days}} ngày",
+        "relativeDaysHours": "{{days}} ngày {{hours}} giờ",
+        "relativeHours": "{{hours}} giờ",
+        "relativeHoursMinutes": "{{hours}} giờ {{minutes}} phút",
+        "relativeMinutes": "{{minutes}} phút",
+        "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      },
+      "credits": {
+        "leftInline": "còn {{left}}",
+        "periodEndOnly": "Kết thúc chu kỳ: {{end}}",
+        "periodRange": "Chu kỳ: {{start}} - {{end}}",
+        "planEndsIn": "Chu kỳ đặt lại sau {{days}} ngày",
+        "planEndsUnknown": "Không có thông tin chu kỳ",
+        "usedLine": "Đã dùng {{used}} / {{total}}"
+      },
+      "flowNotice": {
+        "alternative": "Giải pháp thay thế: dùng cô lập đa phiên bản (khác --user-data-dir). Đăng nhập một lần cho mỗi phiên bản, sau đó khởi chạy theo phiên bản để chuyển nhanh sang môi trường tài khoản mục tiêu."
+      },
+      "injecting": "Đang chèn...",
+      "usage": {
+        "resetLine": "Hạn mức sẽ được đặt lại {{dateText}}.",
+        "resetUnknown": "Hạn mức sẽ đặt lại sau -"
+      }
+    }
   },
   "nav": {
     "overview": "Tài khoản Antigravity",
@@ -31,8 +152,8 @@
     "codex": "Tài khoản Codex",
     "dashboard": "Bảng điều khiển",
     "instances": "Đa Phiên Bản",
-    "githubCopilot": "GitHub Copilot",
-    "windsurf": "Windsurf",
+    "githubCopilot": "Phi công phụ GitHub",
+    "windsurf": "Lướt ván buồm",
     "morePlatforms": "Thêm nền tảng"
   },
   "settings": {
@@ -110,14 +231,14 @@
       "windsurfAppPathPlaceholder": "Đường dẫn mặc định",
       "windsurfPathSelect": "Chọn",
       "windsurfPathReset": "Đặt lại mặc định",
-      "kiroSettingsTitle": "Kiro Settings",
-      "kiroAutoRefresh": "Kiro Auto Refresh Quota",
-      "kiroAutoRefreshDesc": "Background update frequency",
-      "kiroAppPath": "Kiro App Path",
-      "kiroAppPathDesc": "Leave empty to use default path",
-      "kiroAppPathPlaceholder": "Default path",
-      "kiroPathSelect": "Select",
-      "kiroPathReset": "Reset to default"
+      "kiroSettingsTitle": "Cài đặt Kiro",
+      "kiroAutoRefresh": "Hạn ngạch làm mới tự động của Kiro",
+      "kiroAutoRefreshDesc": "Tần suất cập nhật nền",
+      "kiroAppPath": "Đường dẫn ứng dụng Kiro",
+      "kiroAppPathDesc": "Để trống để sử dụng đường dẫn mặc định",
+      "kiroAppPathPlaceholder": "Đường dẫn mặc định",
+      "kiroPathSelect": "Lựa chọn",
+      "kiroPathReset": "Đặt lại về mặc định"
     },
     "network": {
       "apiTitle": "API Antigravity Cockpit",
@@ -134,17 +255,17 @@
       "saveFailed": "Lưu thất bại: {{error}}"
     },
     "about": {
-      "appName": "Cockpit Tools",
+      "appName": "Công cụ buồng lái",
       "slogan": "Giải pháp quản lý tài khoản chuyên nghiệp",
       "author": "Tác giả chính",
       "wechat": "Tài khoản WeChat chính thức",
       "github": "Kho lưu trữ mã nguồn",
       "alipay": "Alipay",
-      "wechatpay": "WeChat Pay",
+      "wechatpay": "WeChat trả tiền",
       "sponsor": "Tài trợ dự án",
-      "sponsorDesc": "Support development",
+      "sponsorDesc": "Hỗ trợ phát triển",
       "feedback": "Phản hồi",
-      "feedbackDesc": "Report issues/suggestions",
+      "feedbackDesc": "Báo cáo vấn đề/đề xuất",
       "supportDev": "Hỗ trợ phát triển",
       "checkUpdate": "Kiểm tra cập nhật",
       "checking": "Đang kiểm tra...",
@@ -170,7 +291,7 @@
     "deleteAccount": "Xóa tài khoản",
     "confirmDelete": "Bạn có chắc chắn muốn xóa tài khoản {{email}} không?",
     "columns": {
-      "email": "Email",
+      "email": "E-mail",
       "subscription": "Loại đăng ký",
       "quota": "Trạng thái hạn mức",
       "fingerprint": "Vân tay",
@@ -180,16 +301,16 @@
     "status": {
       "current": "Hiện tại",
       "disabled": "Đã vô hiệu hóa",
-      "authInvalid": "Invalid credentials",
-      "refreshFailed": "Refresh failed",
+      "authInvalid": "Thông tin xác thực không hợp lệ",
+      "refreshFailed": "Làm mới không thành công",
       "normal": "Bình thường",
       "forbidden": "403",
       "forbidden_tooltip": "API trả về 403 Forbidden, tài khoản không có quyền sử dụng Gemini Code Assist",
       "forbidden_msg": "Tài khoản không có quyền, đã bỏ qua tự động làm mới"
     },
     "tier": {
-      "pro": "PRO",
-      "ultra": "ULTRA",
+      "pro": "CHUYÊN NGHIỆP",
+      "ultra": "SIÊU",
       "free": "MIỄN PHÍ"
     },
     "empty": {
@@ -209,8 +330,8 @@
     "filterLabel": "Lọc tài khoản",
     "filter": {
       "all": "Tất cả ({{count}})",
-      "pro": "PRO ({{count}})",
-      "ultra": "ULTRA ({{count}})",
+      "pro": "CHUYÊN NGHIỆP ({{count}})",
+      "ultra": "SIÊU ({{count}})",
       "free": "MIỄN PHÍ ({{count}})"
     },
     "sortLabel": "Sắp xếp",
@@ -234,7 +355,7 @@
     },
     "tabs": {
       "oauth": "OAuth",
-      "token": "Refresh Token",
+      "token": "Làm mới mã thông báo",
       "import": "Nhập"
     },
     "oauth": {
@@ -487,7 +608,7 @@
     "format": {
       "noReply": "(Không có phản hồi)",
       "durationMs": "{{ms}}ms",
-      "tokens": "tokens={{prompt}}+{{completion}}={{total}}",
+      "tokens": "mã thông báo={{prompt}}+{{completion}}={{total}}",
       "traceId": "traceId={{traceId}}",
       "detailJoiner": ", ",
       "message": "[[{{model}}]]: {{reply}}{{suffix}}",
@@ -540,7 +661,7 @@
     },
     "triggerSource": {
       "scheduled": "Lịch trình",
-      "crontab": "Crontab",
+      "crontab": "crontab",
       "quotaReset": "Đặt lại hạn mức",
       "manual": "Chạy thử",
       "unknown": "Không xác định"
@@ -644,15 +765,11 @@
   "codex": {
     "title": "Quản lý tài khoản Codex",
     "subtitle": "Quản lý các tài khoản OpenAI Codex",
-    "addAccount": "Thêm tài khoản",
-    "refreshAll": "Làm mới tất cả",
-    "refreshQuota": "Làm mới hạn mức",
     "switch": "Chuyển",
     "switched": "Đã chuyển sang {{email}}",
     "switchFailed": "Chuyển thất bại: {{error}}",
     "current": "Hiện tại",
     "empty": {
-      "title": "Chưa có tài khoản",
       "description": "Nhấn \"Thêm tài khoản\" để bắt đầu"
     },
     "addModal": {
@@ -664,11 +781,7 @@
     "oauth": {
       "desc": "Nhấn nút bên dưới và hoàn tất ủy quyền OpenAI trong trình duyệt",
       "preparing": "Đang chuẩn bị liên kết ủy quyền...",
-      "openBrowser": "Mở trong trình duyệt",
-      "hint": "Sau khi ủy quyền, cửa sổ này sẽ tự cập nhật",
       "exchanging": "Đang đổi token...",
-      "success": "Ủy quyền thành công",
-      "failed": "Ủy quyền thất bại",
       "portInUse": "Cổng {{port}} đang được sử dụng. Hãy đóng ứng dụng đang dùng cổng này và thử lại.",
       "portInUseTitle": "Cổng đang được sử dụng",
       "portInUseConfirm": "Cổng {{port}} đang được sử dụng. Bạn có muốn đóng tiến trình dùng cổng này không?",
@@ -678,87 +791,50 @@
     },
     "token": {
       "desc": "Dán nội dung auth.json hoặc dữ liệu JSON tài khoản",
-      "placeholder": "Dán nội dung JSON...",
-      "import": "Nhập",
-      "importing": "Đang nhập...",
-      "importSuccessMsg": "Đã nhập {{count}} tài khoản",
-      "importFailedMsg": "Nhập thất bại: {{error}}",
-      "empty": "Vui lòng nhập Token hoặc JSON"
+      "placeholder": "Dán nội dung JSON..."
     },
     "local": {
       "desc": "Nhập tài khoản hiện tại từ ~/.codex/auth.json",
       "import": "Lấy tài khoản cục bộ"
     },
     "import": {
-      "label": "Nhập",
       "importing": "Đang nhập tài khoản cục bộ...",
       "successMsg": "Nhập thành công: {{email}}",
-      "failedMsg": "Nhập thất bại: {{error}}",
       "localDesc": "Nhập tài khoản Codex từ các phiên đăng nhập cục bộ."
     },
     "quota": {
       "hourly": "Hạn mức 5 giờ",
       "weekly": "Hạn mức tuần",
-      "reset": "Đặt lại",
-      "noData": "Không có dữ liệu hạn mức",
-      "resetDone": "Đã đặt lại"
+      "reset": "Đặt lại"
     },
     "plan": {
-      "free": "FREE",
-      "plus": "PLUS",
-      "pro": "PRO",
-      "team": "TEAM",
-      "enterprise": "ENTERPRISE"
+      "free": "MIỄN PHÍ",
+      "plus": "CỘNG VỚI",
+      "pro": "CHUYÊN NGHIỆP",
+      "team": "ĐỘI",
+      "enterprise": "DOANH NGHIỆP"
     },
     "time": {
-      "relativeDays": "{{days}} ngày",
-      "relativeDaysHours": "{{days}} ngày {{hours}} giờ",
-      "relativeHours": "{{hours}} giờ",
-      "relativeHoursMinutes": "{{hours}} giờ {{minutes}} phút",
-      "relativeMinutes": "{{minutes}} phút",
-      "lessThanMinute": "<1 phút",
       "today": "Hôm nay {{time}}",
       "tomorrow": "Ngày mai {{time}}",
-      "dateTime": "{{date}} {{time}}",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      "dateTime": "{{date}} {{time}}"
     },
-    "search": "Tìm kiếm tài khoản...",
     "view": {
-      "compact": "Dạng thu gọn",
-      "list": "Dạng danh sách",
-      "grid": "Dạng thẻ"
+      "compact": "Dạng thu gọn"
     },
     "filter": {
-      "all": "Tất cả ({{count}})",
-      "free": "FREE ({{count}})",
-      "plus": "PLUS ({{count}})",
-      "pro": "PRO ({{count}})",
-      "team": "TEAM ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
+      "plus": "CỘNG VỚI ({{count}})",
+      "team": "ĐỘI ({{count}})"
     },
-    "filterLabel": "Bộ lọc",
-    "sortLabel": "Sắp xếp",
     "sort": {
       "weekly": "Hạn mức tuần",
       "hourly": "Hạn mức 5 giờ",
       "weeklyReset": "Thời gian đặt lại theo tuần",
-      "hourlyReset": "Thời gian đặt lại 5 giờ",
-      "descTooltip": "Giảm dần (nhấn để chuyển Tăng dần)",
-      "ascTooltip": "Tăng dần (nhấn để chuyển Giảm dần)",
-      "toggleDirection": "Đổi hướng sắp xếp",
-      "createdAt": "Thời gian tạo"
-    },
-    "export": "Xuất",
-    "noMatch": {
-      "title": "Không có tài khoản phù hợp",
-      "desc": "Thử điều chỉnh tìm kiếm hoặc bộ lọc"
+      "hourlyReset": "Thời gian đặt lại 5 giờ"
     },
     "columns": {
-      "email": "Tài khoản",
-      "plan": "Gói",
       "hourly": "Hạn mức 5h",
-      "weekly": "Hạn mức tuần",
-      "actions": "Hành động"
+      "weekly": "Hạn mức tuần"
     },
     "opencodeSwitch": "Công tắc OpenCode",
     "opencodeSwitchDesc": "Đồng bộ chuyển đổi tài khoản Codex trong OpenCode",
@@ -773,7 +849,6 @@
       "comingSoon": "Đa Phiên Bản Sắp Ra Mắt",
       "comingSoonDesc": "Chạy nhiều phiên bản Codex.app với các tài khoản khác nhau cùng lúc.",
       "unsupported": {
-        "title": "Không hỗ trợ trên hệ thống này",
         "desc": "Đa phiên bản Codex hiện chỉ khả dụng trên macOS."
       },
       "quota": {
@@ -819,9 +894,9 @@
       "totalAccounts": "Tổng tài khoản"
     },
     "panels": {
-      "antigravity": "Antigravity",
+      "antigravity": "phản trọng lực",
       "codex": "Codex",
-      "githubCopilot": "GitHub Copilot",
+      "githubCopilot": "Phi công phụ GitHub",
       "planDistribution": "Phân bố gói",
       "current": "Tài khoản hiện tại",
       "recommended": "Tài khoản đề xuất",
@@ -892,7 +967,7 @@
       "running": "Đang chạy",
       "stopped": "Đã dừng",
       "restarting": "Đang khởi động lại",
-      "starting": "Starting"
+      "starting": "Bắt đầu"
     },
     "labels": {
       "path": "Thư mục",
@@ -1036,129 +1111,44 @@
   },
   "githubCopilot": {
     "title": "Quản lý tài khoản GitHub Copilot",
-    "subtitle": "Quản lý các tài khoản GitHub Copilot",
-    "overview": {
-      "title": "Tổng quan tài khoản"
-    },
     "instances": {
-      "title": "Đa Phiên Bản",
-      "subtitle": "Cấu hình độc lập cho mỗi phiên bản, vận hành song song với nhiều tài khoản.",
       "unsupported": {
-        "title": "Không hỗ trợ trên hệ thống này",
         "desc": "Đa phiên bản GitHub Copilot hiện chỉ khả dụng trên macOS."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "Thêm tài khoản",
-    "refreshAll": "Làm mới tất cả",
-    "refreshQuota": "Làm mới hạn mức",
     "empty": {
-      "title": "Chưa có tài khoản",
       "description": "Nhấn \"Thêm tài khoản\" để bắt đầu"
     },
-    "noMatch": {
-      "title": "Không có tài khoản phù hợp",
-      "desc": "Thử điều chỉnh tìm kiếm hoặc bộ lọc"
-    },
     "addModal": {
-      "title": "Thêm tài khoản GitHub Copilot",
-      "oauth": "Đăng nhập OAuth",
-      "token": "Nhập JSON",
-      "import": "Nhập từ máy"
+      "title": "Thêm tài khoản GitHub Copilot"
     },
     "oauth": {
-      "desc": "Nhấn nút bên dưới và hoàn tất ủy quyền GitHub Copilot trong trình duyệt.",
-      "preparing": "Đang chuẩn bị liên kết ủy quyền...",
-      "openBrowser": "Mở trong trình duyệt",
-      "hint": "Sau khi ủy quyền, cửa sổ này sẽ tự cập nhật",
-      "success": "Ủy quyền thành công",
-      "failed": "Ủy quyền thất bại",
-      "retry": "Tạo lại thông tin ủy quyền",
-      "timeoutRetry": "Làm mới liên kết ủy quyền",
-      "waiting": "Đang chờ ủy quyền...",
-      "meta": "Hết hạn sau: {{expires}}s; chu kỳ thăm dò: {{interval}}s"
+      "desc": "Nhấn nút bên dưới và hoàn tất ủy quyền GitHub Copilot trong trình duyệt."
     },
     "token": {
-      "desc": "Dán token truy cập GitHub Copilot hoặc dữ liệu JSON đã xuất.",
-      "placeholder": "Dán nội dung JSON...",
-      "import": "Nhập",
-      "importing": "Đang nhập...",
-      "importSuccessMsg": "Đã nhập {{count}} tài khoản",
-      "importFailedMsg": "Nhập thất bại: {{error}}",
-      "empty": "Vui lòng nhập Token hoặc JSON"
+      "desc": "Dán token truy cập GitHub Copilot hoặc dữ liệu JSON đã xuất."
     },
     "import": {
-      "label": "Nhập",
-      "localDesc": "Nhập tài khoản GitHub Copilot từ các phiên đăng nhập cục bộ.",
-      "importing": "Đang nhập tài khoản cục bộ...",
-      "failedMsg": "Nhập thất bại: {{error}}",
-      "pickFile": "Chọn tệp JSON để nhập"
+      "localDesc": "Nhập tài khoản GitHub Copilot từ các phiên đăng nhập cục bộ."
     },
-    "quota": {
-      "hourly": "Hạn mức 5 giờ",
-      "weekly": "Hạn mức tuần",
-      "noData": "Không có dữ liệu hạn mức",
-      "resetDone": "Đã đặt lại"
-    },
-    "usage": {
-      "resetUnknown": "Hạn mức sẽ đặt lại sau -",
-      "resetLine": "Hạn mức sẽ được đặt lại {{dateText}}."
-    },
-    "time": {
-      "relativeDays": "{{days}} ngày",
-      "relativeDaysHours": "{{days}} ngày {{hours}} giờ",
-      "relativeHours": "{{hours}} giờ",
-      "relativeHoursMinutes": "{{hours}} giờ {{minutes}} phút",
-      "relativeMinutes": "{{minutes}} phút",
-      "lessThanMinute": "<1 phút",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "Tìm kiếm tài khoản...",
-    "view": {
-      "list": "Dạng danh sách",
-      "grid": "Dạng thẻ"
-    },
-    "filter": {
-      "all": "Tất cả ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Bộ lọc",
-    "sortLabel": "Sắp xếp",
     "sort": {
-      "createdAt": "Thời gian tạo",
       "weekly": "Hạn mức tuần",
       "hourly": "Hạn mức 5 giờ",
       "weeklyReset": "Thời gian đặt lại theo tuần",
-      "hourlyReset": "Thời gian đặt lại 5 giờ",
-      "descTooltip": "Giảm dần (nhấn để chuyển Tăng dần)",
-      "ascTooltip": "Tăng dần (nhấn để chuyển Giảm dần)",
-      "toggleDirection": "Đổi hướng sắp xếp"
+      "hourlyReset": "Thời gian đặt lại 5 giờ"
     },
     "columns": {
-      "email": "Tài khoản",
-      "plan": "Gói",
       "hourly": "Hạn mức 5h",
-      "weekly": "Hạn mức tuần",
-      "actions": "Hành động"
+      "weekly": "Hạn mức tuần"
     },
-    "export": "Xuất",
     "flowNotice": {
       "title": "Hướng dẫn tài khoản GitHub Copilot (bấm để mở rộng/thu gọn)",
       "desc": "Việc chuyển tài khoản yêu cầu đọc kho xác thực cục bộ của VS Code và dùng dịch vụ thông tin xác thực hệ thống để giải mã/ghi lại; dữ liệu chỉ được xử lý trên máy cục bộ.",
       "reason": "Phạm vi quyền: đọc cơ sở dữ liệu xác thực VS Code (state.vscdb) và gọi khả năng mã hóa hệ thống (Windows DPAPI / macOS Keychain / Linux Secret Service) để giải mã/ghi lại.",
       "storage": "Phạm vi đọc: chỉ xử lý dữ liệu liên quan đến phiên đăng nhập GitHub; mọi quy trình đều được thực thi cục bộ.",
-      "alternative": "Giải pháp thay thế: dùng cô lập đa phiên bản (khác --user-data-dir). Đăng nhập một lần cho mỗi phiên bản, sau đó khởi chạy theo phiên bản để chuyển nhanh sang môi trường tài khoản mục tiêu.",
       "inject": "Chuyển đổi một lần nhấp: công cụ này đọc dữ liệu mã hóa cục bộ của VS Code (DPAPI/Keychain/Secret Service), giải mã phiên xác thực trong state.vscdb, thay thế token GitHub Copilot rồi mã hóa lại — mọi thao tác đều diễn ra cục bộ trên máy của bạn."
     },
     "injectToVSCode": "Chuyển sang VS Code",
-    "injecting": "Đang chèn...",
     "injectSuccess": "Đã chèn token vào VS Code thành công. VS Code đang được khởi chạy.",
     "injectRequireClose": "Vui lòng đóng VS Code trước khi chèn."
   },
@@ -1202,10 +1192,10 @@
     },
     "windsurfRefreshInterval": "Tự động làm mới hạn ngạch",
     "kiro": {
-      "title": "Kiro Settings",
-      "appPath": "Kiro Path"
+      "title": "Cài đặt Kiro",
+      "appPath": "Con đường Kiro"
     },
-    "kiroRefreshInterval": "Auto refresh quota"
+    "kiroRefreshInterval": "Hạn ngạch làm mới tự động"
   },
   "quotaAlert": {
     "bannerText": "Cảnh báo hạn mức cho {{email}} (ngưỡng {{threshold}}%, thấp nhất {{lowest}}%, mô hình: {{models}})",
@@ -1236,145 +1226,47 @@
   },
   "windsurf": {
     "title": "Quản lý tài khoản Windsurf",
-    "subtitle": "Quản lý các tài khoản Windsurf",
-    "overview": {
-      "title": "Tổng quan tài khoản"
-    },
     "instances": {
-      "title": "Đa Phiên Bản",
-      "subtitle": "Cấu hình độc lập cho mỗi phiên bản, vận hành song song với nhiều tài khoản.",
       "unsupported": {
-        "title": "Không hỗ trợ trên hệ thống này",
         "desc": "Đa phiên bản Windsurf hiện chỉ khả dụng trên macOS."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "Thêm tài khoản",
-    "refreshAll": "Làm mới tất cả",
-    "refreshQuota": "Làm mới hạn mức",
     "empty": {
-      "title": "Chưa có tài khoản",
       "description": "Nhấn \"Thêm tài khoản\" để bắt đầu"
     },
-    "noMatch": {
-      "title": "Không có tài khoản phù hợp",
-      "desc": "Thử điều chỉnh tìm kiếm hoặc bộ lọc"
-    },
     "addModal": {
-      "title": "Thêm tài khoản Windsurf",
-      "oauth": "Đăng nhập OAuth",
-      "token": "Nhập JSON",
-      "import": "Nhập từ máy"
+      "title": "Thêm tài khoản Windsurf"
     },
     "oauth": {
-      "desc": "Nhấn nút bên dưới và hoàn tất ủy quyền Windsurf trong trình duyệt.",
-      "preparing": "Đang chuẩn bị liên kết ủy quyền...",
-      "openBrowser": "Mở trong trình duyệt",
-      "hint": "Sau khi ủy quyền, cửa sổ này sẽ tự cập nhật",
-      "success": "Ủy quyền thành công",
-      "failed": "Ủy quyền thất bại",
-      "retry": "Tạo lại thông tin ủy quyền",
-      "timeoutRetry": "Làm mới liên kết ủy quyền",
-      "waiting": "Đang chờ ủy quyền...",
-      "meta": "Hết hạn sau: {{expires}}s; chu kỳ thăm dò: {{interval}}s"
+      "desc": "Nhấn nút bên dưới và hoàn tất ủy quyền Windsurf trong trình duyệt."
     },
     "token": {
-      "desc": "Dán token truy cập Windsurf hoặc dữ liệu JSON đã xuất.",
-      "placeholder": "Dán nội dung JSON...",
-      "import": "Nhập",
-      "importing": "Đang nhập...",
-      "importSuccessMsg": "Đã nhập {{count}} tài khoản",
-      "importFailedMsg": "Nhập thất bại: {{error}}",
-      "empty": "Vui lòng nhập Token hoặc JSON"
+      "desc": "Dán token truy cập Windsurf hoặc dữ liệu JSON đã xuất."
     },
     "import": {
-      "label": "Nhập",
       "localDesc": "Nhập tài khoản Windsurf từ các phiên đăng nhập cục bộ.",
-      "localClient": "Nhập từ Windsurf cục bộ",
-      "orJson": "Hoặc nhập từ tệp JSON",
-      "importing": "Đang nhập tài khoản cục bộ...",
-      "failedMsg": "Nhập thất bại: {{error}}",
-      "pickFile": "Chọn tệp JSON để nhập"
-    },
-    "quota": {
-      "hourly": "Hạn mức 5 giờ",
-      "weekly": "Hạn mức tuần",
-      "noData": "Không có dữ liệu hạn mức",
-      "resetDone": "Đã đặt lại"
+      "localClient": "Nhập từ Windsurf cục bộ"
     },
     "credits": {
       "title": "Gói",
       "renewMonthly": "Tín dụng được làm mới mỗi tháng",
-      "planEndsIn": "Chu kỳ đặt lại sau {{days}} ngày",
-      "planEndsUnknown": "Không có thông tin chu kỳ",
-      "periodRange": "Chu kỳ: {{start}} - {{end}}",
-      "periodEndOnly": "Kết thúc chu kỳ: {{end}}",
       "left": "Còn {{count}} tín dụng",
       "leftUnknown": "Tín dụng còn lại -",
       "promptLeft": "Còn {{remaining}}/{{total}} tín dụng prompt",
       "promptLeftNoTotal": "Còn {{remaining}} tín dụng prompt",
       "promptLeftUnknown": "Tín dụng prompt còn lại -",
-      "addOnAvailable": "Có {{count}} tín dụng bổ sung khả dụng",
-      "usedLine": "Đã dùng {{used}} / {{total}}",
-      "leftInline": "còn {{left}}"
-    },
-    "usage": {
-      "resetUnknown": "Hạn mức sẽ đặt lại sau -",
-      "resetLine": "Hạn mức sẽ được đặt lại {{dateText}}."
-    },
-    "time": {
-      "relativeDays": "{{days}} ngày",
-      "relativeDaysHours": "{{days}} ngày {{hours}} giờ",
-      "relativeHours": "{{hours}} giờ",
-      "relativeHoursMinutes": "{{hours}} giờ {{minutes}} phút",
-      "relativeMinutes": "{{minutes}} phút",
-      "lessThanMinute": "<1 phút",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "Tìm kiếm tài khoản...",
-    "view": {
-      "list": "Dạng danh sách",
-      "grid": "Dạng thẻ"
-    },
-    "filter": {
-      "all": "Tất cả ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Bộ lọc",
-    "sortLabel": "Sắp xếp",
-    "sort": {
-      "createdAt": "Thời gian tạo",
-      "credits": "Theo tín dụng còn lại",
-      "planEnd": "Theo thời điểm kết thúc chu kỳ",
-      "descTooltip": "Giảm dần (nhấn để chuyển Tăng dần)",
-      "ascTooltip": "Tăng dần (nhấn để chuyển Giảm dần)",
-      "toggleDirection": "Đổi hướng sắp xếp"
+      "addOnAvailable": "Có {{count}} tín dụng bổ sung khả dụng"
     },
     "columns": {
-      "email": "Email",
-      "plan": "Nhãn",
-      "promptCredits": "Tín dụng prompt",
-      "addOnPromptCredits": "Tín dụng prompt bổ sung",
-      "credits": "Tín dụng",
-      "actions": "Hành động"
+      "plan": "Nhãn"
     },
-    "export": "Xuất",
     "injectToVSCode": "Chuyển sang Windsurf",
-    "injecting": "Đang chèn...",
     "injectSuccess": "Chuyển đổi hoàn tất. Windsurf đang khởi chạy.",
     "injectRequireClose": "Vui lòng đóng Windsurf trước khi chuyển đổi.",
     "flowNotice": {
       "title": "Hướng dẫn tài khoản Windsurf (bấm để mở rộng/thu gọn)",
       "desc": "Việc chuyển tài khoản yêu cầu đọc kho xác thực cục bộ của Windsurf và dùng dịch vụ thông tin xác thực hệ thống để giải mã/ghi lại; dữ liệu chỉ được xử lý trên máy cục bộ.",
       "inject": "Chuyển đổi một lần nhấp: công cụ này đọc dữ liệu mã hóa cục bộ của Windsurf (DPAPI/Keychain/Secret Service), giải mã phiên xác thực trong state.vscdb, thay thế token Windsurf rồi mã hóa lại — mọi thao tác đều diễn ra cục bộ trên máy của bạn.",
-      "alternative": "Giải pháp thay thế: dùng cô lập đa phiên bản (khác --user-data-dir). Đăng nhập một lần cho mỗi phiên bản, sau đó khởi chạy theo phiên bản để chuyển nhanh sang môi trường tài khoản mục tiêu.",
       "reason": "Phạm vi quyền: đọc cơ sở dữ liệu xác thực Windsurf (state.vscdb) và gọi khả năng mã hóa hệ thống (Windows DPAPI / macOS Keychain / Linux Secret Service) để giải mã/ghi lại.",
       "storage": "Phạm vi đọc: chỉ xử lý dữ liệu liên quan đến phiên đăng nhập Windsurf; mọi quy trình đều được thực thi cục bộ."
     }
@@ -1412,7 +1304,7 @@
     "historyEmpty": "Chưa có bản ghi",
     "historyClear": "Xóa",
     "historyScoreShort": "Điểm {{score}}",
-    "historyLevelShort": "Lv {{level}}",
+    "historyLevelShort": "Cấp {{level}}",
     "historyDurationShort": "Thời gian {{duration}}",
     "historyReasonGameOver": "Kết thúc game",
     "historyReasonManualExit": "Thoát thủ công",
@@ -1425,140 +1317,62 @@
   },
   "kiro": {
     "account": {
-      "signedInWith": "Signed in with {{provider}}",
-      "providerUnknown": "Unknown",
-      "userId": "User ID"
+      "signedInWith": "Đã đăng nhập bằng {{provider}}",
+      "providerUnknown": "Không xác định",
+      "userId": "ID người dùng"
     },
     "credits": {
-      "planEndsIn": "Chu kỳ đặt lại sau {{days}} ngày",
-      "planEndsUnknown": "Không có thông tin chu kỳ",
-      "periodRange": "Chu kỳ: {{start}} - {{end}}",
-      "periodEndOnly": "Kết thúc chu kỳ: {{end}}",
-      "estimatedResetOn": "Estimated Usage resets on {{date}}",
-      "bonusUsageLine": "{{used}} used / {{total}} total",
-      "planUsageCoveredLine": "{{used}} used / {{total}} covered in plan",
-      "usedLine": "Đã dùng {{used}} / {{total}}",
-      "leftInline": "còn {{left}}",
-      "expiryDays": "{{days}} days",
+      "estimatedResetOn": "Mức sử dụng ước tính được đặt lại trên {{date}}",
+      "bonusUsageLine": "{{used}} đã sử dụng / tổng cộng {{total}}",
+      "planUsageCoveredLine": "{{used}} đã sử dụng / {{total}} nằm trong kế hoạch",
+      "expiryDays": "{{days}} ngày",
       "expiryUnknown": "—",
-      "resetNow": "Reset soon",
-      "resetInHours": "Resets in {{hours}}h",
-      "resetInMinutes": "Resets in {{minutes}}m"
+      "resetNow": "Đặt lại sớm",
+      "resetInHours": "Đặt lại sau {{hours}}h",
+      "resetInMinutes": "Đặt lại sau {{minutes}} phút"
     },
     "columns": {
-      "email": "Email",
-      "plan": "Nhãn",
-      "credits": "Tín dụng",
-      "promptCredits": "Tín dụng prompt",
-      "addOnPromptCredits": "Tín dụng prompt bổ sung",
-      "bonusCredits": "Bonus Credits",
-      "estimatedUsage": "Estimated Usage",
-      "expiry": "Expiry",
-      "estUsage": "Est. Usage",
-      "actions": "Hành động"
+      "bonusCredits": "Tín dụng thưởng",
+      "estimatedUsage": "Mức sử dụng ước tính",
+      "expiry": "Hết hạn",
+      "estUsage": "Ước tính. Cách sử dụng"
     },
     "plan": {
-      "free": "Kiro Free",
-      "individual": "Kiro Individual",
+      "free": "Kiro miễn phí",
+      "individual": "Kiro Cá Nhân",
       "pro": "Kiro Pro",
-      "business": "Kiro Business",
-      "enterprise": "Kiro Enterprise",
-      "unknown": "Unknown"
+      "business": "kinh doanh kiro",
+      "enterprise": "Doanh nghiệp Kiro",
+      "unknown": "Không xác định"
     },
     "flowNotice": {
       "title": "Hướng dẫn tài khoản Kiro (bấm để mở rộng/thu gọn)",
-      "desc": "Việc chuyển tài khoản yêu cầu đọc kho xác thực cục bộ của Kiro và dùng dịch vụ thông tin xác thực hệ thống để giải mã/ghi lại; dữ liệu chỉ được xử lý trên máy cục bộ.",
-      "reason": "Phạm vi quyền: đọc cơ sở dữ liệu xác thực Kiro (state.vscdb) và gọi khả năng mã hóa hệ thống (Windows DPAPI / macOS Keychain / Linux Secret Service) để giải mã/ghi lại.",
-      "storage": "Phạm vi đọc: chỉ xử lý dữ liệu liên quan đến phiên đăng nhập Kiro; mọi quy trình đều được thực thi cục bộ."
+      "desc": "Chuyển tài khoản sẽ đọc/ghi các tệp xác thực Kiro cục bộ và cấu hình instance trên thiết bị này; đăng nhập OAuth và làm mới quota sẽ gọi các API chính thức của Kiro.",
+      "reason": "Các đường dẫn được xử lý gồm ~/.aws/sso/cache/kiro-auth-token.json, profile.json của instance và mục kiro.kiroAgent trong state.vscdb.",
+      "storage": "Dữ liệu được xử lý gồm thông tin phiên và quota của Kiro; các yêu cầu tới API chính thức của Kiro sẽ gửi các trường xác thực cần thiết (như code, refreshToken, accessToken và profileArn)."
     },
-    "title": "Kiro Account Management",
-    "subtitle": "Monitor quota status for all accounts in real time.",
-    "overview": {
-      "title": "Account Overview"
-    },
+    "title": "Quản lý tài khoản Kiro",
     "instances": {
-      "title": "Multi-Instance",
-      "subtitle": "Independent configs per instance for parallel multi-account runs.",
       "unsupported": {
-        "title": "Unsupported on this system",
-        "descPlatform": "Kiro multi-instance is available only on macOS, Windows and Linux."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
+        "descPlatform": "Kiro đa phiên bản chỉ khả dụng trên macOS, Windows và Linux."
       }
     },
-    "addAccount": "Add Account",
-    "refreshAll": "Refresh All",
-    "refreshQuota": "Refresh Quota",
     "empty": {
-      "title": "No Accounts",
-      "description": "Click \"Add Account\" to start managing your Kiro accounts"
-    },
-    "noMatch": {
-      "title": "No matching accounts",
-      "desc": "Try adjusting your search or filters"
+      "description": "Nhấp vào \"Thêm tài khoản\" để bắt đầu quản lý tài khoản Kiro của bạn"
     },
     "addModal": {
-      "title": "Add Kiro Account",
-      "oauth": "OAuth",
-      "token": "Token / JSON",
-      "import": "Local Import"
+      "title": "Thêm tài khoản Kiro"
     },
     "oauth": {
-      "desc": "Click the button below and complete Kiro authorization in your browser.",
-      "preparing": "Preparing authorization info...",
-      "openBrowser": "Open in Browser",
-      "hint": "Once authorized, this window will update automatically",
-      "success": "Authorization successful",
-      "failed": "Authorization failed",
-      "retry": "Regenerate authorization info",
-      "timeoutRetry": "Refresh authorization link",
-      "waiting": "Waiting for authorization...",
-      "meta": "Expires in: {{expires}}s; Poll interval: {{interval}}s"
+      "desc": "Nhấp vào nút bên dưới và hoàn tất ủy quyền Kiro trong trình duyệt của bạn."
     },
     "token": {
-      "desc": "Paste your Kiro access token or exported JSON data.",
-      "placeholder": "Paste token or JSON...",
-      "import": "Import",
-      "importing": "Importing...",
-      "importSuccessMsg": "Imported {{count}} account(s) successfully",
-      "importFailedMsg": "Import failed: {{error}}",
-      "empty": "Please enter a token or JSON"
+      "desc": "Dán mã thông báo truy cập Kiro của bạn hoặc dữ liệu JSON đã xuất."
     },
     "import": {
-      "label": "Import",
-      "localDesc": "Import Kiro account data from local Kiro client or a JSON file.",
-      "localClient": "Import from local Kiro",
-      "orJson": "Or import from JSON file",
-      "importing": "Importing...",
-      "failedMsg": "Import failed: {{error}}",
-      "pickFile": "Select JSON file to import"
+      "localDesc": "Nhập dữ liệu tài khoản Kiro từ ứng dụng khách Kiro cục bộ hoặc tệp JSON.",
+      "localClient": "Nhập khẩu từ Kiro địa phương"
     },
-    "search": "Search accounts...",
-    "view": {
-      "list": "List view",
-      "grid": "Card view"
-    },
-    "filter": {
-      "all": "All ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Filter",
-    "sortLabel": "Sort",
-    "sort": {
-      "createdAt": "Created time",
-      "credits": "By remaining credits",
-      "planEnd": "By cycle end time",
-      "descTooltip": "Current: Descending. Click to switch to ascending",
-      "ascTooltip": "Current: Ascending. Click to switch to descending",
-      "toggleDirection": "Toggle sort direction"
-    },
-    "export": "Export",
-    "injectToVSCode": "Switch to Kiro"
+    "injectToVSCode": "Chuyển sang Kiro"
   }
 }

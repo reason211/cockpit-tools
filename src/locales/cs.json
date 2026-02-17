@@ -20,7 +20,128 @@
     "none": "Žádné",
     "detail": "Detaily",
     "editable": "Upravitelné",
-    "preview": "Náhled"
+    "preview": "Náhled",
+    "shared": {
+      "addAccount": "Přidat účet",
+      "columns": {
+        "actions": "Akce",
+        "plan": "Plán",
+        "addOnPromptCredits": "Doplňkové kredity promptů",
+        "credits": "Kredity",
+        "email": "E-mail",
+        "promptCredits": "Kredity promptů"
+      },
+      "empty": {
+        "title": "Žádné účty"
+      },
+      "export": "Exportovat",
+      "filter": {
+        "all": "Vše ({{count}})",
+        "enterprise": "ENTERPRISE ({{count}})",
+        "free": "ZDARMA ({{count}})",
+        "pro": "PRO ({{count}})",
+        "business": "OBCHOD ({{count}})",
+        "individual": "JEDNOTLIVCE ({{count}})"
+      },
+      "filterLabel": "Filtr",
+      "import": {
+        "failedMsg": "Import se nezdařil: {{error}}",
+        "label": "Importovat",
+        "importing": "Import lokálního účtu...",
+        "pickFile": "Vyberte soubor JSON k importu",
+        "orJson": "Nebo importujte ze souboru JSON"
+      },
+      "instances": {
+        "unsupported": {
+          "title": "Na tomto systému nepodporováno"
+        },
+        "quota": {
+          "chat": "Chatové zprávy",
+          "inline": "Vložené návrhy"
+        },
+        "subtitle": "Nezávislá konfigurace pro každou instanci, paralelní provoz s více účty.",
+        "title": "Více instancí"
+      },
+      "noMatch": {
+        "desc": "Zkuste upravit hledání nebo filtry",
+        "title": "Žádné vyhovující účty"
+      },
+      "oauth": {
+        "failed": "Autorizace selhala",
+        "hint": "Po autorizaci se toto okno automaticky aktualizuje",
+        "openBrowser": "Otevřít v prohlížeči",
+        "success": "Autorizace úspěšná",
+        "meta": "Platnost vyprší za: {{expires}}s; interval dotazování: {{interval}}s",
+        "preparing": "Připravuje se autorizační odkaz...",
+        "retry": "Znovu vygenerovat autorizační údaje",
+        "timeoutRetry": "Obnovit autorizační odkaz",
+        "waiting": "Čekání na autorizaci..."
+      },
+      "refreshAll": "Obnovit vše",
+      "refreshQuota": "Obnovit kvótu",
+      "search": "Hledat účty...",
+      "sort": {
+        "ascTooltip": "Vzestupně (kliknutím přepnete na sestupně)",
+        "createdAt": "Datum vytvoření",
+        "descTooltip": "Sestupně (kliknutím přepnete na vzestupně)",
+        "toggleDirection": "Přepnout směr",
+        "credits": "Zbývajícími kredity",
+        "planEnd": "Podle času konce cyklu"
+      },
+      "sortLabel": "Seřadit",
+      "token": {
+        "empty": "Zadejte token nebo JSON",
+        "import": "Importovat",
+        "importFailedMsg": "Import selhal: {{error}}",
+        "importing": "Importování...",
+        "importSuccessMsg": "Importováno {{count}} účtů",
+        "placeholder": "Vložte JSON..."
+      },
+      "view": {
+        "grid": "Karty",
+        "list": "Seznam"
+      },
+      "addModal": {
+        "import": "Lokální import",
+        "oauth": "OAuth přihlášení",
+        "token": "Import JSON"
+      },
+      "overview": {
+        "title": "Přehled účtů"
+      },
+      "quota": {
+        "noData": "Žádná data kvóty",
+        "resetDone": "Resetováno",
+        "hourly": "Kvóta 5 hodin",
+        "weekly": "Týdenní kvóta"
+      },
+      "subtitle": "Spravujte své účty GitHub Copilot",
+      "time": {
+        "lessThanMinute": "<1 min",
+        "relativeDays": "{{days}} d",
+        "relativeDaysHours": "{{days}} d {{hours}} h",
+        "relativeHours": "{{hours}} h",
+        "relativeHoursMinutes": "{{hours}} h {{minutes}} min",
+        "relativeMinutes": "{{minutes}} min",
+        "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      },
+      "credits": {
+        "leftInline": "zbývá {{left}}",
+        "periodEndOnly": "Konec cyklu: {{end}}",
+        "periodRange": "Cyklus: {{start}} - {{end}}",
+        "planEndsIn": "Cyklus se resetuje za {{days}} dní",
+        "planEndsUnknown": "Časování cyklu není k dispozici",
+        "usedLine": "Použito {{used}} / {{total}}"
+      },
+      "flowNotice": {
+        "alternative": "Alternativa: použijte izolaci více instancí (odlišné --user-data-dir). V každé instanci se přihlaste jednou a poté spouštějte podle instance pro rychlé přepnutí na cílové prostředí účtu."
+      },
+      "injecting": "Probíhá injektování...",
+      "usage": {
+        "resetLine": "Limit se obnoví {{dateText}}.",
+        "resetUnknown": "Limit se obnoví -"
+      }
+    }
   },
   "nav": {
     "overview": "Účet Antigravity",
@@ -32,7 +153,7 @@
     "dashboard": "Dashboard",
     "instances": "Více instancí",
     "githubCopilot": "GitHub Copilot",
-    "windsurf": "Windsurf",
+    "windsurf": "Windsurfing",
     "morePlatforms": "Další platformy"
   },
   "settings": {
@@ -110,14 +231,14 @@
       "windsurfAppPathPlaceholder": "Výchozí cesta",
       "windsurfPathSelect": "Vybrat",
       "windsurfPathReset": "Obnovit výchozí",
-      "kiroSettingsTitle": "Kiro Settings",
-      "kiroAutoRefresh": "Kiro Auto Refresh Quota",
-      "kiroAutoRefreshDesc": "Background update frequency",
-      "kiroAppPath": "Kiro App Path",
-      "kiroAppPathDesc": "Leave empty to use default path",
-      "kiroAppPathPlaceholder": "Default path",
-      "kiroPathSelect": "Select",
-      "kiroPathReset": "Reset to default"
+      "kiroSettingsTitle": "Nastavení Kiro",
+      "kiroAutoRefresh": "Kvóta automatického obnovení Kiro",
+      "kiroAutoRefreshDesc": "Frekvence aktualizace na pozadí",
+      "kiroAppPath": "Cesta aplikace Kiro",
+      "kiroAppPathDesc": "Chcete-li použít výchozí cestu, ponechte prázdné",
+      "kiroAppPathPlaceholder": "Výchozí cesta",
+      "kiroPathSelect": "Vybrat",
+      "kiroPathReset": "Obnovit výchozí"
     },
     "network": {
       "apiTitle": "Antigravity Cockpit API",
@@ -134,7 +255,7 @@
       "saveFailed": "Uložení selhalo: {{error}}"
     },
     "about": {
-      "appName": "Cockpit Tools",
+      "appName": "Nástroje pro kokpit",
       "slogan": "Profesionální řešení pro správu účtů",
       "author": "Autor",
       "wechat": "WeChat",
@@ -142,9 +263,9 @@
       "alipay": "Alipay",
       "wechatpay": "WeChat Pay",
       "sponsor": "Sponzorovat",
-      "sponsorDesc": "Support development",
+      "sponsorDesc": "Podpora rozvoje",
       "feedback": "Zpětná vazba",
-      "feedbackDesc": "Report issues/suggestions",
+      "feedbackDesc": "Hlásit problémy/návrhy",
       "supportDev": "Podpořit vývoj",
       "checkUpdate": "Zkontrolovat aktualizace",
       "checking": "Kontrola...",
@@ -180,8 +301,8 @@
     "status": {
       "current": "Aktuální",
       "disabled": "Zakázáno",
-      "authInvalid": "Invalid credentials",
-      "refreshFailed": "Refresh failed",
+      "authInvalid": "Neplatné přihlašovací údaje",
+      "refreshFailed": "Obnovení se nezdařilo",
       "normal": "Normální",
       "forbidden": "403",
       "forbidden_tooltip": "API vrátilo 403 Forbidden, účet nemá přístup k Gemini Code Assist",
@@ -234,8 +355,8 @@
     },
     "tabs": {
       "oauth": "OAuth",
-      "token": "Refresh Token",
-      "import": "Import"
+      "token": "Obnovit token",
+      "import": "Importovat"
     },
     "oauth": {
       "authorizing": "Probíhá autorizace OAuth...",
@@ -644,15 +765,11 @@
   "codex": {
     "title": "Správa účtů Codex",
     "subtitle": "Spravujte své účty OpenAI Codex",
-    "addAccount": "Přidat účet",
-    "refreshAll": "Obnovit vše",
-    "refreshQuota": "Obnovit kvótu",
     "switch": "Přepnout",
     "switched": "Přepnuto na {{email}}",
     "switchFailed": "Přepnutí se nezdařilo: {{error}}",
     "current": "Aktuální",
     "empty": {
-      "title": "Žádné účty",
       "description": "Klikněte na „Přidat účet“"
     },
     "addModal": {
@@ -664,11 +781,7 @@
     "oauth": {
       "desc": "Klikněte níže a dokončete autorizaci OpenAI v prohlížeči",
       "preparing": "Připravuje se autorizační odkaz...",
-      "openBrowser": "Otevřít v prohlížeči",
-      "hint": "Po autorizaci se toto okno automaticky aktualizuje",
       "exchanging": "Probíhá výměna tokenu...",
-      "success": "Autorizace úspěšná",
-      "failed": "Autorizace selhala",
       "portInUse": "Port {{port}} je již používán. Zavřete aplikaci, která jej používá, a zkuste to znovu.",
       "portInUseTitle": "Port je obsazen",
       "portInUseConfirm": "Port {{port}} je obsazen. Zavřít proces, který jej používá?",
@@ -678,87 +791,50 @@
     },
     "token": {
       "desc": "Vložte obsah auth.json nebo JSON dat účtu",
-      "placeholder": "Vložte JSON...",
-      "import": "Importovat",
-      "importing": "Importování...",
-      "importSuccessMsg": "Importováno {{count}} účtů",
-      "importFailedMsg": "Import selhal: {{error}}",
-      "empty": "Zadejte token nebo JSON"
+      "placeholder": "Vložte JSON..."
     },
     "local": {
       "desc": "Importovat aktuální účet z ~/.codex/auth.json",
       "import": "Načíst lokální účet"
     },
     "import": {
-      "label": "Importovat",
       "importing": "Import lokálního účtu...",
       "successMsg": "Import proběhl úspěšně: {{email}}",
-      "failedMsg": "Import se nezdařil: {{error}}",
       "localDesc": "Importovat účty Codex z místně přihlášených relací."
     },
     "quota": {
       "hourly": "Kvóta 5 hodin",
       "weekly": "Týdenní kvóta",
-      "reset": "Reset",
-      "noData": "Žádná data kvóty",
-      "resetDone": "Resetováno"
+      "reset": "Reset"
     },
     "plan": {
-      "free": "FREE",
+      "free": "UVOLNIT",
       "plus": "PLUS",
       "pro": "PRO",
-      "team": "TEAM",
-      "enterprise": "ENTERPRISE"
+      "team": "TÝM",
+      "enterprise": "PODNIK"
     },
     "time": {
-      "relativeDays": "{{days}} d",
-      "relativeDaysHours": "{{days}} d {{hours}} h",
-      "relativeHours": "{{hours}} h",
-      "relativeHoursMinutes": "{{hours}} h {{minutes}} min",
-      "relativeMinutes": "{{minutes}} min",
-      "lessThanMinute": "<1 min",
       "today": "Dnes {{time}}",
       "tomorrow": "Zítra {{time}}",
-      "dateTime": "{{date}} {{time}}",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      "dateTime": "{{date}} {{time}}"
     },
-    "search": "Hledat účty...",
     "view": {
-      "compact": "Kompaktní",
-      "list": "Seznam",
-      "grid": "Karty"
+      "compact": "Kompaktní"
     },
     "filter": {
-      "all": "Vše ({{count}})",
-      "free": "FREE ({{count}})",
       "plus": "PLUS ({{count}})",
-      "pro": "PRO ({{count}})",
-      "team": "TEAM ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
+      "team": "TÝM ({{count}})"
     },
-    "filterLabel": "Filtr",
-    "sortLabel": "Seřadit",
     "sort": {
       "weekly": "Týdenní kvóta",
       "hourly": "5hodinová kvóta",
       "weeklyReset": "Čas týdenního resetu",
-      "hourlyReset": "Čas resetu 5 hodin",
-      "descTooltip": "Sestupně (kliknutím přepnete na vzestupně)",
-      "ascTooltip": "Vzestupně (kliknutím přepnete na sestupně)",
-      "toggleDirection": "Přepnout směr",
-      "createdAt": "Datum vytvoření"
-    },
-    "export": "Exportovat",
-    "noMatch": {
-      "title": "Žádné vyhovující účty",
-      "desc": "Zkuste upravit hledání nebo filtry"
+      "hourlyReset": "Čas resetu 5 hodin"
     },
     "columns": {
-      "email": "Účet",
-      "plan": "Plán",
       "hourly": "Kvóta 5h",
-      "weekly": "Kvóta týdn.",
-      "actions": "Akce"
+      "weekly": "Kvóta týdn."
     },
     "opencodeSwitch": "Přepínač OpenCode",
     "opencodeSwitchDesc": "Synchronizovat přepnutí účtu Codex v OpenCode",
@@ -773,7 +849,6 @@
       "comingSoon": "Funkce více instancí již brzy",
       "comingSoonDesc": "Spusťte více instancí Codex.app s různými účty současně, zůstaňte naladěni.",
       "unsupported": {
-        "title": "Na tomto systému nepodporováno",
         "desc": "Více instancí Codex je aktuálně dostupné pouze na macOS."
       },
       "quota": {
@@ -819,8 +894,8 @@
       "totalAccounts": "Celkem účtů"
     },
     "panels": {
-      "antigravity": "Antigravity",
-      "codex": "Codex",
+      "antigravity": "Antigravitace",
+      "codex": "Kodex",
       "githubCopilot": "GitHub Copilot",
       "planDistribution": "Rozložení plánů",
       "current": "Aktuální účet",
@@ -892,7 +967,7 @@
       "running": "Běží",
       "stopped": "Zastaveno",
       "restarting": "Restartování",
-      "starting": "Starting"
+      "starting": "Spuštění"
     },
     "labels": {
       "path": "Adresář",
@@ -1036,129 +1111,44 @@
   },
   "githubCopilot": {
     "title": "Správa účtů GitHub Copilot",
-    "subtitle": "Spravujte své účty GitHub Copilot",
-    "overview": {
-      "title": "Přehled účtů"
-    },
     "instances": {
-      "title": "Více instancí",
-      "subtitle": "Nezávislá konfigurace pro každou instanci, paralelní provoz s více účty.",
       "unsupported": {
-        "title": "Na tomto systému nepodporováno",
         "desc": "Více instancí GitHub Copilot je aktuálně dostupné pouze na macOS."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "Přidat účet",
-    "refreshAll": "Obnovit vše",
-    "refreshQuota": "Obnovit kvótu",
     "empty": {
-      "title": "Žádné účty",
       "description": "Klikněte na „Přidat účet“"
     },
-    "noMatch": {
-      "title": "Žádné vyhovující účty",
-      "desc": "Zkuste upravit hledání nebo filtry"
-    },
     "addModal": {
-      "title": "Přidat účet GitHub Copilot",
-      "oauth": "OAuth přihlášení",
-      "token": "Import JSON",
-      "import": "Lokální import"
+      "title": "Přidat účet GitHub Copilot"
     },
     "oauth": {
-      "desc": "Klikněte níže a dokončete autorizaci GitHub Copilot v prohlížeči.",
-      "preparing": "Připravuje se autorizační odkaz...",
-      "openBrowser": "Otevřít v prohlížeči",
-      "hint": "Po autorizaci se toto okno automaticky aktualizuje",
-      "success": "Autorizace úspěšná",
-      "failed": "Autorizace selhala",
-      "retry": "Znovu vygenerovat autorizační údaje",
-      "timeoutRetry": "Obnovit autorizační odkaz",
-      "waiting": "Čekání na autorizaci...",
-      "meta": "Platnost vyprší za: {{expires}}s; interval dotazování: {{interval}}s"
+      "desc": "Klikněte níže a dokončete autorizaci GitHub Copilot v prohlížeči."
     },
     "token": {
-      "desc": "Vložte access token GitHub Copilot nebo exportovaná data JSON.",
-      "placeholder": "Vložte JSON...",
-      "import": "Importovat",
-      "importing": "Importování...",
-      "importSuccessMsg": "Importováno {{count}} účtů",
-      "importFailedMsg": "Import selhal: {{error}}",
-      "empty": "Zadejte token nebo JSON"
+      "desc": "Vložte access token GitHub Copilot nebo exportovaná data JSON."
     },
     "import": {
-      "label": "Importovat",
-      "localDesc": "Importovat účty GitHub Copilot z místně přihlášených relací.",
-      "importing": "Import lokálního účtu...",
-      "failedMsg": "Import se nezdařil: {{error}}",
-      "pickFile": "Vyberte soubor JSON k importu"
+      "localDesc": "Importovat účty GitHub Copilot z místně přihlášených relací."
     },
-    "quota": {
-      "hourly": "Kvóta 5 hodin",
-      "weekly": "Týdenní kvóta",
-      "noData": "Žádná data kvóty",
-      "resetDone": "Resetováno"
-    },
-    "usage": {
-      "resetUnknown": "Limit se obnoví -",
-      "resetLine": "Limit se obnoví {{dateText}}."
-    },
-    "time": {
-      "relativeDays": "{{days}} d",
-      "relativeDaysHours": "{{days}} d {{hours}} h",
-      "relativeHours": "{{hours}} h",
-      "relativeHoursMinutes": "{{hours}} h {{minutes}} min",
-      "relativeMinutes": "{{minutes}} min",
-      "lessThanMinute": "<1 min",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "Hledat účty...",
-    "view": {
-      "list": "Seznam",
-      "grid": "Karty"
-    },
-    "filter": {
-      "all": "Vše ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Filtr",
-    "sortLabel": "Seřadit",
     "sort": {
-      "createdAt": "Datum vytvoření",
       "weekly": "Týdenní kvóta",
       "hourly": "5hodinová kvóta",
       "weeklyReset": "Čas týdenního resetu",
-      "hourlyReset": "Čas resetu 5 hodin",
-      "descTooltip": "Sestupně (kliknutím přepnete na vzestupně)",
-      "ascTooltip": "Vzestupně (kliknutím přepnete na sestupně)",
-      "toggleDirection": "Přepnout směr"
+      "hourlyReset": "Čas resetu 5 hodin"
     },
     "columns": {
-      "email": "Účet",
-      "plan": "Plán",
       "hourly": "Kvóta 5h",
-      "weekly": "Kvóta týdn.",
-      "actions": "Akce"
+      "weekly": "Kvóta týdn."
     },
-    "export": "Exportovat",
     "flowNotice": {
       "title": "Průvodce účty GitHub Copilot (kliknutím rozbalit/sbalit)",
       "desc": "Přepnutí účtu vyžaduje čtení lokálního úložiště ověření ve VS Code a použití systémové služby přihlašovacích údajů pro dešifrování a zpětný zápis; data se zpracovávají pouze lokálně.",
       "reason": "Rozsah oprávnění: čtení databáze ověření VS Code (state.vscdb) a volání systémového šifrování (Windows DPAPI / macOS Keychain / Linux Secret Service) pro dešifrování a zpětný zápis.",
       "storage": "Rozsah čtení: zpracovávají se pouze položky související s relací přihlášení GitHub a veškeré procesy probíhají lokálně.",
-      "alternative": "Alternativa: použijte izolaci více instancí (odlišné --user-data-dir). V každé instanci se přihlaste jednou a poté spouštějte podle instance pro rychlé přepnutí na cílové prostředí účtu.",
       "inject": "Přepnutí jedním kliknutím: Tento nástroj načte lokální šifrovací materiál VS Code (DPAPI/Keychain/Secret Service), dešifruje autentizační relaci ve state.vscdb, nahradí token GitHub Copilot a znovu ji zašifruje — vše lokálně na vašem zařízení."
     },
     "injectToVSCode": "Přepnout do VS Code",
-    "injecting": "Probíhá injektování...",
     "injectSuccess": "Token byl úspěšně vložen do VS Code. VS Code se spouští.",
     "injectRequireClose": "Před injektováním prosím zavřete VS Code."
   },
@@ -1202,10 +1192,10 @@
     },
     "windsurfRefreshInterval": "Automatická aktualizace kvóty",
     "kiro": {
-      "title": "Kiro Settings",
-      "appPath": "Kiro Path"
+      "title": "Nastavení Kiro",
+      "appPath": "Kiro cesta"
     },
-    "kiroRefreshInterval": "Auto refresh quota"
+    "kiroRefreshInterval": "Kvóta automatického obnovení"
   },
   "quotaAlert": {
     "bannerText": "Upozornění na kvótu pro {{email}} (práh {{threshold}} %, minimum {{lowest}} %, modely: {{models}})",
@@ -1236,145 +1226,47 @@
   },
   "windsurf": {
     "title": "Správa účtů Windsurf",
-    "subtitle": "Spravujte své účty Windsurf",
-    "overview": {
-      "title": "Přehled účtů"
-    },
     "instances": {
-      "title": "Více instancí",
-      "subtitle": "Nezávislá konfigurace pro každou instanci, paralelní provoz s více účty.",
       "unsupported": {
-        "title": "Na tomto systému nepodporováno",
         "desc": "Více instancí Windsurf je aktuálně dostupné pouze na macOS."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "Přidat účet",
-    "refreshAll": "Obnovit vše",
-    "refreshQuota": "Obnovit kvótu",
     "empty": {
-      "title": "Žádné účty",
       "description": "Klikněte na „Přidat účet“"
     },
-    "noMatch": {
-      "title": "Žádné vyhovující účty",
-      "desc": "Zkuste upravit hledání nebo filtry"
-    },
     "addModal": {
-      "title": "Přidat účet Windsurf",
-      "oauth": "OAuth přihlášení",
-      "token": "Import JSON",
-      "import": "Lokální import"
+      "title": "Přidat účet Windsurf"
     },
     "oauth": {
-      "desc": "Klikněte níže a dokončete autorizaci Windsurf v prohlížeči.",
-      "preparing": "Připravuje se autorizační odkaz...",
-      "openBrowser": "Otevřít v prohlížeči",
-      "hint": "Po autorizaci se toto okno automaticky aktualizuje",
-      "success": "Autorizace úspěšná",
-      "failed": "Autorizace selhala",
-      "retry": "Znovu vygenerovat autorizační údaje",
-      "timeoutRetry": "Obnovit autorizační odkaz",
-      "waiting": "Čekání na autorizaci...",
-      "meta": "Platnost vyprší za: {{expires}}s; interval dotazování: {{interval}}s"
+      "desc": "Klikněte níže a dokončete autorizaci Windsurf v prohlížeči."
     },
     "token": {
-      "desc": "Vložte access token Windsurf nebo exportovaná data JSON.",
-      "placeholder": "Vložte JSON...",
-      "import": "Importovat",
-      "importing": "Importování...",
-      "importSuccessMsg": "Importováno {{count}} účtů",
-      "importFailedMsg": "Import selhal: {{error}}",
-      "empty": "Zadejte token nebo JSON"
+      "desc": "Vložte access token Windsurf nebo exportovaná data JSON."
     },
     "import": {
-      "label": "Importovat",
       "localDesc": "Importovat účty Windsurf z místně přihlášených relací.",
-      "localClient": "Import z místního Windsurf",
-      "orJson": "Nebo import z JSON souboru",
-      "importing": "Import lokálního účtu...",
-      "failedMsg": "Import se nezdařil: {{error}}",
-      "pickFile": "Vyberte soubor JSON k importu"
-    },
-    "quota": {
-      "hourly": "Kvóta 5 hodin",
-      "weekly": "Týdenní kvóta",
-      "noData": "Žádná data kvóty",
-      "resetDone": "Resetováno"
+      "localClient": "Import z místního Windsurf"
     },
     "credits": {
       "title": "Tarif",
       "renewMonthly": "Kredity se obnovují každý měsíc",
-      "planEndsIn": "Cyklus se resetuje za {{days}} dní",
-      "planEndsUnknown": "Časování cyklu není k dispozici",
-      "periodRange": "Cyklus: {{start}} - {{end}}",
-      "periodEndOnly": "Konec cyklu: {{end}}",
       "left": "Zbývá {{count}} kreditů",
       "leftUnknown": "Zbývající kredity -",
       "promptLeft": "Zbývá {{remaining}}/{{total}} kreditů promptů",
       "promptLeftNoTotal": "Zbývá {{remaining}} kreditů promptů",
       "promptLeftUnknown": "Zbývající kredity promptů -",
-      "addOnAvailable": "Dostupných {{count}} doplňkových kreditů",
-      "usedLine": "Použito {{used}} / {{total}}",
-      "leftInline": "zbývá {{left}}"
-    },
-    "usage": {
-      "resetUnknown": "Limit se obnoví -",
-      "resetLine": "Limit se obnoví {{dateText}}."
-    },
-    "time": {
-      "relativeDays": "{{days}} d",
-      "relativeDaysHours": "{{days}} d {{hours}} h",
-      "relativeHours": "{{hours}} h",
-      "relativeHoursMinutes": "{{hours}} h {{minutes}} min",
-      "relativeMinutes": "{{minutes}} min",
-      "lessThanMinute": "<1 min",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "Hledat účty...",
-    "view": {
-      "list": "Seznam",
-      "grid": "Karty"
-    },
-    "filter": {
-      "all": "Vše ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Filtr",
-    "sortLabel": "Seřadit",
-    "sort": {
-      "createdAt": "Datum vytvoření",
-      "credits": "Podle zbývajících kreditů",
-      "planEnd": "Podle konce cyklu",
-      "descTooltip": "Sestupně (kliknutím přepnete na vzestupně)",
-      "ascTooltip": "Vzestupně (kliknutím přepnete na sestupně)",
-      "toggleDirection": "Přepnout směr"
+      "addOnAvailable": "Dostupných {{count}} doplňkových kreditů"
     },
     "columns": {
-      "email": "E-mail",
-      "plan": "Štítek",
-      "promptCredits": "Kredity promptů",
-      "addOnPromptCredits": "Doplňkové kredity promptů",
-      "credits": "Kredity",
-      "actions": "Akce"
+      "plan": "Štítek"
     },
-    "export": "Exportovat",
     "injectToVSCode": "Přepnout do Windsurf",
-    "injecting": "Probíhá injektování...",
     "injectSuccess": "Přepnutí dokončeno. Windsurf se spouští.",
     "injectRequireClose": "Před přepnutím prosím zavřete Windsurf.",
     "flowNotice": {
       "title": "Průvodce účty Windsurf (kliknutím rozbalit/sbalit)",
       "desc": "Přepnutí účtu vyžaduje čtení lokálního úložiště ověření ve Windsurf a použití systémové služby přihlašovacích údajů pro dešifrování a zpětný zápis; data se zpracovávají pouze lokálně.",
       "inject": "Přepnutí jedním kliknutím: Tento nástroj načte lokální šifrovací materiál Windsurf (DPAPI/Keychain/Secret Service), dešifruje autentizační relaci ve state.vscdb, nahradí token Windsurf a znovu ji zašifruje — vše lokálně na vašem zařízení.",
-      "alternative": "Alternativa: použijte izolaci více instancí (odlišné --user-data-dir). V každé instanci se přihlaste jednou a poté spouštějte podle instance pro rychlé přepnutí na cílové prostředí účtu.",
       "reason": "Rozsah oprávnění: čtení databáze ověření Windsurf (state.vscdb) a volání systémového šifrování (Windows DPAPI / macOS Keychain / Linux Secret Service) pro dešifrování a zpětný zápis.",
       "storage": "Rozsah čtení: zpracovávají se pouze položky související s relací přihlášení Windsurf a veškeré procesy probíhají lokálně."
     }
@@ -1425,140 +1317,62 @@
   },
   "kiro": {
     "account": {
-      "signedInWith": "Signed in with {{provider}}",
-      "providerUnknown": "Unknown",
-      "userId": "User ID"
+      "signedInWith": "Přihlášen pomocí {{provider}}",
+      "providerUnknown": "Neznámý",
+      "userId": "ID uživatele"
     },
     "credits": {
-      "planEndsIn": "Cyklus se resetuje za {{days}} dní",
-      "planEndsUnknown": "Časování cyklu není k dispozici",
-      "periodRange": "Cyklus: {{start}} - {{end}}",
-      "periodEndOnly": "Konec cyklu: {{end}}",
-      "estimatedResetOn": "Estimated Usage resets on {{date}}",
-      "bonusUsageLine": "{{used}} used / {{total}} total",
-      "planUsageCoveredLine": "{{used}} used / {{total}} covered in plan",
-      "usedLine": "Použito {{used}} / {{total}}",
-      "leftInline": "zbývá {{left}}",
-      "expiryDays": "{{days}} days",
+      "estimatedResetOn": "Odhadované využití se resetuje na {{date}}",
+      "bonusUsageLine": "{{used}} použitá / {{total}} celkem",
+      "planUsageCoveredLine": "{{used}} použitá / {{total}} pokrytá v plánu",
+      "expiryDays": "{{days}} dnů",
       "expiryUnknown": "—",
-      "resetNow": "Reset soon",
-      "resetInHours": "Resets in {{hours}}h",
-      "resetInMinutes": "Resets in {{minutes}}m"
+      "resetNow": "Resetovat brzy",
+      "resetInHours": "Resetuje se za {{hours}}h",
+      "resetInMinutes": "Resetuje se za {{minutes}}m"
     },
     "columns": {
-      "email": "E-mail",
-      "plan": "Štítek",
-      "credits": "Kredity",
-      "promptCredits": "Kredity promptů",
-      "addOnPromptCredits": "Doplňkové kredity promptů",
-      "bonusCredits": "Bonus Credits",
-      "estimatedUsage": "Estimated Usage",
-      "expiry": "Expiry",
-      "estUsage": "Est. Usage",
-      "actions": "Akce"
+      "bonusCredits": "Bonusové kredity",
+      "estimatedUsage": "Odhadované využití",
+      "expiry": "Uplynutí",
+      "estUsage": "Odhad. Používání"
     },
     "plan": {
-      "free": "Kiro Free",
-      "individual": "Kiro Individual",
+      "free": "Kiro zdarma",
+      "individual": "Kiro jednotlivec",
       "pro": "Kiro Pro",
       "business": "Kiro Business",
       "enterprise": "Kiro Enterprise",
-      "unknown": "Unknown"
+      "unknown": "Neznámý"
     },
     "flowNotice": {
-      "title": "Průvodce účty Kiro (kliknutím rozbalit/sbalit)",
-      "desc": "Přepnutí účtu vyžaduje čtení lokálního úložiště ověření ve Kiro a použití systémové služby přihlašovacích údajů pro dešifrování a zpětný zápis; data se zpracovávají pouze lokálně.",
-      "reason": "Rozsah oprávnění: čtení databáze ověření Kiro (state.vscdb) a volání systémového šifrování (Windows DPAPI / macOS Keychain / Linux Secret Service) pro dešifrování a zpětný zápis.",
-      "storage": "Rozsah čtení: zpracovávají se pouze položky související s relací přihlášení Kiro a veškeré procesy probíhají lokálně."
+      "title": "Průvodce správou účtu Kiro (kliknutím rozbalit/sbalit)",
+      "desc": "Přepnutí účtu čte a zapisuje místní autorizační soubory Kiro a nastavení instance na tomto zařízení; při OAuth přihlášení a obnovení kvót volá oficiální API Kiro.",
+      "reason": "Zpracovávané cesty zahrnují ~/.aws/sso/cache/kiro-auth-token.json, soubor profile.json instance a položku kiro.kiroAgent v state.vscdb.",
+      "storage": "Zpracovávaná data zahrnují informace o relaci a kvótách Kiro; při volání oficiálních API Kiro se odesílají nezbytná autentizační pole (např. code, refreshToken, accessToken a profileArn)."
     },
-    "title": "Kiro Account Management",
-    "subtitle": "Monitor quota status for all accounts in real time.",
-    "overview": {
-      "title": "Account Overview"
-    },
+    "title": "Správa účtu Kiro",
     "instances": {
-      "title": "Multi-Instance",
-      "subtitle": "Independent configs per instance for parallel multi-account runs.",
       "unsupported": {
-        "title": "Unsupported on this system",
-        "descPlatform": "Kiro multi-instance is available only on macOS, Windows and Linux."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
+        "descPlatform": "Kiro multi-instance je k dispozici pouze na macOS, Windows a Linux."
       }
     },
-    "addAccount": "Add Account",
-    "refreshAll": "Refresh All",
-    "refreshQuota": "Refresh Quota",
     "empty": {
-      "title": "No Accounts",
-      "description": "Click \"Add Account\" to start managing your Kiro accounts"
-    },
-    "noMatch": {
-      "title": "No matching accounts",
-      "desc": "Try adjusting your search or filters"
+      "description": "Kliknutím na „Přidat účet“ zahájíte správu účtů Kiro"
     },
     "addModal": {
-      "title": "Add Kiro Account",
-      "oauth": "OAuth",
-      "token": "Token / JSON",
-      "import": "Local Import"
+      "title": "Přidat Kiro účet"
     },
     "oauth": {
-      "desc": "Click the button below and complete Kiro authorization in your browser.",
-      "preparing": "Preparing authorization info...",
-      "openBrowser": "Open in Browser",
-      "hint": "Once authorized, this window will update automatically",
-      "success": "Authorization successful",
-      "failed": "Authorization failed",
-      "retry": "Regenerate authorization info",
-      "timeoutRetry": "Refresh authorization link",
-      "waiting": "Waiting for authorization...",
-      "meta": "Expires in: {{expires}}s; Poll interval: {{interval}}s"
+      "desc": "Klikněte na tlačítko níže a dokončete autorizaci Kiro ve svém prohlížeči."
     },
     "token": {
-      "desc": "Paste your Kiro access token or exported JSON data.",
-      "placeholder": "Paste token or JSON...",
-      "import": "Import",
-      "importing": "Importing...",
-      "importSuccessMsg": "Imported {{count}} account(s) successfully",
-      "importFailedMsg": "Import failed: {{error}}",
-      "empty": "Please enter a token or JSON"
+      "desc": "Vložte svůj přístupový token Kiro nebo exportovaná data JSON."
     },
     "import": {
-      "label": "Import",
-      "localDesc": "Import Kiro account data from local Kiro client or a JSON file.",
-      "localClient": "Import from local Kiro",
-      "orJson": "Or import from JSON file",
-      "importing": "Importing...",
-      "failedMsg": "Import failed: {{error}}",
-      "pickFile": "Select JSON file to import"
+      "localDesc": "Importujte data účtu Kiro z místního klienta Kiro nebo souboru JSON.",
+      "localClient": "Dovoz z místní Kiro"
     },
-    "search": "Search accounts...",
-    "view": {
-      "list": "List view",
-      "grid": "Card view"
-    },
-    "filter": {
-      "all": "All ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Filter",
-    "sortLabel": "Sort",
-    "sort": {
-      "createdAt": "Created time",
-      "credits": "By remaining credits",
-      "planEnd": "By cycle end time",
-      "descTooltip": "Current: Descending. Click to switch to ascending",
-      "ascTooltip": "Current: Ascending. Click to switch to descending",
-      "toggleDirection": "Toggle sort direction"
-    },
-    "export": "Export",
-    "injectToVSCode": "Switch to Kiro"
+    "injectToVSCode": "Přepněte na Kiro"
   }
 }

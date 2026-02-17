@@ -20,7 +20,128 @@
     "none": "暂无",
     "detail": "详情",
     "editable": "可编辑",
-    "preview": "预览"
+    "preview": "预览",
+    "shared": {
+      "addAccount": "添加账号",
+      "columns": {
+        "actions": "操作",
+        "plan": "订阅",
+        "addOnPromptCredits": "Add-on prompt credits",
+        "credits": "制作人员",
+        "email": "邮箱",
+        "promptCredits": "User Prompt credits"
+      },
+      "empty": {
+        "title": "暂无账号"
+      },
+      "export": "导出",
+      "filter": {
+        "all": "全部 ({{count}})",
+        "enterprise": "企业 ({{count}})",
+        "free": "免费（{{count}}）",
+        "pro": "专业版 ({{count}})",
+        "business": "商业 ({{count}})",
+        "individual": "个人 ({{count}})"
+      },
+      "filterLabel": "筛选",
+      "import": {
+        "failedMsg": "导入失败: {{error}}",
+        "label": "导入",
+        "importing": "正在导入...",
+        "pickFile": "选择 JSON 文件导入",
+        "orJson": "或从 JSON 文件导入"
+      },
+      "instances": {
+        "unsupported": {
+          "title": "暂不支持当前系统"
+        },
+        "quota": {
+          "chat": "聊天消息",
+          "inline": "内嵌建议"
+        },
+        "subtitle": "多实例独立配置，多账号并行运行。",
+        "title": "多开实例"
+      },
+      "noMatch": {
+        "desc": "请尝试调整搜索或筛选条件",
+        "title": "没有匹配的账号"
+      },
+      "oauth": {
+        "failed": "授权失败",
+        "hint": "完成授权后，此窗口将自动更新",
+        "openBrowser": "在浏览器中打开",
+        "success": "授权成功",
+        "meta": "授权有效期：{{expires}}s；轮询间隔：{{interval}}s",
+        "preparing": "正在准备授权信息...",
+        "retry": "重新生成授权信息",
+        "timeoutRetry": "刷新授权链接",
+        "waiting": "等待授权完成..."
+      },
+      "refreshAll": "刷新全部",
+      "refreshQuota": "刷新配额",
+      "search": "搜索账号...",
+      "sort": {
+        "ascTooltip": "当前：升序，点击切换为降序",
+        "createdAt": "按创建时间",
+        "descTooltip": "当前：降序，点击切换为升序",
+        "toggleDirection": "切换排序方向",
+        "credits": "按剩余 Credits",
+        "planEnd": "按配额周期结束时间"
+      },
+      "sortLabel": "排序",
+      "token": {
+        "empty": "请输入 Token 或 JSON",
+        "import": "导入",
+        "importFailedMsg": "导入失败: {{error}}",
+        "importing": "正在导入...",
+        "importSuccessMsg": "成功导入 {{count}} 个账号",
+        "placeholder": "粘贴 Token 或 JSON..."
+      },
+      "view": {
+        "grid": "卡片视图",
+        "list": "列表视图"
+      },
+      "addModal": {
+        "import": "本地导入",
+        "oauth": "开放认证",
+        "token": "令牌/JSON"
+      },
+      "overview": {
+        "title": "账号总览"
+      },
+      "quota": {
+        "noData": "暂无配额数据",
+        "resetDone": "已重置",
+        "hourly": "Inline Suggestions",
+        "weekly": "Chat messages"
+      },
+      "subtitle": "实时监控所有账号的配额状态。",
+      "time": {
+        "lessThanMinute": "<1分钟",
+        "relativeDays": "{{days}}天",
+        "relativeDaysHours": "{{days}}天{{hours}}小时",
+        "relativeHours": "{{hours}}小时",
+        "relativeHoursMinutes": "{{hours}}小时{{minutes}}分钟",
+        "relativeMinutes": "{{minutes}}分钟",
+        "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      },
+      "credits": {
+        "leftInline": "{{left}} left",
+        "periodEndOnly": "周期结束：{{end}}",
+        "periodRange": "周期：{{start}} - {{end}}",
+        "planEndsIn": "配额周期剩余 {{days}} 天",
+        "planEndsUnknown": "配额周期时间未知",
+        "usedLine": "{{used}} / {{total}} used"
+      },
+      "flowNotice": {
+        "alternative": "多开实例隔离：使用不同 --user-data-dir 做账号隔离；每个实例登录一次，后续按实例启动即可快速切换到对应账号环境。"
+      },
+      "injecting": "注入中...",
+      "usage": {
+        "resetLine": "Allowance resets {{dateText}}.",
+        "resetUnknown": "Allowance resets -"
+      }
+    }
   },
   "nav": {
     "dashboard": "仪表盘",
@@ -30,8 +151,8 @@
     "fingerprints": "设备指纹",
     "settings": "设置",
     "codex": "Codex 账号",
-    "githubCopilot": "GitHub Copilot",
-    "windsurf": "Windsurf",
+    "githubCopilot": "GitHub 副驾驶",
+    "windsurf": "风帆冲浪",
     "morePlatforms": "更多平台",
     "instances": "多开实例"
   },
@@ -231,7 +352,7 @@
       "force": {
         "title": "强制重启",
         "principle": "按 --user-data-dir 匹配进程并强制终止（SIGKILL / taskkill /F），再启动目标实例。",
-        "commandMac": "macOS/Linux: pkill -9 -f \"--user-data-dir <dir>\"",
+        "commandMac": "macOS/Linux：pkill -9 -f“--user-data-dir <dir>”",
         "commandWin": "Windows: taskkill /F /PID <pid> （匹配 --user-data-dir）",
         "pros": "可精准重启单个实例。",
         "cons": "可能触发“意外终止”提示，存在未保存数据丢失风险。"
@@ -331,7 +452,7 @@
       "kiroPathReset": "重置默认"
     },
     "network": {
-      "apiTitle": "Antigravity Cockpit API",
+      "apiTitle": "反重力驾驶舱 API",
       "wsService": "WebSocket 服务",
       "wsServiceDesc": "允许外部程序（如 VS Code 插件）连接控制",
       "preferredPort": "首选端口",
@@ -345,7 +466,7 @@
       "saveFailed": "保存失败: {{error}}"
     },
     "about": {
-      "appName": "Cockpit Tools",
+      "appName": "驾驶舱工具",
       "slogan": "专业账号管理解决方案",
       "author": "主作者",
       "wechat": "微信公众号",
@@ -406,9 +527,9 @@
       "forbidden_msg": "账号无权限，已跳过自动刷新"
     },
     "tier": {
-      "pro": "PRO",
-      "ultra": "ULTRA",
-      "free": "FREE"
+      "pro": "专业版",
+      "ultra": "极端主义者",
+      "free": "自由的"
     },
     "empty": {
       "title": "暂无账号",
@@ -427,9 +548,9 @@
     "filterLabel": "筛选账号",
     "filter": {
       "all": "全部 ({{count}})",
-      "pro": "PRO ({{count}})",
-      "ultra": "ULTRA ({{count}})",
-      "free": "FREE ({{count}})"
+      "pro": "专业版 ({{count}})",
+      "ultra": "超 ({{count}})",
+      "free": "免费（{{count}}）"
     },
     "sortLabel": "排序",
     "sort": {
@@ -479,7 +600,7 @@
     },
     "tabs": {
       "oauth": "OAuth 授权",
-      "token": "Refresh Token",
+      "token": "刷新令牌",
       "import": "导入"
     },
     "oauth": {
@@ -705,8 +826,8 @@
     "format": {
       "noReply": "(无回复)",
       "durationMs": "{{ms}}ms",
-      "tokens": "tokens={{prompt}}+{{completion}}={{total}}",
-      "traceId": "traceId={{traceId}}",
+      "tokens": "令牌={{prompt}}+{{completion}}={{total}}",
+      "traceId": "跟踪ID={{traceId}}",
       "detailJoiner": "，",
       "message": "[[{{model}}]]：{{reply}}{{suffix}}",
       "none": "--",
@@ -717,7 +838,7 @@
       "joiner": "、",
       "moreItems": "{{items}} 等{{total}}项",
       "quotaReset": "配额重置自动唤醒",
-      "crontab": "Crontab: {{expr}}",
+      "crontab": "定时任务：{{expr}}",
       "daily": "每日 {{times}}{{suffix}}",
       "weekly": "每周 {{days}} {{times}}{{suffix}}",
       "interval": "间隔 {{hours}} 小时 ({{start}}-{{end}})",
@@ -758,7 +879,7 @@
     },
     "triggerSource": {
       "scheduled": "定时",
-      "crontab": "Crontab",
+      "crontab": "定时任务",
       "quotaReset": "配额重置",
       "manual": "立即测试",
       "unknown": "未知"
@@ -786,7 +907,7 @@
       "triggerMode": "唤醒方式",
       "triggerModeHint": "1. 定时：按照设定时间触发。\\n2. Crontab：使用表达式定义。\\n3. 配额重置：额度满后触发一次。",
       "modeScheduled": "📅 定时触发",
-      "modeCrontab": "🧩 Crontab",
+      "modeCrontab": "🧩 定时任务",
       "modeQuotaReset": "🔄 配额重置",
       "modelSelect": "模型选择",
       "modelHint": "同一配额组建议只选一个模型，多模型会依次触发。",
@@ -867,7 +988,6 @@
       "comingSoon": "多开实例功能即将上线",
       "comingSoonDesc": "支持以不同账号同时运行多个 Codex.app 实例，敬请期待。",
       "unsupported": {
-        "title": "暂不支持当前系统",
         "desc": "Codex 多开实例仅支持 macOS，请在 macOS 上使用。"
       },
       "quota": {
@@ -882,14 +1002,11 @@
         },
         "force": {
           "principle": "按 CODEX_HOME 匹配进程并强制终止（SIGKILL / taskkill /F），再启动目标实例。",
-          "commandMac": "macOS: pkill -9 -f \"CODEX_HOME=<dir>\"",
+          "commandMac": "macOS：pkill -9 -f“CODEX_HOME=<dir>”",
           "commandWin": "Windows: taskkill /F /PID <pid> （匹配 CODEX_HOME）"
         }
       }
     },
-    "addAccount": "添加账号",
-    "refreshAll": "刷新全部",
-    "refreshQuota": "刷新配额",
     "refreshSuccess": "刷新配额成功",
     "refreshFailed": "刷新配额失败: {{error}}",
     "refreshAllSuccess": "刷新完成，共成功 {{count}} 个账号",
@@ -899,7 +1016,6 @@
     "switchFailed": "切换失败: {{error}}",
     "current": "当前",
     "empty": {
-      "title": "暂无账号",
       "description": "点击\"添加账号\"开始管理您的 Codex 账号"
     },
     "addModal": {
@@ -911,11 +1027,7 @@
     "oauth": {
       "desc": "点击下方按钮，在浏览器中完成 OpenAI 账号授权",
       "preparing": "正在准备授权链接...",
-      "openBrowser": "在浏览器中打开",
-      "hint": "完成授权后，此窗口将自动更新",
       "exchanging": "正在交换令牌...",
-      "success": "授权成功",
-      "failed": "授权失败",
       "portInUse": "端口 {{port}} 已被占用，请关闭占用该端口的程序后重试。",
       "portInUseTitle": "端口被占用",
       "portInUseConfirm": "端口 {{port}} 已被占用，是否关闭占用该端口的进程？",
@@ -925,30 +1037,21 @@
     },
     "token": {
       "desc": "粘贴 auth.json 内容或账号 JSON 数据",
-      "placeholder": "粘贴 JSON 内容...",
-      "import": "导入",
-      "importing": "正在导入...",
-      "importSuccessMsg": "成功导入 {{count}} 个账号",
-      "importFailedMsg": "导入失败: {{error}}",
-      "empty": "请输入 Token 或 JSON"
+      "placeholder": "粘贴 JSON 内容..."
     },
     "local": {
       "desc": "从 ~/.codex/auth.json 导入当前已登录的账号",
       "import": "获取本地账号"
     },
     "import": {
-      "label": "导入",
       "localDesc": "从本地已登录的会话中导入 Codex 账号。",
       "importing": "正在导入本地账号...",
-      "successMsg": "导入成功: {{email}}",
-      "failedMsg": "导入失败: {{error}}"
+      "successMsg": "导入成功: {{email}}"
     },
     "quota": {
       "hourly": "5小时配额",
       "weekly": "周配额",
-      "reset": "重置",
-      "noData": "暂无配额数据",
-      "resetDone": "已重置"
+      "reset": "重置"
     },
     "quotaError": {
       "badge": "配额异常",
@@ -956,64 +1059,36 @@
       "deactivatedWorkspace": "工作区已停用，请切换账号或重新授权"
     },
     "plan": {
-      "free": "FREE",
-      "plus": "PLUS",
-      "pro": "PRO",
-      "team": "TEAM",
-      "enterprise": "ENTERPRISE"
+      "free": "自由的",
+      "plus": "加",
+      "pro": "专业版",
+      "team": "团队",
+      "enterprise": "企业"
     },
     "time": {
-      "relativeDays": "{{days}}天",
-      "relativeDaysHours": "{{days}}天{{hours}}小时",
-      "relativeHours": "{{hours}}小时",
-      "relativeHoursMinutes": "{{hours}}小时{{minutes}}分钟",
-      "relativeMinutes": "{{minutes}}分钟",
-      "lessThanMinute": "<1分钟",
       "today": "今天 {{time}}",
       "tomorrow": "明天 {{time}}",
-      "dateTime": "{{date}} {{time}}",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      "dateTime": "{{date}} {{time}}"
     },
-    "search": "搜索账号...",
     "view": {
-      "compact": "紧凑视图",
-      "list": "列表视图",
-      "grid": "卡片视图"
+      "compact": "紧凑视图"
     },
     "filter": {
-      "all": "全部 ({{count}})",
-      "free": "FREE ({{count}})",
-      "plus": "PLUS ({{count}})",
-      "pro": "PRO ({{count}})",
-      "team": "TEAM ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
+      "plus": "加上（{{count}}）",
+      "team": "团队 ({{count}})"
     },
-    "filterLabel": "筛选",
-    "sortLabel": "排序",
     "sort": {
       "weekly": "按周配额",
       "hourly": "按5小时配额",
       "weeklyReset": "按周配额重置时间",
-      "hourlyReset": "按5小时配额重置时间",
-      "descTooltip": "当前：降序，点击切换为升序",
-      "ascTooltip": "当前：升序，点击切换为降序",
-      "toggleDirection": "切换排序方向",
-      "createdAt": "按创建时间"
+      "hourlyReset": "按5小时配额重置时间"
     },
     "opencodeSwitch": "OpenCode切换开关",
     "opencodeSwitchDesc": "同步切换OpenCode里codex账户信息",
     "opencodeSwitchFailed": "更新 OpenCode 开关失败: {{error}}",
-    "export": "导出",
-    "noMatch": {
-      "title": "没有匹配的账号",
-      "desc": "请尝试调整搜索或筛选条件"
-    },
     "columns": {
-      "email": "账号",
-      "plan": "订阅",
       "hourly": "5小时配额",
-      "weekly": "周配额",
-      "actions": "操作"
+      "weekly": "周配额"
     },
     "filterTags": "标签筛选",
     "filterTagsCount": "标签",
@@ -1023,129 +1098,44 @@
   },
   "githubCopilot": {
     "title": "GitHub Copilot 账号管理",
-    "subtitle": "实时监控所有账号的配额状态。",
-    "overview": {
-      "title": "账号总览"
-    },
     "instances": {
-      "title": "多开实例",
-      "subtitle": "多实例独立配置，多账号并行运行。",
       "unsupported": {
-        "title": "暂不支持当前系统",
         "desc": "GitHub Copilot 多开实例仅支持 macOS。"
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "添加账号",
-    "refreshAll": "刷新全部",
-    "refreshQuota": "刷新配额",
     "empty": {
-      "title": "暂无账号",
       "description": "点击\"添加账号\"开始管理您的 GitHub Copilot 账号"
     },
-    "noMatch": {
-      "title": "没有匹配的账号",
-      "desc": "请尝试调整搜索或筛选条件"
-    },
     "addModal": {
-      "title": "添加 GitHub Copilot 账号",
-      "oauth": "OAuth",
-      "token": "Token / JSON",
-      "import": "本地导入"
+      "title": "添加 GitHub Copilot 账号"
     },
     "oauth": {
-      "desc": "点击下方按钮，在浏览器中完成 GitHub Copilot 授权登录。",
-      "preparing": "正在准备授权信息...",
-      "openBrowser": "在浏览器中打开",
-      "hint": "完成授权后，此窗口将自动更新",
-      "success": "授权成功",
-      "failed": "授权失败",
-      "retry": "重新生成授权信息",
-      "timeoutRetry": "刷新授权链接",
-      "waiting": "等待授权完成...",
-      "meta": "授权有效期：{{expires}}s；轮询间隔：{{interval}}s"
+      "desc": "点击下方按钮，在浏览器中完成 GitHub Copilot 授权登录。"
     },
     "token": {
-      "desc": "粘贴您的 GitHub Copilot Access Token 或导出的 JSON 数据。",
-      "placeholder": "粘贴 Token 或 JSON...",
-      "import": "导入",
-      "importing": "正在导入...",
-      "importSuccessMsg": "成功导入 {{count}} 个账号",
-      "importFailedMsg": "导入失败: {{error}}",
-      "empty": "请输入 Token 或 JSON"
+      "desc": "粘贴您的 GitHub Copilot Access Token 或导出的 JSON 数据。"
     },
     "import": {
-      "label": "导入",
-      "localDesc": "从 JSON 文件导入 GitHub Copilot 账号数据。",
-      "importing": "正在导入...",
-      "failedMsg": "导入失败: {{error}}",
-      "pickFile": "选择 JSON 文件导入"
+      "localDesc": "从 JSON 文件导入 GitHub Copilot 账号数据。"
     },
-    "quota": {
-      "hourly": "Inline Suggestions",
-      "weekly": "Chat messages",
-      "noData": "暂无配额数据",
-      "resetDone": "已重置"
-    },
-    "usage": {
-      "resetUnknown": "Allowance resets -",
-      "resetLine": "Allowance resets {{dateText}}."
-    },
-    "time": {
-      "relativeDays": "{{days}}天",
-      "relativeDaysHours": "{{days}}天 {{hours}}小时",
-      "relativeHours": "{{hours}}小时",
-      "relativeHoursMinutes": "{{hours}}小时 {{minutes}}分钟",
-      "relativeMinutes": "{{minutes}}分钟",
-      "lessThanMinute": "<1分钟",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "搜索账号...",
-    "view": {
-      "list": "列表视图",
-      "grid": "卡片视图"
-    },
-    "filter": {
-      "all": "全部 ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "筛选",
-    "sortLabel": "排序",
     "sort": {
-      "createdAt": "按创建时间",
       "weekly": "按 Chat messages 使用量",
       "hourly": "按 Inline Suggestions 使用量",
       "weeklyReset": "按 Chat messages 重置时间",
-      "hourlyReset": "按 Inline Suggestions 重置时间",
-      "descTooltip": "当前：降序，点击切换为升序",
-      "ascTooltip": "当前：升序，点击切换为降序",
-      "toggleDirection": "切换排序方向"
+      "hourlyReset": "按 Inline Suggestions 重置时间"
     },
     "columns": {
-      "email": "账号",
-      "plan": "订阅",
       "hourly": "Inline Suggestions",
-      "weekly": "Chat messages",
-      "actions": "操作"
+      "weekly": "Chat messages"
     },
-    "export": "导出",
     "flowNotice": {
       "title": "GitHub Copilot 账号管理说明（点击展开/收起）",
       "desc": "切换账号时需要读取 VS Code 本地认证存储，并调用系统凭据服务完成解密与回写；数据仅在本机处理。",
-      "alternative": "多开实例隔离：使用不同 --user-data-dir 做账号隔离；每个实例登录一次，后续按实例启动即可快速切换到对应账号环境。",
       "inject": "一键切号：本工具读取本地 VS Code 加密材料（DPAPI/Keychain/Secret Service），解密 state.vscdb 中的认证会话，替换 GitHub Copilot 令牌并重新加密 —— 全部在本机完成。",
       "reason": "权限需求：读取 VS Code 认证数据库（state.vscdb），并调用系统加密能力（Windows DPAPI / macOS Keychain / Linux Secret Service）进行解密与写回。",
       "storage": "读取范围：仅处理 GitHub 登录会话相关数据，所有流程均在本地执行。"
     },
     "injectToVSCode": "切换到 VS Code",
-    "injecting": "注入中...",
     "injectSuccess": "已成功将令牌注入 VS Code，VS Code 正在启动。",
     "injectRequireClose": "请先关闭 VS Code 再进行注入。"
   },
@@ -1174,9 +1164,9 @@
       "totalAccounts": "账号总数"
     },
     "panels": {
-      "antigravity": "Antigravity",
-      "codex": "Codex",
-      "githubCopilot": "GitHub Copilot",
+      "antigravity": "反重力",
+      "codex": "法典",
+      "githubCopilot": "GitHub 副驾驶",
       "planDistribution": "订阅分布",
       "current": "当前账号",
       "recommended": "推荐账号",
@@ -1280,146 +1270,48 @@
   },
   "windsurf": {
     "title": "Windsurf 账号管理",
-    "subtitle": "实时监控所有账号的配额状态。",
-    "overview": {
-      "title": "账号总览"
-    },
     "instances": {
-      "title": "多开实例",
-      "subtitle": "多实例独立配置，多账号并行运行。",
       "unsupported": {
-        "title": "暂不支持当前系统",
         "desc": "Windsurf 多开实例仅支持 macOS。"
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "添加账号",
-    "refreshAll": "刷新全部",
-    "refreshQuota": "刷新配额",
     "empty": {
-      "title": "暂无账号",
       "description": "点击\"添加账号\"开始管理您的 Windsurf 账号"
     },
-    "noMatch": {
-      "title": "没有匹配的账号",
-      "desc": "请尝试调整搜索或筛选条件"
-    },
     "addModal": {
-      "title": "添加 Windsurf 账号",
-      "oauth": "OAuth",
-      "token": "Token / JSON",
-      "import": "本地导入"
+      "title": "添加 Windsurf 账号"
     },
     "oauth": {
-      "desc": "点击下方按钮，在浏览器中完成 Windsurf 授权登录。",
-      "preparing": "正在准备授权信息...",
-      "openBrowser": "在浏览器中打开",
-      "hint": "完成授权后，此窗口将自动更新",
-      "success": "授权成功",
-      "failed": "授权失败",
-      "retry": "重新生成授权信息",
-      "timeoutRetry": "刷新授权链接",
-      "waiting": "等待授权完成...",
-      "meta": "授权有效期：{{expires}}s；轮询间隔：{{interval}}s"
+      "desc": "点击下方按钮，在浏览器中完成 Windsurf 授权登录。"
     },
     "token": {
-      "desc": "粘贴您的 Windsurf Access Token 或导出的 JSON 数据。",
-      "placeholder": "粘贴 Token 或 JSON...",
-      "import": "导入",
-      "importing": "正在导入...",
-      "importSuccessMsg": "成功导入 {{count}} 个账号",
-      "importFailedMsg": "导入失败: {{error}}",
-      "empty": "请输入 Token 或 JSON"
+      "desc": "粘贴您的 Windsurf Access Token 或导出的 JSON 数据。"
     },
     "import": {
-      "label": "导入",
       "localDesc": "从 JSON 文件导入 Windsurf 账号数据。",
-      "localClient": "从本机 Windsurf 导入",
-      "orJson": "或从 JSON 文件导入",
-      "importing": "正在导入...",
-      "failedMsg": "导入失败: {{error}}",
-      "pickFile": "选择 JSON 文件导入"
-    },
-    "quota": {
-      "hourly": "Inline Suggestions",
-      "weekly": "Chat messages",
-      "noData": "暂无配额数据",
-      "resetDone": "已重置"
+      "localClient": "从本机 Windsurf 导入"
     },
     "credits": {
-      "title": "Plan",
+      "title": "计划",
       "renewMonthly": "Credits 每月自动重置",
-      "planEndsIn": "配额周期剩余 {{days}} 天",
-      "planEndsUnknown": "配额周期时间未知",
-      "periodRange": "周期：{{start}} - {{end}}",
-      "periodEndOnly": "周期结束：{{end}}",
       "left": "剩余 {{count}} credits",
       "leftUnknown": "剩余 credits -",
       "promptLeft": "剩余 {{remaining}}/{{total}} prompt credits",
       "promptLeftNoTotal": "剩余 {{remaining}} prompt credits",
       "promptLeftUnknown": "Prompt credits -",
-      "addOnAvailable": "{{count}} add-on credits 可用",
-      "usedLine": "{{used}} / {{total}} used",
-      "leftInline": "{{left}} left"
-    },
-    "usage": {
-      "resetUnknown": "Allowance resets -",
-      "resetLine": "Allowance resets {{dateText}}."
-    },
-    "time": {
-      "relativeDays": "{{days}}天",
-      "relativeDaysHours": "{{days}}天 {{hours}}小时",
-      "relativeHours": "{{hours}}小时",
-      "relativeHoursMinutes": "{{hours}}小时 {{minutes}}分钟",
-      "relativeMinutes": "{{minutes}}分钟",
-      "lessThanMinute": "<1分钟",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "搜索账号...",
-    "view": {
-      "list": "列表视图",
-      "grid": "卡片视图"
-    },
-    "filter": {
-      "all": "全部 ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "筛选",
-    "sortLabel": "排序",
-    "sort": {
-      "createdAt": "按创建时间",
-      "credits": "按剩余 Credits",
-      "planEnd": "按配额周期结束时间",
-      "descTooltip": "当前：降序，点击切换为升序",
-      "ascTooltip": "当前：升序，点击切换为降序",
-      "toggleDirection": "切换排序方向"
+      "addOnAvailable": "{{count}} add-on credits 可用"
     },
     "columns": {
-      "email": "邮箱",
-      "plan": "标签",
-      "promptCredits": "User Prompt credits",
-      "addOnPromptCredits": "Add-on prompt credits",
-      "credits": "Credits",
-      "actions": "操作"
+      "plan": "标签"
     },
-    "export": "导出",
     "flowNotice": {
       "title": "Windsurf 账号管理说明（点击展开/收起）",
       "desc": "切换账号时需要读取 Windsurf 本地认证存储，并按客户端兼容规则调用系统凭据能力完成会话解密与写回；数据仅在本机处理。",
-      "alternative": "多开实例隔离：使用不同 --user-data-dir 做账号隔离；每个实例登录一次，后续按实例启动即可快速切换到对应账号环境。",
       "inject": "一键切号：本工具读取本机 Windsurf 加密材料（DPAPI/Keychain/Secret Service），处理 state.vscdb 中的认证会话并写回 Windsurf 令牌 —— 全部在本机完成。",
       "reason": "权限需求：读取 Windsurf 认证数据库（state.vscdb），并使用系统加密能力（Windows DPAPI / macOS Keychain / Linux Secret Service）处理登录会话的解密与写回。",
       "storage": "读取范围：仅处理 Windsurf 登录会话相关数据，所有流程均在本地执行。"
     },
     "injectToVSCode": "切换到 Windsurf",
-    "injecting": "注入中...",
     "injectSuccess": "已完成切换，Windsurf 正在启动。",
     "injectRequireClose": "请先关闭 Windsurf 再进行切换。"
   },
@@ -1430,15 +1322,9 @@
       "userId": "用户 ID"
     },
     "credits": {
-      "planEndsIn": "配额周期剩余 {{days}} 天",
-      "planEndsUnknown": "配额周期时间未知",
-      "periodRange": "周期：{{start}} - {{end}}",
-      "periodEndOnly": "周期结束：{{end}}",
       "estimatedResetOn": "Estimated Usage 在 {{date}} 重置",
-      "bonusUsageLine": "{{used}} used / {{total}} total",
-      "planUsageCoveredLine": "{{used}} used / {{total}} covered in plan",
-      "usedLine": "{{used}} / {{total}} used",
-      "leftInline": "{{left}} left",
+      "bonusUsageLine": "使用 {{used}} / 总共 {{total}}",
+      "planUsageCoveredLine": "{{used}} 已使用 / {{total}} 包含在计划中",
       "expiryDays": "{{days}} 天",
       "expiryUnknown": "—",
       "resetNow": "即将重置",
@@ -1446,119 +1332,47 @@
       "resetInMinutes": "{{minutes}} 分钟后重置"
     },
     "columns": {
-      "email": "邮箱",
-      "plan": "计划",
-      "credits": "Credits",
-      "promptCredits": "User Prompt credits",
-      "addOnPromptCredits": "Add-on prompt credits",
-      "bonusCredits": "Bonus Credits",
-      "estimatedUsage": "Estimated Usage",
-      "expiry": "Expiry",
-      "estUsage": "Est. Usage",
-      "actions": "操作"
+      "bonusCredits": "奖励积分",
+      "estimatedUsage": "预计使用量",
+      "expiry": "到期日",
+      "estUsage": "预计。用法"
     },
     "plan": {
-      "free": "Kiro Free",
-      "individual": "Kiro Individual",
-      "pro": "Kiro Pro",
-      "business": "Kiro Business",
-      "enterprise": "Kiro Enterprise",
-      "unknown": "Unknown"
+      "free": "基罗自由",
+      "individual": "基罗个人赛",
+      "pro": "基罗专业版",
+      "business": "基罗商务",
+      "enterprise": "基罗企业",
+      "unknown": "未知"
     },
     "flowNotice": {
       "title": "Kiro 账号管理说明（点击展开/收起）",
-      "desc": "切换账号需要读取 VS Code 本地认证存储，并调用系统凭据服务进行解密/重加密；数据仅在本机处理。",
-      "reason": "权限范围：读取 VS Code 认证数据库（state.vscdb），并调用系统凭据能力（Windows DPAPI / macOS Keychain / Linux Secret Service）进行解密与写回。",
-      "storage": "数据范围：仅读取/更新 Kiro 登录会话相关条目；不会修改系统其他密钥，也不会上传任何 key/token。"
+      "desc": "账号切换会在本机读写 Kiro 登录文件与实例配置；OAuth 登录与配额刷新会调用 Kiro 官方接口。",
+      "reason": "处理路径包括 ~/.aws/sso/cache/kiro-auth-token.json、实例目录 profile.json，以及 state.vscdb 中 kiro.kiroAgent 条目。",
+      "storage": "处理数据包括 Kiro 登录会话与配额信息；请求 Kiro 官方接口时会发送必要认证字段（如 code、refreshToken、accessToken、profileArn）。"
     },
     "title": "Kiro 账号管理",
-    "subtitle": "实时监控所有账号的配额状态。",
-    "overview": {
-      "title": "账号总览"
-    },
     "instances": {
-      "title": "多开实例",
-      "subtitle": "多实例独立配置，多账号并行运行。",
       "unsupported": {
-        "title": "暂不支持当前系统",
         "descPlatform": "Kiro 多开实例仅支持 macOS、Windows 和 Linux。"
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "添加账号",
-    "refreshAll": "刷新全部",
-    "refreshQuota": "刷新配额",
     "empty": {
-      "title": "暂无账号",
       "description": "点击\"添加账号\"开始管理您的 Kiro 账号"
     },
-    "noMatch": {
-      "title": "没有匹配的账号",
-      "desc": "请尝试调整搜索或筛选条件"
-    },
     "addModal": {
-      "title": "添加 Kiro 账号",
-      "oauth": "OAuth",
-      "token": "Token / JSON",
-      "import": "本地导入"
+      "title": "添加 Kiro 账号"
     },
     "oauth": {
-      "desc": "点击下方按钮，在浏览器中完成 Kiro 授权登录。",
-      "preparing": "正在准备授权信息...",
-      "openBrowser": "在浏览器中打开",
-      "hint": "授权完成后，当前窗口会自动更新",
-      "success": "授权成功",
-      "failed": "授权失败",
-      "retry": "重新生成授权信息",
-      "timeoutRetry": "刷新授权链接",
-      "waiting": "等待授权完成...",
-      "meta": "授权有效期：{{expires}}s；轮询间隔：{{interval}}s"
+      "desc": "点击下方按钮，在浏览器中完成 Kiro 授权登录。"
     },
     "token": {
-      "desc": "粘贴您的 Kiro Access Token 或导出的 JSON 数据。",
-      "placeholder": "粘贴 Token 或 JSON...",
-      "import": "导入",
-      "importing": "正在导入...",
-      "importSuccessMsg": "成功导入 {{count}} 个账号",
-      "importFailedMsg": "导入失败: {{error}}",
-      "empty": "请输入 Token 或 JSON"
+      "desc": "粘贴您的 Kiro Access Token 或导出的 JSON 数据。"
     },
     "import": {
-      "label": "导入",
       "localDesc": "支持从本机 Kiro 客户端或 JSON 文件导入账号数据。",
-      "localClient": "从本机 Kiro 导入",
-      "orJson": "或从 JSON 文件导入",
-      "importing": "正在导入...",
-      "failedMsg": "导入失败: {{error}}",
-      "pickFile": "选择 JSON 文件导入"
+      "localClient": "从本机 Kiro 导入"
     },
-    "search": "搜索账号...",
-    "view": {
-      "list": "列表视图",
-      "grid": "卡片视图"
-    },
-    "filter": {
-      "all": "All ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "筛选",
-    "sortLabel": "排序",
-    "sort": {
-      "createdAt": "按创建时间",
-      "credits": "按剩余 Credits",
-      "planEnd": "按配额周期结束时间",
-      "descTooltip": "当前：降序，点击切换为升序",
-      "ascTooltip": "当前：升序，点击切换为降序",
-      "toggleDirection": "切换排序方向"
-    },
-    "export": "导出",
     "injectToVSCode": "切换到 Kiro"
   }
 }

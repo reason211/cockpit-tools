@@ -782,7 +782,7 @@ export function DashboardPage({ onNavigate, onOpenPlatformLayout, onEasterEggTri
             <>
               <div className="mini-quota-row-stacked">
                 <div className="mini-quota-header">
-                  <span className="model-name">{t('githubCopilot.quota.hourly', 'Inline Suggestions')}</span>
+                  <span className="model-name">{t('common.shared.quota.hourly', 'Inline Suggestions')}</span>
                   <span className={`model-pct ${getGitHubCopilotQuotaClass(hourly ?? 0)}`}>
                     {hourly ?? 0}%
                   </span>
@@ -802,7 +802,7 @@ export function DashboardPage({ onNavigate, onOpenPlatformLayout, onEasterEggTri
 
               <div className="mini-quota-row-stacked">
                 <div className="mini-quota-header">
-                  <span className="model-name">{t('githubCopilot.quota.weekly', 'Chat messages')}</span>
+                  <span className="model-name">{t('common.shared.quota.weekly', 'Chat messages')}</span>
                   <span className={`model-pct ${getGitHubCopilotQuotaClass(weekly ?? 0)}`}>
                     {weekly ?? 0}%
                   </span>
@@ -861,7 +861,7 @@ export function DashboardPage({ onNavigate, onOpenPlatformLayout, onEasterEggTri
     const isSwitching = switching.has(account.id);
     const cycleText = credits.planEndsAt
       ? formatWindsurfResetTime(credits.planEndsAt, t)
-      : t('windsurf.credits.planEndsUnknown', '配额周期时间未知');
+      : t('common.shared.credits.planEndsUnknown', '配额周期时间未知');
 
     return (
       <div className="account-mini-card">
@@ -877,7 +877,7 @@ export function DashboardPage({ onNavigate, onOpenPlatformLayout, onEasterEggTri
         <div className="account-mini-quotas">
           <div className="mini-quota-row-stacked">
             <div className="mini-quota-header">
-              <span className="model-name">{t('windsurf.columns.promptCredits', 'User Prompt credits')}</span>
+              <span className="model-name">{t('common.shared.columns.promptCredits', 'User Prompt credits')}</span>
               <span className={`model-pct ${getWindsurfQuotaClass(promptMetrics.usedPercent)}`}>
                 {promptMetrics.usedPercent}%
               </span>
@@ -889,14 +889,14 @@ export function DashboardPage({ onNavigate, onOpenPlatformLayout, onEasterEggTri
               />
             </div>
             <div className="mini-reset-time">
-              {t('windsurf.credits.usedLine', {
+              {t('common.shared.credits.usedLine', {
                 used: formatDecimal(promptMetrics.used),
                 total: formatDecimal(promptMetrics.total),
                 defaultValue: '{{used}} / {{total}} used',
               })}
             </div>
             <div className="mini-reset-time">
-              {t('windsurf.credits.leftInline', {
+              {t('common.shared.credits.leftInline', {
                 left: formatDecimal(promptMetrics.left),
                 defaultValue: '{{left}} left',
               })}
@@ -905,7 +905,7 @@ export function DashboardPage({ onNavigate, onOpenPlatformLayout, onEasterEggTri
 
           <div className="mini-quota-row-stacked">
             <div className="mini-quota-header">
-              <span className="model-name">{t('windsurf.columns.addOnPromptCredits', 'Add-on prompt credits')}</span>
+              <span className="model-name">{t('common.shared.columns.addOnPromptCredits', 'Add-on prompt credits')}</span>
               <span className={`model-pct ${getWindsurfQuotaClass(addOnMetrics.usedPercent)}`}>
                 {addOnMetrics.usedPercent}%
               </span>
@@ -917,14 +917,14 @@ export function DashboardPage({ onNavigate, onOpenPlatformLayout, onEasterEggTri
               />
             </div>
             <div className="mini-reset-time">
-              {t('windsurf.credits.usedLine', {
+              {t('common.shared.credits.usedLine', {
                 used: formatDecimal(addOnMetrics.used),
                 total: formatDecimal(addOnMetrics.total),
                 defaultValue: '{{used}} / {{total}} used',
               })}
             </div>
             <div className="mini-reset-time">
-              {t('windsurf.credits.leftInline', {
+              {t('common.shared.credits.leftInline', {
                 left: formatDecimal(addOnMetrics.left),
                 defaultValue: '{{left}} left',
               })}
@@ -990,7 +990,7 @@ export function DashboardPage({ onNavigate, onOpenPlatformLayout, onEasterEggTri
     const isSwitching = switching.has(account.id);
     const cycleText = credits.planEndsAt
       ? formatKiroResetTime(credits.planEndsAt, t)
-      : t('kiro.credits.planEndsUnknown', '配额周期时间未知');
+      : t('common.shared.credits.planEndsUnknown', '配额周期时间未知');
 
     return (
       <div className="account-mini-card">
@@ -1006,7 +1006,7 @@ export function DashboardPage({ onNavigate, onOpenPlatformLayout, onEasterEggTri
         <div className="account-mini-quotas">
           <div className="mini-quota-row-stacked">
             <div className="mini-quota-header">
-              <span className="model-name">{t('kiro.columns.promptCredits', 'User Prompt credits')}</span>
+              <span className="model-name">{t('common.shared.columns.promptCredits', 'User Prompt credits')}</span>
               <span className={`model-pct ${getKiroQuotaClass(promptMetrics.usedPercent)}`}>
                 {promptMetrics.usedPercent}%
               </span>
@@ -1018,14 +1018,14 @@ export function DashboardPage({ onNavigate, onOpenPlatformLayout, onEasterEggTri
               />
             </div>
             <div className="mini-reset-time">
-              {t('kiro.credits.usedLine', {
+              {t('common.shared.credits.usedLine', {
                 used: formatDecimal(promptMetrics.used),
                 total: formatDecimal(promptMetrics.total),
                 defaultValue: '{{used}} / {{total}} used',
               })}
             </div>
             <div className="mini-reset-time">
-              {t('kiro.credits.leftInline', {
+              {t('common.shared.credits.leftInline', {
                 left: formatDecimal(promptMetrics.left),
                 defaultValue: '{{left}} left',
               })}
@@ -1035,7 +1035,7 @@ export function DashboardPage({ onNavigate, onOpenPlatformLayout, onEasterEggTri
           {hasAddOnCredits && (
             <div className="mini-quota-row-stacked">
               <div className="mini-quota-header">
-                <span className="model-name">{t('kiro.columns.addOnPromptCredits', 'Add-on prompt credits')}</span>
+                <span className="model-name">{t('common.shared.columns.addOnPromptCredits', 'Add-on prompt credits')}</span>
                 <span className={`model-pct ${getKiroQuotaClass(addOnMetrics.usedPercent)}`}>
                   {addOnMetrics.usedPercent}%
                 </span>
@@ -1047,14 +1047,14 @@ export function DashboardPage({ onNavigate, onOpenPlatformLayout, onEasterEggTri
                 />
               </div>
               <div className="mini-reset-time">
-                {t('kiro.credits.usedLine', {
+                {t('common.shared.credits.usedLine', {
                   used: formatDecimal(addOnMetrics.used),
                   total: formatDecimal(addOnMetrics.total),
                   defaultValue: '{{used}} / {{total}} used',
                 })}
               </div>
               <div className="mini-reset-time">
-                {t('kiro.credits.leftInline', {
+                {t('common.shared.credits.leftInline', {
                   left: formatDecimal(addOnMetrics.left),
                   defaultValue: '{{left}} left',
                 })}

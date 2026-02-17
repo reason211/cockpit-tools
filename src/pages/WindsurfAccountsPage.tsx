@@ -196,7 +196,7 @@ export function WindsurfAccountsPage() {
     oauthActiveRef.current = false;
     oauthCompletingRef.current = false;
     setOauthPolling(false);
-    setOauthPrepareError(t('windsurf.oauth.failed', '授权失败') + ': ' + msg);
+    setOauthPrepareError(t('common.shared.oauth.failed', '授权失败') + ': ' + msg);
   }, [t]);
 
   const completeOauthSuccess = useCallback(async () => {
@@ -205,7 +205,7 @@ export function WindsurfAccountsPage() {
     });
     await fetchAccounts();
     setAddStatus('success');
-    setAddMessage(t('windsurf.oauth.success', '授权成功'));
+    setAddMessage(t('common.shared.oauth.success', '授权成功'));
     setTimeout(() => {
       setShowAddModal(false);
       resetAddModalState();
@@ -408,7 +408,7 @@ export function WindsurfAccountsPage() {
   const handleImportJsonFile = async (file: File) => {
     setImporting(true);
     setAddStatus('loading');
-    setAddMessage(t('windsurf.import.importing', '正在导入...'));
+    setAddMessage(t('common.shared.import.importing', '正在导入...'));
 
     try {
       const content = await file.text();
@@ -417,7 +417,7 @@ export function WindsurfAccountsPage() {
 
       setAddStatus('success');
       setAddMessage(
-        t('windsurf.token.importSuccessMsg', {
+        t('common.shared.token.importSuccessMsg', {
           count: imported.length,
           defaultValue: '成功导入 {{count}} 个账号',
         })
@@ -430,7 +430,7 @@ export function WindsurfAccountsPage() {
       setAddStatus('error');
       const errorMsg = String(e).replace(/^Error:\s*/, '');
       setAddMessage(
-        t('windsurf.import.failedMsg', {
+        t('common.shared.import.failedMsg', {
           error: errorMsg,
           defaultValue: '导入失败: {{error}}',
         })
@@ -443,13 +443,13 @@ export function WindsurfAccountsPage() {
   const handleImportFromLocalClient = async () => {
     setImporting(true);
     setAddStatus('loading');
-    setAddMessage(t('windsurf.import.importing', '正在导入...'));
+    setAddMessage(t('common.shared.import.importing', '正在导入...'));
     try {
       const imported = await windsurfService.importWindsurfFromLocal();
       await fetchAccounts();
       setAddStatus('success');
       setAddMessage(
-        t('windsurf.token.importSuccessMsg', {
+        t('common.shared.token.importSuccessMsg', {
           count: imported.length,
           defaultValue: '成功导入 {{count}} 个账号',
         })
@@ -462,7 +462,7 @@ export function WindsurfAccountsPage() {
       setAddStatus('error');
       const errorMsg = String(e).replace(/^Error:\s*/, '');
       setAddMessage(
-        t('windsurf.import.failedMsg', {
+        t('common.shared.import.failedMsg', {
           error: errorMsg,
           defaultValue: '导入失败: {{error}}',
         })
@@ -475,13 +475,13 @@ export function WindsurfAccountsPage() {
     const trimmed = tokenInput.trim();
     if (!trimmed) {
       setAddStatus('error');
-      setAddMessage(t('windsurf.token.empty', '请输入 Token 或 JSON'));
+      setAddMessage(t('common.shared.token.empty', '请输入 Token 或 JSON'));
       return;
     }
 
     setImporting(true);
     setAddStatus('loading');
-    setAddMessage(t('windsurf.token.importing', '正在导入...'));
+    setAddMessage(t('common.shared.token.importing', '正在导入...'));
 
     try {
       let importedCount = 0;
@@ -495,7 +495,7 @@ export function WindsurfAccountsPage() {
       await fetchAccounts();
       setAddStatus('success');
       setAddMessage(
-        t('windsurf.token.importSuccessMsg', {
+        t('common.shared.token.importSuccessMsg', {
           count: importedCount,
           defaultValue: '成功导入 {{count}} 个账号',
         })
@@ -508,7 +508,7 @@ export function WindsurfAccountsPage() {
       setAddStatus('error');
       const errorMsg = String(e).replace(/^Error:\s*/, '');
       setAddMessage(
-        t('windsurf.token.importFailedMsg', {
+        t('common.shared.token.importFailedMsg', {
           error: errorMsg,
           defaultValue: '导入失败: {{error}}',
         })
@@ -647,7 +647,7 @@ export function WindsurfAccountsPage() {
       const start = credits.planStartsAt ?? null;
 
       if (!end) {
-        const summary = t('windsurf.credits.planEndsUnknown', '配额周期时间未知');
+        const summary = t('common.shared.credits.planEndsUnknown', '配额周期时间未知');
         return {
           summary,
           detail: '',
@@ -658,7 +658,7 @@ export function WindsurfAccountsPage() {
       const now = Math.floor(Date.now() / 1000);
       const secondsLeft = end - now;
       const days = secondsLeft <= 0 ? 0 : Math.floor(secondsLeft / 86400);
-      const summary = t('windsurf.credits.planEndsIn', {
+      const summary = t('common.shared.credits.planEndsIn', {
         days,
         defaultValue: '配额周期剩余 {{days}} 天',
       });
@@ -667,13 +667,13 @@ export function WindsurfAccountsPage() {
       const endText = formatCycleDate(end);
       let detail = '';
       if (startText && endText) {
-        detail = t('windsurf.credits.periodRange', {
+        detail = t('common.shared.credits.periodRange', {
           start: startText,
           end: endText,
           defaultValue: '周期：{{start}} - {{end}}',
         });
       } else if (endText) {
-        detail = t('windsurf.credits.periodEndOnly', {
+        detail = t('common.shared.credits.periodEndOnly', {
           end: endText,
           defaultValue: '周期结束：{{end}}',
         });
@@ -781,7 +781,7 @@ export function WindsurfAccountsPage() {
 
   const formatUsedLine = useCallback(
     (used: number | null | undefined, total: number | null | undefined) =>
-      t('windsurf.credits.usedLine', {
+      t('common.shared.credits.usedLine', {
         used: formatCreditsNumber(used),
         total: formatCreditsNumber(total),
         defaultValue: '{{used}} / {{total}} used',
@@ -791,7 +791,7 @@ export function WindsurfAccountsPage() {
 
   const formatLeftLine = useCallback(
     (left: number | null | undefined) =>
-      t('windsurf.credits.leftInline', {
+      t('common.shared.credits.leftInline', {
         left: formatCreditsNumber(left),
         defaultValue: '{{left}} left',
       }),
@@ -1002,7 +1002,7 @@ export function WindsurfAccountsPage() {
           <div className="ghcp-quota-section">
             <div className="quota-item windsurf-credit-item">
               <div className="quota-header">
-                <span className="quota-label">{t('windsurf.columns.promptCredits', 'User Prompt credits')}</span>
+                <span className="quota-label">{t('common.shared.columns.promptCredits', 'User Prompt credits')}</span>
                 <span className={`quota-pct ${getWindsurfQuotaClass(promptMetrics.usedPercent)}`}>
                   {promptMetrics.usedPercent}%
                 </span>
@@ -1021,7 +1021,7 @@ export function WindsurfAccountsPage() {
 
             <div className="quota-item windsurf-credit-item">
               <div className="quota-header">
-                <span className="quota-label">{t('windsurf.columns.addOnPromptCredits', 'Add-on prompt credits')}</span>
+                <span className="quota-label">{t('common.shared.columns.addOnPromptCredits', 'Add-on prompt credits')}</span>
                 <span className={`quota-pct ${getWindsurfQuotaClass(addOnMetrics.usedPercent)}`}>
                   {addOnMetrics.usedPercent}%
                 </span>
@@ -1072,7 +1072,7 @@ export function WindsurfAccountsPage() {
                 className="card-action-btn"
                 onClick={() => handleRefresh(account.id)}
                 disabled={refreshing === account.id}
-                title={t('windsurf.refreshQuota', '刷新配额')}
+                title={t('common.shared.refreshQuota', '刷新配额')}
               >
                 <RotateCw
                   size={14}
@@ -1131,7 +1131,7 @@ export function WindsurfAccountsPage() {
           <td>
             <div className="quota-item windsurf-table-credit-item">
               <div className="quota-header">
-                <span className="quota-name">{t('windsurf.columns.promptCredits', 'User Prompt credits')}</span>
+                <span className="quota-name">{t('common.shared.columns.promptCredits', 'User Prompt credits')}</span>
                 <span className={`quota-value ${getWindsurfQuotaClass(promptMetrics.usedPercent)}`}>
                   {promptMetrics.usedPercent}%
                 </span>
@@ -1151,7 +1151,7 @@ export function WindsurfAccountsPage() {
           <td>
             <div className="quota-item windsurf-table-credit-item">
               <div className="quota-header">
-                <span className="quota-name">{t('windsurf.columns.addOnPromptCredits', 'Add-on prompt credits')}</span>
+                <span className="quota-name">{t('common.shared.columns.addOnPromptCredits', 'Add-on prompt credits')}</span>
                 <span className={`quota-value ${getWindsurfQuotaClass(addOnMetrics.usedPercent)}`}>
                   {addOnMetrics.usedPercent}%
                 </span>
@@ -1189,7 +1189,7 @@ export function WindsurfAccountsPage() {
                 className="action-btn"
                 onClick={() => handleRefresh(account.id)}
                 disabled={refreshing === account.id}
-                title={t('windsurf.refreshQuota', '刷新配额')}
+                title={t('common.shared.refreshQuota', '刷新配额')}
               >
                 <RotateCw size={14} className={refreshing === account.id ? 'loading-spinner' : ''} />
               </button>
@@ -1266,7 +1266,7 @@ export function WindsurfAccountsPage() {
             <Search size={16} className="search-icon" />
             <input
               type="text"
-              placeholder={t('windsurf.search', '搜索账号...')}
+              placeholder={t('common.shared.search', '搜索账号...')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -1276,14 +1276,14 @@ export function WindsurfAccountsPage() {
             <button
               className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
               onClick={() => setViewMode('list')}
-              title={t('windsurf.view.list', '列表视图')}
+              title={t('common.shared.view.list', '列表视图')}
             >
               <List size={16} />
             </button>
             <button
               className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
               onClick={() => setViewMode('grid')}
-              title={t('windsurf.view.grid', '卡片视图')}
+              title={t('common.shared.view.grid', '卡片视图')}
             >
               <LayoutGrid size={16} />
             </button>
@@ -1293,31 +1293,31 @@ export function WindsurfAccountsPage() {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as typeof filterType)}
-              aria-label={t('windsurf.filterLabel', '筛选')}
+              aria-label={t('common.shared.filterLabel', '筛选')}
             >
               <option value="all">
-                {t('windsurf.filter.all', { count: tierCounts.all, defaultValue: 'All ({{count}})' })}
+                {t('common.shared.filter.all', { count: tierCounts.all, defaultValue: 'All ({{count}})' })}
               </option>
               <option value="FREE">
-                {t('windsurf.filter.free', { count: tierCounts.FREE, defaultValue: 'FREE ({{count}})' })}
+                {t('common.shared.filter.free', { count: tierCounts.FREE, defaultValue: 'FREE ({{count}})' })}
               </option>
               <option value="INDIVIDUAL">
-                {t('windsurf.filter.individual', {
+                {t('common.shared.filter.individual', {
                   count: tierCounts.INDIVIDUAL,
                   defaultValue: 'INDIVIDUAL ({{count}})',
                 })}
               </option>
               <option value="PRO">
-                {t('windsurf.filter.pro', { count: tierCounts.PRO, defaultValue: 'PRO ({{count}})' })}
+                {t('common.shared.filter.pro', { count: tierCounts.PRO, defaultValue: 'PRO ({{count}})' })}
               </option>
               <option value="BUSINESS">
-                {t('windsurf.filter.business', {
+                {t('common.shared.filter.business', {
                   count: tierCounts.BUSINESS,
                   defaultValue: 'BUSINESS ({{count}})',
                 })}
               </option>
               <option value="ENTERPRISE">
-                {t('windsurf.filter.enterprise', {
+                {t('common.shared.filter.enterprise', {
                   count: tierCounts.ENTERPRISE,
                   defaultValue: 'ENTERPRISE ({{count}})',
                 })}
@@ -1391,11 +1391,11 @@ export function WindsurfAccountsPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              aria-label={t('windsurf.sortLabel', '排序')}
+              aria-label={t('common.shared.sortLabel', '排序')}
             >
-              <option value="created_at">{t('windsurf.sort.createdAt', '按创建时间')}</option>
-              <option value="credits">{t('windsurf.sort.credits', '按剩余 Credits')}</option>
-              <option value="plan_end">{t('windsurf.sort.planEnd', '按配额周期结束时间')}</option>
+              <option value="created_at">{t('common.shared.sort.createdAt', '按创建时间')}</option>
+              <option value="credits">{t('common.shared.sort.credits', '按剩余 Credits')}</option>
+              <option value="plan_end">{t('common.shared.sort.planEnd', '按配额周期结束时间')}</option>
             </select>
           </div>
 
@@ -1404,10 +1404,10 @@ export function WindsurfAccountsPage() {
             onClick={() => setSortDirection((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
             title={
               sortDirection === 'desc'
-                ? t('windsurf.sort.descTooltip', '当前：降序，点击切换为升序')
-                : t('windsurf.sort.ascTooltip', '当前：升序，点击切换为降序')
+                ? t('common.shared.sort.descTooltip', '当前：降序，点击切换为升序')
+                : t('common.shared.sort.ascTooltip', '当前：升序，点击切换为降序')
             }
-            aria-label={t('windsurf.sort.toggleDirection', '切换排序方向')}
+            aria-label={t('common.shared.sort.toggleDirection', '切换排序方向')}
           >
             {sortDirection === 'desc' ? '⬇' : '⬆'}
           </button>
@@ -1416,8 +1416,8 @@ export function WindsurfAccountsPage() {
           <button
             className="btn btn-primary icon-only"
             onClick={() => openAddModal('oauth')}
-            title={t('windsurf.addAccount', '添加账号')}
-            aria-label={t('windsurf.addAccount', '添加账号')}
+            title={t('common.shared.addAccount', '添加账号')}
+            aria-label={t('common.shared.addAccount', '添加账号')}
           >
             <Plus size={14} />
           </button>
@@ -1425,8 +1425,8 @@ export function WindsurfAccountsPage() {
             className="btn btn-secondary icon-only"
             onClick={handleRefreshAll}
             disabled={refreshingAll || accounts.length === 0}
-            title={t('windsurf.refreshAll', '刷新全部')}
-            aria-label={t('windsurf.refreshAll', '刷新全部')}
+            title={t('common.shared.refreshAll', '刷新全部')}
+            aria-label={t('common.shared.refreshAll', '刷新全部')}
           >
             <RefreshCw size={14} className={refreshingAll ? 'loading-spinner' : ''} />
           </button>
@@ -1450,8 +1450,8 @@ export function WindsurfAccountsPage() {
             className="btn btn-secondary icon-only"
             onClick={() => openAddModal('token')}
             disabled={importing}
-            title={t('windsurf.import.label', '导入')}
-            aria-label={t('windsurf.import.label', '导入')}
+            title={t('common.shared.import.label', '导入')}
+            aria-label={t('common.shared.import.label', '导入')}
           >
             <Download size={14} />
           </button>
@@ -1459,8 +1459,8 @@ export function WindsurfAccountsPage() {
             className="btn btn-secondary export-btn icon-only"
             onClick={handleExport}
             disabled={exporting}
-            title={selected.size > 0 ? `${t('windsurf.export', '导出')} (${selected.size})` : t('windsurf.export', '导出')}
-            aria-label={selected.size > 0 ? `${t('windsurf.export', '导出')} (${selected.size})` : t('windsurf.export', '导出')}
+            title={selected.size > 0 ? `${t('common.shared.export', '导出')} (${selected.size})` : t('common.shared.export', '导出')}
+            aria-label={selected.size > 0 ? `${t('common.shared.export', '导出')} (${selected.size})` : t('common.shared.export', '导出')}
           >
             <Upload size={14} />
           </button>
@@ -1486,17 +1486,17 @@ export function WindsurfAccountsPage() {
       ) : accounts.length === 0 ? (
         <div className="empty-state">
           <Globe size={48} />
-          <h3>{t('windsurf.empty.title', '暂无账号')}</h3>
+          <h3>{t('common.shared.empty.title', '暂无账号')}</h3>
           <p>{t('windsurf.empty.description', '点击"添加账号"开始管理您的 Windsurf 账号')}</p>
           <button className="btn btn-primary" onClick={() => openAddModal('oauth')}>
             <Plus size={16} />
-            {t('windsurf.addAccount', '添加账号')}
+            {t('common.shared.addAccount', '添加账号')}
           </button>
         </div>
       ) : filteredAccounts.length === 0 ? (
         <div className="empty-state">
-          <h3>{t('windsurf.noMatch.title', '没有匹配的账号')}</h3>
-          <p>{t('windsurf.noMatch.desc', '请尝试调整搜索或筛选条件')}</p>
+          <h3>{t('common.shared.noMatch.title', '没有匹配的账号')}</h3>
+          <p>{t('common.shared.noMatch.desc', '请尝试调整搜索或筛选条件')}</p>
         </div>
       ) : viewMode === 'grid' ? (
         groupByTag ? (
@@ -1530,11 +1530,11 @@ export function WindsurfAccountsPage() {
                     onChange={toggleSelectAll}
                   />
                 </th>
-                <th style={{ width: 240 }}>{t('windsurf.columns.email', '邮箱')}</th>
+                <th style={{ width: 240 }}>{t('common.shared.columns.email', '邮箱')}</th>
                 <th style={{ width: 120 }}>{t('windsurf.columns.plan', '标签')}</th>
-                <th>{t('windsurf.columns.promptCredits', 'User Prompt credits')}</th>
-                <th>{t('windsurf.columns.addOnPromptCredits', 'Add-on prompt credits')}</th>
-                <th className="sticky-action-header table-action-header">{t('windsurf.columns.actions', '操作')}</th>
+                <th>{t('common.shared.columns.promptCredits', 'User Prompt credits')}</th>
+                <th>{t('common.shared.columns.addOnPromptCredits', 'Add-on prompt credits')}</th>
+                <th className="sticky-action-header table-action-header">{t('common.shared.columns.actions', '操作')}</th>
               </tr>
             </thead>
             <tbody>
@@ -1566,11 +1566,11 @@ export function WindsurfAccountsPage() {
                     onChange={toggleSelectAll}
                   />
                 </th>
-                <th style={{ width: 240 }}>{t('windsurf.columns.email', '邮箱')}</th>
+                <th style={{ width: 240 }}>{t('common.shared.columns.email', '邮箱')}</th>
                 <th style={{ width: 120 }}>{t('windsurf.columns.plan', '标签')}</th>
-                <th>{t('windsurf.columns.promptCredits', 'User Prompt credits')}</th>
-                <th>{t('windsurf.columns.addOnPromptCredits', 'Add-on prompt credits')}</th>
-                <th className="sticky-action-header table-action-header">{t('windsurf.columns.actions', '操作')}</th>
+                <th>{t('common.shared.columns.promptCredits', 'User Prompt credits')}</th>
+                <th>{t('common.shared.columns.addOnPromptCredits', 'Add-on prompt credits')}</th>
+                <th className="sticky-action-header table-action-header">{t('common.shared.columns.actions', '操作')}</th>
               </tr>
             </thead>
             <tbody>
@@ -1596,21 +1596,21 @@ export function WindsurfAccountsPage() {
                 onClick={() => openAddModal('oauth')}
               >
                 <Globe size={14} />
-                {t('windsurf.addModal.oauth', 'OAuth')}
+                {t('common.shared.addModal.oauth', 'OAuth')}
               </button>
               <button
                 className={`modal-tab ${addTab === 'token' ? 'active' : ''}`}
                 onClick={() => openAddModal('token')}
               >
                 <KeyRound size={14} />
-                {t('windsurf.addModal.token', 'Token / JSON')}
+                {t('common.shared.addModal.token', 'Token / JSON')}
               </button>
               <button
                 className={`modal-tab ${addTab === 'import' ? 'active' : ''}`}
                 onClick={() => openAddModal('import')}
               >
                 <Database size={14} />
-                {t('windsurf.addModal.import', '本地导入')}
+                {t('common.shared.addModal.import', '本地导入')}
               </button>
             </div>
 
@@ -1626,7 +1626,7 @@ export function WindsurfAccountsPage() {
                       <CircleAlert size={16} />
                       <span>{oauthPrepareError}</span>
                       <button className="btn btn-sm btn-outline" onClick={handleRetryOauth}>
-                        {t('windsurf.oauth.retry', '重新生成授权信息')}
+                        {t('common.shared.oauth.retry', '重新生成授权信息')}
                       </button>
                     </div>
                   ) : oauthUrl ? (
@@ -1647,7 +1647,7 @@ export function WindsurfAccountsPage() {
                       )}
                       {oauthMeta && (
                         <p className="oauth-hint">
-                          {t('windsurf.oauth.meta', '授权有效期：{{expires}}s；轮询间隔：{{interval}}s', {
+                          {t('common.shared.oauth.meta', '授权有效期：{{expires}}s；轮询间隔：{{interval}}s', {
                             expires: oauthMeta.expiresIn,
                             interval: oauthMeta.intervalSeconds,
                           })}
@@ -1658,12 +1658,12 @@ export function WindsurfAccountsPage() {
                         onClick={handleOpenOauthUrl}
                       >
                         <Globe size={16} />
-                        {t('windsurf.oauth.openBrowser', '在浏览器中打开')}
+                        {t('common.shared.oauth.openBrowser', '在浏览器中打开')}
                       </button>
                       {oauthPolling && (
                         <div className="add-status loading">
                           <RefreshCw size={16} className="loading-spinner" />
-                          <span>{t('windsurf.oauth.waiting', '等待授权完成...')}</span>
+                          <span>{t('common.shared.oauth.waiting', '等待授权完成...')}</span>
                         </div>
                       )}
                       {oauthCompleteError && (
@@ -1672,19 +1672,19 @@ export function WindsurfAccountsPage() {
                           <span>{oauthCompleteError}</span>
                           {oauthTimedOut && (
                             <button className="btn btn-sm btn-outline" onClick={handleRetryOauth}>
-                              {t('windsurf.oauth.timeoutRetry', '刷新授权链接')}
+                              {t('common.shared.oauth.timeoutRetry', '刷新授权链接')}
                             </button>
                           )}
                         </div>
                       )}
                       <p className="oauth-hint">
-                        {t('windsurf.oauth.hint', 'Once authorized, this window will update automatically')}
+                        {t('common.shared.oauth.hint', 'Once authorized, this window will update automatically')}
                       </p>
                     </div>
                   ) : (
                     <div className="oauth-loading">
                       <RefreshCw size={24} className="loading-spinner" />
-                      <span>{t('windsurf.oauth.preparing', '正在准备授权信息...')}</span>
+                      <span>{t('common.shared.oauth.preparing', '正在准备授权信息...')}</span>
                     </div>
                   )}
                 </div>
@@ -1699,7 +1699,7 @@ export function WindsurfAccountsPage() {
                     className="token-input"
                     value={tokenInput}
                     onChange={(e) => setTokenInput(e.target.value)}
-                    placeholder={t('windsurf.token.placeholder', '粘贴 Token 或 JSON...')}
+                    placeholder={t('common.shared.token.placeholder', '粘贴 Token 或 JSON...')}
                   />
                   <button
                     className="btn btn-primary btn-full"
@@ -1707,7 +1707,7 @@ export function WindsurfAccountsPage() {
                     disabled={importing || !tokenInput.trim()}
                   >
                     {importing ? <RefreshCw size={16} className="loading-spinner" /> : <Download size={16} />}
-                    {t('windsurf.token.import', 'Import')}
+                    {t('common.shared.token.import', 'Import')}
                   </button>
                 </div>
               )}
@@ -1722,7 +1722,7 @@ export function WindsurfAccountsPage() {
                     {t('windsurf.import.localClient', '从本机 Windsurf 导入')}
                   </button>
                   <div className="oauth-hint" style={{ margin: '8px 0 4px' }}>
-                    {t('windsurf.import.orJson', '或从 JSON 文件导入')}
+                    {t('common.shared.import.orJson', '或从 JSON 文件导入')}
                   </div>
                   <input
                     ref={importFileInputRef}
@@ -1739,7 +1739,7 @@ export function WindsurfAccountsPage() {
                   />
                   <button className="btn btn-primary btn-full" onClick={handlePickImportFile} disabled={importing}>
                     {importing ? <RefreshCw size={16} className="loading-spinner" /> : <Database size={16} />}
-                    {t('windsurf.import.pickFile', '选择 JSON 文件导入')}
+                    {t('common.shared.import.pickFile', '选择 JSON 文件导入')}
                   </button>
                 </div>
               )}

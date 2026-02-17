@@ -20,7 +20,128 @@
     "none": "暫無",
     "detail": "詳情",
     "editable": "可編輯",
-    "preview": "預覽"
+    "preview": "預覽",
+    "shared": {
+      "addAccount": "新增帳號",
+      "columns": {
+        "actions": "操作",
+        "plan": "訂閱",
+        "addOnPromptCredits": "Add-on Prompt 點數",
+        "credits": "點數",
+        "email": "電子郵件",
+        "promptCredits": "User Prompt 點數"
+      },
+      "empty": {
+        "title": "暫無帳號"
+      },
+      "export": "匯出",
+      "filter": {
+        "all": "全部 ({{count}})",
+        "enterprise": "企業 ({{count}})",
+        "free": "免費（{{count}}）",
+        "pro": "專業版 ({{count}})",
+        "business": "商業 ({{count}})",
+        "individual": "個人 ({{count}})"
+      },
+      "filterLabel": "篩選",
+      "import": {
+        "failedMsg": "匯入失敗: {{error}}",
+        "label": "匯入",
+        "importing": "正在匯入本地帳號...",
+        "pickFile": "選擇要匯入的 JSON 檔案",
+        "orJson": "或從 JSON 檔案匯入"
+      },
+      "instances": {
+        "unsupported": {
+          "title": "暫不支援目前系統"
+        },
+        "quota": {
+          "chat": "聊天訊息",
+          "inline": "內嵌建議"
+        },
+        "subtitle": "多實例獨立配置，多帳號並行運行。",
+        "title": "多開實例"
+      },
+      "noMatch": {
+        "desc": "請嘗試調整搜尋或篩選條件",
+        "title": "沒有匹配的帳號"
+      },
+      "oauth": {
+        "failed": "授權失敗",
+        "hint": "完成授權後，此視窗將自動更新",
+        "openBrowser": "在瀏覽器中開啟",
+        "success": "授權成功",
+        "meta": "有效期限：{{expires}}s；輪詢間隔：{{interval}}s",
+        "preparing": "正在準備授權連結...",
+        "retry": "重新產生授權資訊",
+        "timeoutRetry": "更新授權連結",
+        "waiting": "等待授權中..."
+      },
+      "refreshAll": "全部刷新",
+      "refreshQuota": "刷新配額",
+      "search": "搜尋帳號...",
+      "sort": {
+        "ascTooltip": "目前：升序，點擊切換為降序",
+        "createdAt": "按建立時間",
+        "descTooltip": "目前：降序，點擊切換為升序",
+        "toggleDirection": "切換排序方向",
+        "credits": "按剩餘學分",
+        "planEnd": "按週期結束時間"
+      },
+      "sortLabel": "排序",
+      "token": {
+        "empty": "請輸入 Token 或 JSON",
+        "import": "匯入",
+        "importFailedMsg": "匯入失敗: {{error}}",
+        "importing": "匯入中...",
+        "importSuccessMsg": "成功匯入 {{count}} 個帳號",
+        "placeholder": "貼上 JSON 內容..."
+      },
+      "view": {
+        "grid": "卡片檢視",
+        "list": "列表檢視"
+      },
+      "addModal": {
+        "import": "本機匯入",
+        "oauth": "OAuth 登入",
+        "token": "JSON 匯入"
+      },
+      "overview": {
+        "title": "帳號總覽"
+      },
+      "quota": {
+        "noData": "暫無配額資料",
+        "resetDone": "已重置",
+        "hourly": "5 小時配額",
+        "weekly": "週配額"
+      },
+      "subtitle": "管理您的 GitHub Copilot 帳號",
+      "time": {
+        "lessThanMinute": "<1分鐘",
+        "relativeDays": "{{days}}天",
+        "relativeDaysHours": "{{days}}天{{hours}}小時",
+        "relativeHours": "{{hours}}小時",
+        "relativeHoursMinutes": "{{hours}}小時{{minutes}}分鐘",
+        "relativeMinutes": "{{minutes}}分鐘",
+        "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      },
+      "credits": {
+        "leftInline": "剩餘 {{left}}",
+        "periodEndOnly": "週期結束：{{end}}",
+        "periodRange": "週期：{{start}} - {{end}}",
+        "planEndsIn": "配額週期剩餘 {{days}} 天",
+        "planEndsUnknown": "配額週期時間未知",
+        "usedLine": "已使用 {{used}} / {{total}}"
+      },
+      "flowNotice": {
+        "alternative": "替代方案：使用多開隔離（不同 --user-data-dir）。每個實例登入一次，之後按實例啟動即可快速切換到目標帳號環境。"
+      },
+      "injecting": "注入中...",
+      "usage": {
+        "resetLine": "額度將於 {{dateText}} 重置。",
+        "resetUnknown": "額度重置倒數 -"
+      }
+    }
   },
   "nav": {
     "overview": "Antigravity 帳號",
@@ -31,8 +152,8 @@
     "codex": "Codex 帳號",
     "dashboard": "儀表板",
     "instances": "多開實例",
-    "githubCopilot": "GitHub Copilot",
-    "windsurf": "Windsurf",
+    "githubCopilot": "GitHub 副駕駛",
+    "windsurf": "風帆衝浪",
     "morePlatforms": "更多平台"
   },
   "settings": {
@@ -64,7 +185,7 @@
       "every1hour": "每 1 小時",
       "minutes": "分",
       "refreshIntervalLimited": "配額重置喚醒已啟用，刷新間隔最小值為 2 分鐘",
-      "storageTitle": "Directories & Storage",
+      "storageTitle": "目錄和存儲",
       "dataDir": "資料目錄",
       "dataDirDesc": "帳號與設定檔的儲存位置。",
       "fpDir": "Antigravity 儲存目錄",
@@ -110,17 +231,17 @@
       "windsurfAppPathPlaceholder": "預設路徑",
       "windsurfPathSelect": "選擇",
       "windsurfPathReset": "重設預設值",
-      "kiroSettingsTitle": "Kiro Settings",
-      "kiroAutoRefresh": "Kiro Auto Refresh Quota",
-      "kiroAutoRefreshDesc": "Background update frequency",
-      "kiroAppPath": "Kiro App Path",
-      "kiroAppPathDesc": "Leave empty to use default path",
-      "kiroAppPathPlaceholder": "Default path",
-      "kiroPathSelect": "Select",
-      "kiroPathReset": "Reset to default"
+      "kiroSettingsTitle": "基羅設定",
+      "kiroAutoRefresh": "Kiro 自動刷新配額",
+      "kiroAutoRefreshDesc": "後台更新頻率",
+      "kiroAppPath": "Kiro 應用程式路徑",
+      "kiroAppPathDesc": "留空以使用預設路徑",
+      "kiroAppPathPlaceholder": "預設路徑",
+      "kiroPathSelect": "選擇",
+      "kiroPathReset": "重設為預設值"
     },
     "network": {
-      "apiTitle": "Antigravity Cockpit API",
+      "apiTitle": "反重力駕駛艙 API",
       "wsService": "WebSocket 服務",
       "wsServiceDesc": "允許外部程式 (如 VS Code 擴充功能) 連接控制",
       "preferredPort": "偏好連接埠",
@@ -134,7 +255,7 @@
       "saveFailed": "儲存失敗: {{error}}"
     },
     "about": {
-      "appName": "Cockpit Tools",
+      "appName": "駕駛艙工具",
       "slogan": "專業帳號管理解決方案",
       "author": "主作者",
       "wechat": "微信公眾號",
@@ -188,9 +309,9 @@
       "forbidden_msg": "帳號無權限，已跳過自動刷新"
     },
     "tier": {
-      "pro": "PRO",
-      "ultra": "ULTRA",
-      "free": "FREE"
+      "pro": "專業版",
+      "ultra": "極端主義者",
+      "free": "自由的"
     },
     "empty": {
       "title": "暫無帳號",
@@ -209,9 +330,9 @@
     "filterLabel": "篩選帳號",
     "filter": {
       "all": "全部 ({{count}})",
-      "pro": "PRO ({{count}})",
-      "ultra": "ULTRA ({{count}})",
-      "free": "FREE ({{count}})"
+      "pro": "專業版 ({{count}})",
+      "ultra": "超 ({{count}})",
+      "free": "免費（{{count}}）"
     },
     "sortLabel": "排序",
     "sort": {
@@ -234,7 +355,7 @@
     },
     "tabs": {
       "oauth": "OAuth 授權",
-      "token": "Refresh Token",
+      "token": "刷新令牌",
       "import": "匯入"
     },
     "oauth": {
@@ -487,8 +608,8 @@
     "format": {
       "noReply": "(無回覆)",
       "durationMs": "{{ms}}ms",
-      "tokens": "tokens={{prompt}}+{{completion}}={{total}}",
-      "traceId": "traceId={{traceId}}",
+      "tokens": "令牌={{prompt}}+{{completion}}={{total}}",
+      "traceId": "追蹤ID={{traceId}}",
       "detailJoiner": "，",
       "message": "[[{{model}}]]：{{reply}}{{suffix}}",
       "none": "--",
@@ -499,7 +620,7 @@
       "joiner": "、",
       "moreItems": "{{items}} 等{{total}}項",
       "quotaReset": "配額重置自動喚醒",
-      "crontab": "Crontab: {{expr}}",
+      "crontab": "定時任務：{{expr}}",
       "daily": "每日 {{times}}{{suffix}}",
       "weekly": "每週 {{days}} {{times}}{{suffix}}",
       "interval": "間隔 {{hours}} 小時 ({{start}}-{{end}})",
@@ -540,7 +661,7 @@
     },
     "triggerSource": {
       "scheduled": "定時",
-      "crontab": "Crontab",
+      "crontab": "定時任務",
       "quotaReset": "配額重置",
       "manual": "立即測試",
       "unknown": "未知"
@@ -568,7 +689,7 @@
       "triggerMode": "喚醒方式",
       "triggerModeHint": "1. 定時：依照設定時間觸發。\\n2. Crontab：使用表達式定義。\\n3. 配額重置：額度滿後觸發一次。",
       "modeScheduled": "📅 定時觸發",
-      "modeCrontab": "🧩 Crontab",
+      "modeCrontab": "🧩 定時任務",
       "modeQuotaReset": "🔄 配額重置",
       "modelSelect": "模型選擇",
       "modelHint": "同一配額組建議只選一個模型，多模型會依序觸發。",
@@ -644,15 +765,11 @@
   "codex": {
     "title": "Codex 帳號管理",
     "subtitle": "管理您的 OpenAI Codex 帳號",
-    "addAccount": "新增帳號",
-    "refreshAll": "全部刷新",
-    "refreshQuota": "刷新配額",
     "switch": "切換",
     "switched": "已切換至 {{email}}",
     "switchFailed": "切換失敗: {{error}}",
     "current": "目前",
     "empty": {
-      "title": "暫無帳號",
       "description": "點擊「新增帳號」開始管理您的 Codex 帳號"
     },
     "addModal": {
@@ -664,11 +781,7 @@
     "oauth": {
       "desc": "點擊下方按鈕，在瀏覽器中完成 OpenAI 帳號授權",
       "preparing": "正在準備授權連結...",
-      "openBrowser": "在瀏覽器中開啟",
-      "hint": "完成授權後，此視窗將自動更新",
       "exchanging": "正在交換權杖...",
-      "success": "授權成功",
-      "failed": "授權失敗",
       "portInUse": "連接埠 {{port}} 已被佔用，請關閉佔用該連接埠的程式後重試。",
       "portInUseTitle": "連接埠被佔用",
       "portInUseConfirm": "連接埠 {{port}} 已被佔用，是否關閉佔用該連接埠的程式？",
@@ -678,87 +791,50 @@
     },
     "token": {
       "desc": "貼上 auth.json 內容或帳號 JSON 資料",
-      "placeholder": "貼上 JSON 內容...",
-      "import": "匯入",
-      "importing": "匯入中...",
-      "importSuccessMsg": "成功匯入 {{count}} 個帳號",
-      "importFailedMsg": "匯入失敗: {{error}}",
-      "empty": "請輸入 Token 或 JSON"
+      "placeholder": "貼上 JSON 內容..."
     },
     "local": {
       "desc": "從 ~/.codex/auth.json 匯入目前已登入的帳號",
       "import": "取得本機帳號"
     },
     "import": {
-      "label": "匯入",
       "importing": "正在匯入本地帳號...",
       "successMsg": "匯入成功: {{email}}",
-      "failedMsg": "匯入失敗: {{error}}",
       "localDesc": "從本機已登入的會話匯入 Codex 帳號。"
     },
     "quota": {
       "hourly": "5 小時配額",
       "weekly": "週配額",
-      "reset": "重置",
-      "noData": "暫無配額資料",
-      "resetDone": "已重置"
+      "reset": "重置"
     },
     "plan": {
-      "free": "FREE",
-      "plus": "PLUS",
-      "pro": "PRO",
-      "team": "TEAM",
-      "enterprise": "ENTERPRISE"
+      "free": "自由的",
+      "plus": "加",
+      "pro": "專業版",
+      "team": "團隊",
+      "enterprise": "企業"
     },
     "time": {
-      "relativeDays": "{{days}}天",
-      "relativeDaysHours": "{{days}}天{{hours}}小時",
-      "relativeHours": "{{hours}}小時",
-      "relativeHoursMinutes": "{{hours}}小時{{minutes}}分鐘",
-      "relativeMinutes": "{{minutes}}分鐘",
-      "lessThanMinute": "<1分鐘",
       "today": "今天 {{time}}",
       "tomorrow": "明天 {{time}}",
-      "dateTime": "{{date}} {{time}}",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      "dateTime": "{{date}} {{time}}"
     },
-    "search": "搜尋帳號...",
     "view": {
-      "compact": "緊湊檢視",
-      "list": "列表檢視",
-      "grid": "卡片檢視"
+      "compact": "緊湊檢視"
     },
     "filter": {
-      "all": "全部 ({{count}})",
-      "free": "FREE ({{count}})",
-      "plus": "PLUS ({{count}})",
-      "pro": "PRO ({{count}})",
-      "team": "TEAM ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
+      "plus": "加上（{{count}}）",
+      "team": "團隊 ({{count}})"
     },
-    "filterLabel": "篩選",
-    "sortLabel": "排序",
     "sort": {
       "weekly": "按週配額",
       "hourly": "按5小時配額",
       "weeklyReset": "按週配額重置時間",
-      "hourlyReset": "按5小時配額重置時間",
-      "descTooltip": "目前：降序，點擊切換為升序",
-      "ascTooltip": "目前：升序，點擊切換為降序",
-      "toggleDirection": "切換排序方向",
-      "createdAt": "按建立時間"
-    },
-    "export": "匯出",
-    "noMatch": {
-      "title": "沒有匹配的帳號",
-      "desc": "請嘗試調整搜尋或篩選條件"
+      "hourlyReset": "按5小時配額重置時間"
     },
     "columns": {
-      "email": "帳號",
-      "plan": "訂閱",
       "hourly": "5小時配額",
-      "weekly": "週配額",
-      "actions": "操作"
+      "weekly": "週配額"
     },
     "opencodeSwitch": "OpenCode 切換開關",
     "opencodeSwitchDesc": "同步切換 OpenCode 裡的 Codex 帳號資訊",
@@ -773,7 +849,6 @@
       "comingSoon": "多開實例功能即將上線",
       "comingSoonDesc": "支援以不同帳號同時運行多個 Codex.app 實例，敬請期待。",
       "unsupported": {
-        "title": "暫不支援目前系統",
         "desc": "Codex 多開實例僅支援 macOS，請在 macOS 上使用。"
       },
       "quota": {
@@ -788,7 +863,7 @@
         },
         "force": {
           "principle": "通過 CODEX_HOME 識別進程並強制關閉（SIGKILL / taskkill /F），隨後啟動目標實例。",
-          "commandMac": "macOS: pkill -9 -f \"CODEX_HOME=<dir>\"",
+          "commandMac": "macOS：pkill -9 -f“CODEX_HOME=<dir>”",
           "commandWin": "Windows: taskkill /F /PID <pid>（匹配 CODEX_HOME）"
         }
       }
@@ -819,9 +894,9 @@
       "totalAccounts": "總帳戶數"
     },
     "panels": {
-      "antigravity": "Antigravity",
-      "codex": "Codex",
-      "githubCopilot": "GitHub Copilot",
+      "antigravity": "反重力",
+      "codex": "法典",
+      "githubCopilot": "GitHub 副駕駛",
       "planDistribution": "方案分佈",
       "current": "目前帳號",
       "recommended": "推薦帳號",
@@ -994,7 +1069,7 @@
       "force": {
         "title": "精準強啟",
         "principle": "通過 --user-data-dir 識別進程並強制關閉（SIGKILL / taskkill /F），隨後啟動目標實例。",
-        "commandMac": "macOS/Linux: pkill -9 -f \"--user-data-dir <dir>\"",
+        "commandMac": "macOS/Linux：pkill -9 -f“--user-data-dir <dir>”",
         "commandWin": "Windows: taskkill /F /PID <pid>（匹配 --user-data-dir）",
         "pros": "可以精準地僅重啟單個實例。",
         "cons": "可能導致「意外關閉」警告，存在未保存數據丟失風險。"
@@ -1036,129 +1111,44 @@
   },
   "githubCopilot": {
     "title": "GitHub Copilot 帳號管理",
-    "subtitle": "管理您的 GitHub Copilot 帳號",
-    "overview": {
-      "title": "帳號總覽"
-    },
     "instances": {
-      "title": "多開實例",
-      "subtitle": "多實例獨立配置，多帳號並行運行。",
       "unsupported": {
-        "title": "暫不支援目前系統",
         "desc": "GitHub Copilot 多開實例僅支援 macOS，請在 macOS 上使用。"
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "新增帳號",
-    "refreshAll": "全部刷新",
-    "refreshQuota": "刷新配額",
     "empty": {
-      "title": "暫無帳號",
       "description": "點擊「新增帳號」開始管理您的 GitHub Copilot 帳號"
     },
-    "noMatch": {
-      "title": "沒有匹配的帳號",
-      "desc": "請嘗試調整搜尋或篩選條件"
-    },
     "addModal": {
-      "title": "新增 GitHub Copilot 帳號",
-      "oauth": "OAuth 登入",
-      "token": "JSON 匯入",
-      "import": "本機匯入"
+      "title": "新增 GitHub Copilot 帳號"
     },
     "oauth": {
-      "desc": "點擊下方按鈕，在瀏覽器中完成 GitHub Copilot 授權。",
-      "preparing": "正在準備授權連結...",
-      "openBrowser": "在瀏覽器中開啟",
-      "hint": "完成授權後，此視窗將自動更新",
-      "success": "授權成功",
-      "failed": "授權失敗",
-      "retry": "重新產生授權資訊",
-      "timeoutRetry": "更新授權連結",
-      "waiting": "等待授權中...",
-      "meta": "有效期限：{{expires}}s；輪詢間隔：{{interval}}s"
+      "desc": "點擊下方按鈕，在瀏覽器中完成 GitHub Copilot 授權。"
     },
     "token": {
-      "desc": "貼上 GitHub Copilot 存取權杖或匯出的 JSON 資料。",
-      "placeholder": "貼上 JSON 內容...",
-      "import": "匯入",
-      "importing": "匯入中...",
-      "importSuccessMsg": "成功匯入 {{count}} 個帳號",
-      "importFailedMsg": "匯入失敗: {{error}}",
-      "empty": "請輸入 Token 或 JSON"
+      "desc": "貼上 GitHub Copilot 存取權杖或匯出的 JSON 資料。"
     },
     "import": {
-      "label": "匯入",
-      "localDesc": "從本機已登入的會話匯入 GitHub Copilot 帳號。",
-      "importing": "正在匯入本地帳號...",
-      "failedMsg": "匯入失敗: {{error}}",
-      "pickFile": "選擇要匯入的 JSON 檔案"
+      "localDesc": "從本機已登入的會話匯入 GitHub Copilot 帳號。"
     },
-    "quota": {
-      "hourly": "5 小時配額",
-      "weekly": "週配額",
-      "noData": "暫無配額資料",
-      "resetDone": "已重置"
-    },
-    "usage": {
-      "resetUnknown": "額度重置倒數 -",
-      "resetLine": "額度將於 {{dateText}} 重置。"
-    },
-    "time": {
-      "relativeDays": "{{days}}天",
-      "relativeDaysHours": "{{days}}天{{hours}}小時",
-      "relativeHours": "{{hours}}小時",
-      "relativeHoursMinutes": "{{hours}}小時{{minutes}}分鐘",
-      "relativeMinutes": "{{minutes}}分鐘",
-      "lessThanMinute": "<1分鐘",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "搜尋帳號...",
-    "view": {
-      "list": "列表檢視",
-      "grid": "卡片檢視"
-    },
-    "filter": {
-      "all": "全部 ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "篩選",
-    "sortLabel": "排序",
     "sort": {
-      "createdAt": "按建立時間",
       "weekly": "按週配額",
       "hourly": "按5小時配額",
       "weeklyReset": "按週配額重置時間",
-      "hourlyReset": "按5小時配額重置時間",
-      "descTooltip": "目前：降序，點擊切換為升序",
-      "ascTooltip": "目前：升序，點擊切換為降序",
-      "toggleDirection": "切換排序方向"
+      "hourlyReset": "按5小時配額重置時間"
     },
     "columns": {
-      "email": "帳號",
-      "plan": "訂閱",
       "hourly": "5小時配額",
-      "weekly": "週配額",
-      "actions": "操作"
+      "weekly": "週配額"
     },
-    "export": "匯出",
     "flowNotice": {
       "title": "GitHub Copilot 帳號指南（點擊展開/收合）",
       "desc": "切換帳號時需要讀取 VS Code 本機認證儲存，並呼叫系統憑證服務完成解密與回寫；資料僅在本機處理。",
       "reason": "權限需求：讀取 VS Code 認證資料庫（state.vscdb），並呼叫系統加密能力（Windows DPAPI / macOS Keychain / Linux Secret Service）進行解密與寫回。",
       "storage": "讀取範圍：僅處理 GitHub 登入工作階段相關資料，所有流程均在本機執行。",
-      "alternative": "替代方案：使用多開隔離（不同 --user-data-dir）。每個實例登入一次，之後按實例啟動即可快速切換到目標帳號環境。",
       "inject": "一鍵切換：本工具會讀取本機 VS Code 加密材料（DPAPI/Keychain/Secret Service），解密 state.vscdb 中的驗證工作階段，替換 GitHub Copilot 權杖後再加密，全部流程都在本機完成。"
     },
     "injectToVSCode": "切換到 VS Code",
-    "injecting": "注入中...",
     "injectSuccess": "已成功將權杖注入 VS Code，VS Code 正在啟動。",
     "injectRequireClose": "注入前請先關閉 VS Code。"
   },
@@ -1202,10 +1192,10 @@
     },
     "windsurfRefreshInterval": "配額自動重新整理",
     "kiro": {
-      "title": "Kiro Settings",
-      "appPath": "Kiro Path"
+      "title": "基羅設定",
+      "appPath": "基羅之路"
     },
-    "kiroRefreshInterval": "Auto refresh quota"
+    "kiroRefreshInterval": "自動刷新配額"
   },
   "quotaAlert": {
     "bannerText": "帳號 {{email}} 觸發配額預警（閾值 {{threshold}}%，最低 {{lowest}}%，模型：{{models}}）",
@@ -1236,145 +1226,47 @@
   },
   "windsurf": {
     "title": "Windsurf 帳號管理",
-    "subtitle": "管理您的 Windsurf 帳號",
-    "overview": {
-      "title": "帳號總覽"
-    },
     "instances": {
-      "title": "多開實例",
-      "subtitle": "多實例獨立配置，多帳號並行運行。",
       "unsupported": {
-        "title": "暫不支援目前系統",
         "desc": "Windsurf 多開實例僅支援 macOS，請在 macOS 上使用。"
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "新增帳號",
-    "refreshAll": "全部刷新",
-    "refreshQuota": "刷新配額",
     "empty": {
-      "title": "暫無帳號",
       "description": "點擊「新增帳號」開始管理您的 Windsurf 帳號"
     },
-    "noMatch": {
-      "title": "沒有匹配的帳號",
-      "desc": "請嘗試調整搜尋或篩選條件"
-    },
     "addModal": {
-      "title": "新增 Windsurf 帳號",
-      "oauth": "OAuth 登入",
-      "token": "JSON 匯入",
-      "import": "本機匯入"
+      "title": "新增 Windsurf 帳號"
     },
     "oauth": {
-      "desc": "點擊下方按鈕，在瀏覽器中完成 Windsurf 授權。",
-      "preparing": "正在準備授權連結...",
-      "openBrowser": "在瀏覽器中開啟",
-      "hint": "完成授權後，此視窗將自動更新",
-      "success": "授權成功",
-      "failed": "授權失敗",
-      "retry": "重新產生授權資訊",
-      "timeoutRetry": "更新授權連結",
-      "waiting": "等待授權中...",
-      "meta": "有效期限：{{expires}}s；輪詢間隔：{{interval}}s"
+      "desc": "點擊下方按鈕，在瀏覽器中完成 Windsurf 授權。"
     },
     "token": {
-      "desc": "貼上 Windsurf 存取權杖或匯出的 JSON 資料。",
-      "placeholder": "貼上 JSON 內容...",
-      "import": "匯入",
-      "importing": "匯入中...",
-      "importSuccessMsg": "成功匯入 {{count}} 個帳號",
-      "importFailedMsg": "匯入失敗: {{error}}",
-      "empty": "請輸入 Token 或 JSON"
+      "desc": "貼上 Windsurf 存取權杖或匯出的 JSON 資料。"
     },
     "import": {
-      "label": "匯入",
       "localDesc": "從本機已登入的會話匯入 Windsurf 帳號。",
-      "localClient": "從本機 Windsurf 匯入",
-      "orJson": "或從 JSON 檔案匯入",
-      "importing": "正在匯入本地帳號...",
-      "failedMsg": "匯入失敗: {{error}}",
-      "pickFile": "選擇要匯入的 JSON 檔案"
-    },
-    "quota": {
-      "hourly": "5 小時配額",
-      "weekly": "週配額",
-      "noData": "暫無配額資料",
-      "resetDone": "已重置"
+      "localClient": "從本機 Windsurf 匯入"
     },
     "credits": {
       "title": "方案",
       "renewMonthly": "點數每月自動重置",
-      "planEndsIn": "配額週期剩餘 {{days}} 天",
-      "planEndsUnknown": "配額週期時間未知",
-      "periodRange": "週期：{{start}} - {{end}}",
-      "periodEndOnly": "週期結束：{{end}}",
       "left": "剩餘 {{count}} 點數",
       "leftUnknown": "剩餘點數 -",
       "promptLeft": "剩餘 {{remaining}}/{{total}} prompt 點數",
       "promptLeftNoTotal": "剩餘 {{remaining}} prompt 點數",
       "promptLeftUnknown": "剩餘 prompt 點數 -",
-      "addOnAvailable": "{{count}} add-on 點數可用",
-      "usedLine": "已使用 {{used}} / {{total}}",
-      "leftInline": "剩餘 {{left}}"
-    },
-    "usage": {
-      "resetUnknown": "額度重置倒數 -",
-      "resetLine": "額度將於 {{dateText}} 重置。"
-    },
-    "time": {
-      "relativeDays": "{{days}}天",
-      "relativeDaysHours": "{{days}}天{{hours}}小時",
-      "relativeHours": "{{hours}}小時",
-      "relativeHoursMinutes": "{{hours}}小時{{minutes}}分鐘",
-      "relativeMinutes": "{{minutes}}分鐘",
-      "lessThanMinute": "<1分鐘",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "搜尋帳號...",
-    "view": {
-      "list": "列表檢視",
-      "grid": "卡片檢視"
-    },
-    "filter": {
-      "all": "全部 ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "篩選",
-    "sortLabel": "排序",
-    "sort": {
-      "createdAt": "按建立時間",
-      "credits": "依剩餘點數排序",
-      "planEnd": "依配額週期結束時間排序",
-      "descTooltip": "目前：降序，點擊切換為升序",
-      "ascTooltip": "目前：升序，點擊切換為降序",
-      "toggleDirection": "切換排序方向"
+      "addOnAvailable": "{{count}} add-on 點數可用"
     },
     "columns": {
-      "email": "電子郵件",
-      "plan": "標籤",
-      "promptCredits": "User Prompt 點數",
-      "addOnPromptCredits": "Add-on Prompt 點數",
-      "credits": "點數",
-      "actions": "操作"
+      "plan": "標籤"
     },
-    "export": "匯出",
     "injectToVSCode": "切換到 Windsurf",
-    "injecting": "注入中...",
     "injectSuccess": "已完成切換，Windsurf 正在啟動。",
     "injectRequireClose": "請先關閉 Windsurf 再進行切換。",
     "flowNotice": {
       "title": "Windsurf 帳號指南（點擊展開/收合）",
       "desc": "切換帳號時需要讀取 Windsurf 本機認證儲存，並呼叫系統憑證服務完成解密與回寫；資料僅在本機處理。",
       "inject": "一鍵切換：本工具會讀取本機 Windsurf 加密材料（DPAPI/Keychain/Secret Service），解密 state.vscdb 中的驗證工作階段，替換 Windsurf 權杖後再加密，全部流程都在本機完成。",
-      "alternative": "替代方案：使用多開隔離（不同 --user-data-dir）。每個實例登入一次，之後按實例啟動即可快速切換到目標帳號環境。",
       "reason": "權限需求：讀取 Windsurf 認證資料庫（state.vscdb），並呼叫系統加密能力（Windows DPAPI / macOS Keychain / Linux Secret Service）進行解密與寫回。",
       "storage": "讀取範圍：僅處理 Windsurf 登入工作階段相關資料，所有流程均在本機執行。"
     }
@@ -1425,140 +1317,62 @@
   },
   "kiro": {
     "account": {
-      "signedInWith": "Signed in with {{provider}}",
-      "providerUnknown": "Unknown",
-      "userId": "User ID"
+      "signedInWith": "使用 {{provider}} 登入",
+      "providerUnknown": "未知",
+      "userId": "使用者身分"
     },
     "credits": {
-      "planEndsIn": "配額週期剩餘 {{days}} 天",
-      "planEndsUnknown": "配額週期時間未知",
-      "periodRange": "週期：{{start}} - {{end}}",
-      "periodEndOnly": "週期結束：{{end}}",
-      "estimatedResetOn": "Estimated Usage resets on {{date}}",
-      "bonusUsageLine": "{{used}} used / {{total}} total",
-      "planUsageCoveredLine": "{{used}} used / {{total}} covered in plan",
-      "usedLine": "已使用 {{used}} / {{total}}",
-      "leftInline": "剩餘 {{left}}",
-      "expiryDays": "{{days}} days",
+      "estimatedResetOn": "預計使用量在 {{date}} 上重置",
+      "bonusUsageLine": "使用 {{used}} / 總共 {{total}}",
+      "planUsageCoveredLine": "{{used}} 已使用 / {{total}} 包含在計劃中",
+      "expiryDays": "{{days}} 天",
       "expiryUnknown": "—",
-      "resetNow": "Reset soon",
-      "resetInHours": "Resets in {{hours}}h",
-      "resetInMinutes": "Resets in {{minutes}}m"
+      "resetNow": "盡快重置",
+      "resetInHours": "在 {{hours}}h 中重置",
+      "resetInMinutes": "在 {{minutes}}m 中重置"
     },
     "columns": {
-      "email": "電子郵件",
-      "plan": "標籤",
-      "credits": "點數",
-      "promptCredits": "User Prompt 點數",
-      "addOnPromptCredits": "Add-on Prompt 點數",
-      "bonusCredits": "Bonus Credits",
-      "estimatedUsage": "Estimated Usage",
-      "expiry": "Expiry",
-      "estUsage": "Est. Usage",
-      "actions": "操作"
+      "bonusCredits": "獎勵積分",
+      "estimatedUsage": "預計使用量",
+      "expiry": "到期日",
+      "estUsage": "預計。用法"
     },
     "plan": {
-      "free": "Kiro Free",
-      "individual": "Kiro Individual",
-      "pro": "Kiro Pro",
-      "business": "Kiro Business",
-      "enterprise": "Kiro Enterprise",
-      "unknown": "Unknown"
+      "free": "基羅自由",
+      "individual": "基羅個人賽",
+      "pro": "基羅專業版",
+      "business": "基羅商務",
+      "enterprise": "基羅企業",
+      "unknown": "未知"
     },
     "flowNotice": {
-      "title": "Kiro 帳號指南（點擊展開/收合）",
-      "desc": "切換帳號時需要讀取 Kiro 本機認證儲存，並呼叫系統憑證服務完成解密與回寫；資料僅在本機處理。",
-      "reason": "權限需求：讀取 Kiro 認證資料庫（state.vscdb），並呼叫系統加密能力（Windows DPAPI / macOS Keychain / Linux Secret Service）進行解密與寫回。",
-      "storage": "讀取範圍：僅處理 Kiro 登入工作階段相關資料，所有流程均在本機執行。"
+      "title": "Kiro 帳號管理說明（點擊展開/收起）",
+      "desc": "帳號切換會在本機讀寫 Kiro 登入檔與實例設定；OAuth 登入與配額刷新會呼叫 Kiro 官方介面。",
+      "reason": "處理路徑包含 ~/.aws/sso/cache/kiro-auth-token.json、實例目錄 profile.json，以及 state.vscdb 中的 kiro.kiroAgent 條目。",
+      "storage": "處理資料包含 Kiro 登入會話與配額資訊；請求 Kiro 官方介面時會傳送必要認證欄位（如 code、refreshToken、accessToken、profileArn）。"
     },
-    "title": "Kiro Account Management",
-    "subtitle": "Monitor quota status for all accounts in real time.",
-    "overview": {
-      "title": "Account Overview"
-    },
+    "title": "Kiro 帳戶管理",
     "instances": {
-      "title": "Multi-Instance",
-      "subtitle": "Independent configs per instance for parallel multi-account runs.",
       "unsupported": {
-        "title": "Unsupported on this system",
-        "descPlatform": "Kiro multi-instance is available only on macOS, Windows and Linux."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
+        "descPlatform": "Kiro 多執行個體僅適用於 macOS、Windows 和 Linux。"
       }
     },
-    "addAccount": "Add Account",
-    "refreshAll": "Refresh All",
-    "refreshQuota": "Refresh Quota",
     "empty": {
-      "title": "No Accounts",
-      "description": "Click \"Add Account\" to start managing your Kiro accounts"
-    },
-    "noMatch": {
-      "title": "No matching accounts",
-      "desc": "Try adjusting your search or filters"
+      "description": "點擊「新增帳戶」開始管理您的 Kiro 帳戶"
     },
     "addModal": {
-      "title": "Add Kiro Account",
-      "oauth": "OAuth",
-      "token": "Token / JSON",
-      "import": "Local Import"
+      "title": "新增 Kiro 帳戶"
     },
     "oauth": {
-      "desc": "Click the button below and complete Kiro authorization in your browser.",
-      "preparing": "Preparing authorization info...",
-      "openBrowser": "Open in Browser",
-      "hint": "Once authorized, this window will update automatically",
-      "success": "Authorization successful",
-      "failed": "Authorization failed",
-      "retry": "Regenerate authorization info",
-      "timeoutRetry": "Refresh authorization link",
-      "waiting": "Waiting for authorization...",
-      "meta": "Expires in: {{expires}}s; Poll interval: {{interval}}s"
+      "desc": "點擊下面的按鈕並在瀏覽器中完成 Kiro 授權。"
     },
     "token": {
-      "desc": "Paste your Kiro access token or exported JSON data.",
-      "placeholder": "Paste token or JSON...",
-      "import": "Import",
-      "importing": "Importing...",
-      "importSuccessMsg": "Imported {{count}} account(s) successfully",
-      "importFailedMsg": "Import failed: {{error}}",
-      "empty": "Please enter a token or JSON"
+      "desc": "貼上您的 Kiro 存取權杖或匯出的 JSON 資料。"
     },
     "import": {
-      "label": "Import",
-      "localDesc": "Import Kiro account data from local Kiro client or a JSON file.",
-      "localClient": "Import from local Kiro",
-      "orJson": "Or import from JSON file",
-      "importing": "Importing...",
-      "failedMsg": "Import failed: {{error}}",
-      "pickFile": "Select JSON file to import"
+      "localDesc": "從本機 Kiro 用戶端或 JSON 檔案匯入 Kiro 帳戶資料。",
+      "localClient": "從當地Kiro進口"
     },
-    "search": "Search accounts...",
-    "view": {
-      "list": "List view",
-      "grid": "Card view"
-    },
-    "filter": {
-      "all": "All ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Filter",
-    "sortLabel": "Sort",
-    "sort": {
-      "createdAt": "Created time",
-      "credits": "By remaining credits",
-      "planEnd": "By cycle end time",
-      "descTooltip": "Current: Descending. Click to switch to ascending",
-      "ascTooltip": "Current: Ascending. Click to switch to descending",
-      "toggleDirection": "Toggle sort direction"
-    },
-    "export": "Export",
-    "injectToVSCode": "Switch to Kiro"
+    "injectToVSCode": "切換到基羅"
   }
 }

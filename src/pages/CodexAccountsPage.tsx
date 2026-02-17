@@ -160,7 +160,7 @@ export function CodexAccountsPage() {
       setOauthPrepareError(t('codex.oauth.portInUse', { port: match[1] }));
       return;
     }
-    setOauthPrepareError(t('codex.oauth.failed', '授权失败') + ': ' + String(e));
+    setOauthPrepareError(t('common.shared.oauth.failed', '授权失败') + ': ' + String(e));
     console.error('准备 Codex OAuth 链接失败:', e);
   }, [t]);
 
@@ -171,7 +171,7 @@ export function CodexAccountsPage() {
     await fetchAccounts();
     await fetchCurrentAccount();
     setAddStatus('success');
-    setAddMessage(t('codex.oauth.success', '授权成功'));
+    setAddMessage(t('common.shared.oauth.success', '授权成功'));
     setTimeout(() => {
       setShowAddModal(false);
       resetAddModalState();
@@ -184,7 +184,7 @@ export function CodexAccountsPage() {
       error: String(e),
     });
     setAddStatus('error');
-    setAddMessage(t('codex.oauth.failed', '授权失败') + ': ' + String(e));
+    setAddMessage(t('common.shared.oauth.failed', '授权失败') + ': ' + String(e));
   }, [t]);
 
   const getCallbackUrlFromAuthUrl = useCallback((authUrl: string): string | null => {
@@ -537,7 +537,7 @@ export function CodexAccountsPage() {
     } catch (e) {
       setAddStatus('error');
       const errorMsg = String(e).replace(/^Error:\s*/, '');
-      setAddMessage(t('codex.import.failedMsg', '导入失败: {{error}}').replace('{{error}}', errorMsg));
+      setAddMessage(t('common.shared.import.failedMsg', '导入失败: {{error}}').replace('{{error}}', errorMsg));
     }
     setImporting(false);
   };
@@ -546,13 +546,13 @@ export function CodexAccountsPage() {
     const trimmed = tokenInput.trim();
     if (!trimmed) {
       setAddStatus('error');
-      setAddMessage(t('codex.token.empty', '请输入 Token 或 JSON'));
+      setAddMessage(t('common.shared.token.empty', '请输入 Token 或 JSON'));
       return;
     }
 
     setImporting(true);
     setAddStatus('loading');
-    setAddMessage(t('codex.token.importing', '正在导入...'));
+    setAddMessage(t('common.shared.token.importing', '正在导入...'));
 
     try {
       const accounts = await codexService.importCodexFromJson(trimmed);
@@ -562,7 +562,7 @@ export function CodexAccountsPage() {
       }
       await fetchAccounts();
       setAddStatus('success');
-      setAddMessage(t('codex.token.importSuccessMsg', '成功导入 {{count}} 个账号').replace('{{count}}', String(accounts.length)));
+      setAddMessage(t('common.shared.token.importSuccessMsg', '成功导入 {{count}} 个账号').replace('{{count}}', String(accounts.length)));
       setTimeout(() => {
         setShowAddModal(false);
         resetAddModalState();
@@ -570,7 +570,7 @@ export function CodexAccountsPage() {
     } catch (e) {
       setAddStatus('error');
       const errorMsg = String(e).replace(/^Error:\s*/, '');
-      setAddMessage(t('codex.token.importFailedMsg', '导入失败: {{error}}').replace('{{error}}', errorMsg));
+      setAddMessage(t('common.shared.token.importFailedMsg', '导入失败: {{error}}').replace('{{error}}', errorMsg));
     }
     setImporting(false);
   };
@@ -968,7 +968,7 @@ export function CodexAccountsPage() {
             </div>
 
             {!account.quota && (
-              <div className="quota-empty">{t('codex.quota.noData', '暂无配额数据')}</div>
+              <div className="quota-empty">{t('common.shared.quota.noData', '暂无配额数据')}</div>
             )}
           </div>
 
@@ -998,7 +998,7 @@ export function CodexAccountsPage() {
                 className="card-action-btn"
                 onClick={() => handleRefresh(account.id)}
                 disabled={refreshing === account.id}
-                title={t('codex.refreshQuota', '刷新配额')}
+                title={t('common.shared.refreshQuota', '刷新配额')}
               >
                 <RotateCw
                   size={14}
@@ -1128,7 +1128,7 @@ export function CodexAccountsPage() {
                 className="action-btn"
                 onClick={() => handleRefresh(account.id)}
                 disabled={refreshing === account.id}
-                title={t('codex.refreshQuota', '刷新配额')}
+                title={t('common.shared.refreshQuota', '刷新配额')}
               >
                 <RotateCw size={14} className={refreshing === account.id ? 'loading-spinner' : ''} />
               </button>
@@ -1167,7 +1167,7 @@ export function CodexAccountsPage() {
             <Search size={16} className="search-icon" />
             <input
               type="text"
-              placeholder={t('codex.search', '搜索账号...')}
+              placeholder={t('common.shared.search', '搜索账号...')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -1177,14 +1177,14 @@ export function CodexAccountsPage() {
             <button
               className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
               onClick={() => setViewMode('list')}
-              title={t('codex.view.list', '列表视图')}
+              title={t('common.shared.view.list', '列表视图')}
             >
               <List size={16} />
             </button>
             <button
               className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
               onClick={() => setViewMode('grid')}
-              title={t('codex.view.grid', '卡片视图')}
+              title={t('common.shared.view.grid', '卡片视图')}
             >
               <LayoutGrid size={16} />
             </button>
@@ -1194,14 +1194,14 @@ export function CodexAccountsPage() {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as typeof filterType)}
-              aria-label={t('codex.filterLabel', '筛选')}
+              aria-label={t('common.shared.filterLabel', '筛选')}
             >
-              <option value="all">{t('codex.filter.all', { count: tierCounts.all })}</option>
-              <option value="FREE">{t('codex.filter.free', { count: tierCounts.FREE })}</option>
+              <option value="all">{t('common.shared.filter.all', { count: tierCounts.all })}</option>
+              <option value="FREE">{t('common.shared.filter.free', { count: tierCounts.FREE })}</option>
               <option value="PLUS">{t('codex.filter.plus', { count: tierCounts.PLUS })}</option>
-              <option value="PRO">{t('codex.filter.pro', { count: tierCounts.PRO })}</option>
+              <option value="PRO">{t('common.shared.filter.pro', { count: tierCounts.PRO })}</option>
               <option value="TEAM">{t('codex.filter.team', { count: tierCounts.TEAM })}</option>
-              <option value="ENTERPRISE">{t('codex.filter.enterprise', { count: tierCounts.ENTERPRISE })}</option>
+              <option value="ENTERPRISE">{t('common.shared.filter.enterprise', { count: tierCounts.ENTERPRISE })}</option>
             </select>
           </div>
 
@@ -1271,9 +1271,9 @@ export function CodexAccountsPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              aria-label={t('codex.sortLabel', '排序')}
+              aria-label={t('common.shared.sortLabel', '排序')}
             >
-              <option value="created_at">{t('codex.sort.createdAt', '按创建时间')}</option>
+              <option value="created_at">{t('common.shared.sort.createdAt', '按创建时间')}</option>
               <option value="weekly">{t('codex.sort.weekly', '按周配额')}</option>
               <option value="hourly">{t('codex.sort.hourly', '按5小时配额')}</option>
               <option value="weekly_reset">{t('codex.sort.weeklyReset', '按周配额重置时间')}</option>
@@ -1286,10 +1286,10 @@ export function CodexAccountsPage() {
             onClick={() => setSortDirection((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
             title={
               sortDirection === 'desc'
-                ? t('codex.sort.descTooltip', '当前：降序，点击切换为升序')
-                : t('codex.sort.ascTooltip', '当前：升序，点击切换为降序')
+                ? t('common.shared.sort.descTooltip', '当前：降序，点击切换为升序')
+                : t('common.shared.sort.ascTooltip', '当前：升序，点击切换为降序')
             }
-            aria-label={t('codex.sort.toggleDirection', '切换排序方向')}
+            aria-label={t('common.shared.sort.toggleDirection', '切换排序方向')}
           >
             {sortDirection === 'desc' ? '⬇' : '⬆'}
           </button>
@@ -1298,8 +1298,8 @@ export function CodexAccountsPage() {
           <button
             className="btn btn-primary icon-only"
             onClick={() => openAddModal('oauth')}
-            title={t('codex.addAccount', '添加账号')}
-            aria-label={t('codex.addAccount', '添加账号')}
+            title={t('common.shared.addAccount', '添加账号')}
+            aria-label={t('common.shared.addAccount', '添加账号')}
           >
             <Plus size={14} />
           </button>
@@ -1307,8 +1307,8 @@ export function CodexAccountsPage() {
             className="btn btn-secondary icon-only"
             onClick={handleRefreshAll}
             disabled={refreshingAll || accounts.length === 0}
-            title={t('codex.refreshAll', '刷新全部')}
-            aria-label={t('codex.refreshAll', '刷新全部')}
+            title={t('common.shared.refreshAll', '刷新全部')}
+            aria-label={t('common.shared.refreshAll', '刷新全部')}
           >
             <RefreshCw size={14} className={refreshingAll ? 'loading-spinner' : ''} />
           </button>
@@ -1332,8 +1332,8 @@ export function CodexAccountsPage() {
             className="btn btn-secondary icon-only"
             onClick={() => openAddModal('token')}
             disabled={importing}
-            title={t('codex.import.label', '导入')}
-            aria-label={t('codex.import.label', '导入')}
+            title={t('common.shared.import.label', '导入')}
+            aria-label={t('common.shared.import.label', '导入')}
           >
             <Download size={14} />
           </button>
@@ -1341,8 +1341,8 @@ export function CodexAccountsPage() {
             className="btn btn-secondary export-btn icon-only"
             onClick={handleExport}
             disabled={exporting}
-            title={selected.size > 0 ? `${t('codex.export', '导出')} (${selected.size})` : t('codex.export', '导出')}
-            aria-label={selected.size > 0 ? `${t('codex.export', '导出')} (${selected.size})` : t('codex.export', '导出')}
+            title={selected.size > 0 ? `${t('common.shared.export', '导出')} (${selected.size})` : t('common.shared.export', '导出')}
+            aria-label={selected.size > 0 ? `${t('common.shared.export', '导出')} (${selected.size})` : t('common.shared.export', '导出')}
           >
             <Upload size={14} />
           </button>
@@ -1368,17 +1368,17 @@ export function CodexAccountsPage() {
       ) : accounts.length === 0 ? (
         <div className="empty-state">
           <Globe size={48} />
-          <h3>{t('codex.empty.title', '暂无账号')}</h3>
+          <h3>{t('common.shared.empty.title', '暂无账号')}</h3>
           <p>{t('codex.empty.description', '点击"添加账号"开始管理您的 Codex 账号')}</p>
           <button className="btn btn-primary" onClick={() => openAddModal('oauth')}>
             <Plus size={16} />
-            {t('codex.addAccount', '添加账号')}
+            {t('common.shared.addAccount', '添加账号')}
           </button>
         </div>
       ) : filteredAccounts.length === 0 ? (
         <div className="empty-state">
-          <h3>{t('codex.noMatch.title', '没有匹配的账号')}</h3>
-          <p>{t('codex.noMatch.desc', '请尝试调整搜索或筛选条件')}</p>
+          <h3>{t('common.shared.noMatch.title', '没有匹配的账号')}</h3>
+          <p>{t('common.shared.noMatch.desc', '请尝试调整搜索或筛选条件')}</p>
         </div>
       ) : viewMode === 'grid' ? (
         groupByTag ? (
@@ -1412,11 +1412,11 @@ export function CodexAccountsPage() {
                     onChange={toggleSelectAll}
                   />
                 </th>
-                <th style={{ width: 260 }}>{t('codex.columns.email', '账号')}</th>
-                <th style={{ width: 140 }}>{t('codex.columns.plan', '订阅')}</th>
+                <th style={{ width: 260 }}>{t('common.shared.columns.email', '账号')}</th>
+                <th style={{ width: 140 }}>{t('common.shared.columns.plan', '订阅')}</th>
                 <th>{t('codex.columns.hourly', '5小时配额')}</th>
                 <th>{t('codex.columns.weekly', '周配额')}</th>
-                <th className="sticky-action-header table-action-header">{t('codex.columns.actions', '操作')}</th>
+                <th className="sticky-action-header table-action-header">{t('common.shared.columns.actions', '操作')}</th>
               </tr>
             </thead>
             <tbody>
@@ -1448,11 +1448,11 @@ export function CodexAccountsPage() {
                     onChange={toggleSelectAll}
                   />
                 </th>
-                <th style={{ width: 260 }}>{t('codex.columns.email', '账号')}</th>
-                <th style={{ width: 140 }}>{t('codex.columns.plan', '订阅')}</th>
+                <th style={{ width: 260 }}>{t('common.shared.columns.email', '账号')}</th>
+                <th style={{ width: 140 }}>{t('common.shared.columns.plan', '订阅')}</th>
                 <th>{t('codex.columns.hourly', '5小时配额')}</th>
                 <th>{t('codex.columns.weekly', '周配额')}</th>
-                <th className="sticky-action-header table-action-header">{t('codex.columns.actions', '操作')}</th>
+                <th className="sticky-action-header table-action-header">{t('common.shared.columns.actions', '操作')}</th>
               </tr>
             </thead>
             <tbody>
@@ -1533,7 +1533,7 @@ export function CodexAccountsPage() {
                         {isOauthTimeoutState ? <RefreshCw size={16} /> : <Globe size={16} />}
                         {isOauthTimeoutState
                           ? t('codex.oauth.timeoutRetry', '刷新授权链接')
-                          : t('codex.oauth.openBrowser', 'Open in Browser')}
+                          : t('common.shared.oauth.openBrowser', 'Open in Browser')}
                       </button>
                       {isOauthTimeoutState && (
                         <div className="add-status error">
@@ -1542,7 +1542,7 @@ export function CodexAccountsPage() {
                         </div>
                       )}
                       <p className="oauth-hint">
-                        {t('codex.oauth.hint', 'Once authorized, this window will update automatically')}
+                        {t('common.shared.oauth.hint', 'Once authorized, this window will update automatically')}
                       </p>
                     </div>
                   ) : (
@@ -1571,7 +1571,7 @@ export function CodexAccountsPage() {
                     disabled={importing || !tokenInput.trim()}
                   >
                     {importing ? <RefreshCw size={16} className="loading-spinner" /> : <Download size={16} />}
-                    {t('codex.token.import', 'Import')}
+                    {t('common.shared.token.import', 'Import')}
                   </button>
                 </div>
               )}

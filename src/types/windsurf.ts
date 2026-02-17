@@ -893,10 +893,10 @@ export function formatWindsurfAllowanceResetLine(
 ): string {
   const usage = getWindsurfUsage(account);
   const resetAt = usage.allowanceResetAt;
-  if (!resetAt) return t('windsurf.usage.resetUnknown', { defaultValue: 'Allowance resets -' });
+  if (!resetAt) return t('common.shared.usage.resetUnknown', { defaultValue: 'Allowance resets -' });
   const dateText = formatUnixSecondsToYmd(resetAt, locale);
-  if (!dateText) return t('windsurf.usage.resetUnknown', { defaultValue: 'Allowance resets -' });
-  return t('windsurf.usage.resetLine', {
+  if (!dateText) return t('common.shared.usage.resetUnknown', { defaultValue: 'Allowance resets -' });
+  return t('common.shared.usage.resetLine', {
     dateText,
     defaultValue: 'Allowance resets {{dateText}}.',
   });
@@ -909,45 +909,45 @@ export function formatWindsurfResetTime(
   if (!resetTime) return '';
   const now = Math.floor(Date.now() / 1000);
   const diff = resetTime - now;
-  if (diff <= 0) return t('windsurf.quota.resetDone', { defaultValue: '已重置' });
+  if (diff <= 0) return t('common.shared.quota.resetDone', { defaultValue: '已重置' });
 
   const totalMinutes = Math.floor(diff / 60);
   const days = Math.floor(totalMinutes / (60 * 24));
   const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
   const minutes = totalMinutes % 60;
 
-  let relative = t('windsurf.time.lessThanMinute', { defaultValue: '<1m' });
+  let relative = t('common.shared.time.lessThanMinute', { defaultValue: '<1m' });
   if (days > 0 && hours > 0) {
-    relative = t('windsurf.time.relativeDaysHours', {
+    relative = t('common.shared.time.relativeDaysHours', {
       days,
       hours,
       defaultValue: '{{days}}d {{hours}}h',
     });
   } else if (days > 0) {
-    relative = t('windsurf.time.relativeDays', {
+    relative = t('common.shared.time.relativeDays', {
       days,
       defaultValue: '{{days}}d',
     });
   } else if (hours > 0 && minutes > 0) {
-    relative = t('windsurf.time.relativeHoursMinutes', {
+    relative = t('common.shared.time.relativeHoursMinutes', {
       hours,
       minutes,
       defaultValue: '{{hours}}h {{minutes}}m',
     });
   } else if (hours > 0) {
-    relative = t('windsurf.time.relativeHours', {
+    relative = t('common.shared.time.relativeHours', {
       hours,
       defaultValue: '{{hours}}h',
     });
   } else if (minutes > 0) {
-    relative = t('windsurf.time.relativeMinutes', {
+    relative = t('common.shared.time.relativeMinutes', {
       minutes,
       defaultValue: '{{minutes}}m',
     });
   }
 
   const absolute = formatWindsurfResetTimeAbsolute(resetTime);
-  return t('windsurf.time.relativeWithAbsolute', {
+  return t('common.shared.time.relativeWithAbsolute', {
     relative,
     absolute,
     defaultValue: '{{relative}} ({{absolute}})',

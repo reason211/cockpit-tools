@@ -198,7 +198,7 @@ export function GitHubCopilotAccountsPage() {
     oauthActiveRef.current = false;
     oauthCompletingRef.current = false;
     setOauthPolling(false);
-    setOauthPrepareError(t('githubCopilot.oauth.failed', '授权失败') + ': ' + msg);
+    setOauthPrepareError(t('common.shared.oauth.failed', '授权失败') + ': ' + msg);
   }, [t]);
 
   const completeOauthSuccess = useCallback(async () => {
@@ -207,7 +207,7 @@ export function GitHubCopilotAccountsPage() {
     });
     await fetchAccounts();
     setAddStatus('success');
-    setAddMessage(t('githubCopilot.oauth.success', '授权成功'));
+    setAddMessage(t('common.shared.oauth.success', '授权成功'));
     setTimeout(() => {
       setShowAddModal(false);
       resetAddModalState();
@@ -410,7 +410,7 @@ export function GitHubCopilotAccountsPage() {
   const handleImportJsonFile = async (file: File) => {
     setImporting(true);
     setAddStatus('loading');
-    setAddMessage(t('githubCopilot.import.importing', '正在导入...'));
+    setAddMessage(t('common.shared.import.importing', '正在导入...'));
 
     try {
       const content = await file.text();
@@ -419,7 +419,7 @@ export function GitHubCopilotAccountsPage() {
 
       setAddStatus('success');
       setAddMessage(
-        t('githubCopilot.token.importSuccessMsg', {
+        t('common.shared.token.importSuccessMsg', {
           count: imported.length,
           defaultValue: '成功导入 {{count}} 个账号',
         })
@@ -432,7 +432,7 @@ export function GitHubCopilotAccountsPage() {
       setAddStatus('error');
       const errorMsg = String(e).replace(/^Error:\s*/, '');
       setAddMessage(
-        t('githubCopilot.import.failedMsg', {
+        t('common.shared.import.failedMsg', {
           error: errorMsg,
           defaultValue: '导入失败: {{error}}',
         })
@@ -446,13 +446,13 @@ export function GitHubCopilotAccountsPage() {
     const trimmed = tokenInput.trim();
     if (!trimmed) {
       setAddStatus('error');
-      setAddMessage(t('githubCopilot.token.empty', '请输入 Token 或 JSON'));
+      setAddMessage(t('common.shared.token.empty', '请输入 Token 或 JSON'));
       return;
     }
 
     setImporting(true);
     setAddStatus('loading');
-    setAddMessage(t('githubCopilot.token.importing', '正在导入...'));
+    setAddMessage(t('common.shared.token.importing', '正在导入...'));
 
     try {
       let importedCount = 0;
@@ -466,7 +466,7 @@ export function GitHubCopilotAccountsPage() {
       await fetchAccounts();
       setAddStatus('success');
       setAddMessage(
-        t('githubCopilot.token.importSuccessMsg', {
+        t('common.shared.token.importSuccessMsg', {
           count: importedCount,
           defaultValue: '成功导入 {{count}} 个账号',
         })
@@ -479,7 +479,7 @@ export function GitHubCopilotAccountsPage() {
       setAddStatus('error');
       const errorMsg = String(e).replace(/^Error:\s*/, '');
       setAddMessage(
-        t('githubCopilot.token.importFailedMsg', {
+        t('common.shared.token.importFailedMsg', {
           error: errorMsg,
           defaultValue: '导入失败: {{error}}',
         })
@@ -828,7 +828,7 @@ export function GitHubCopilotAccountsPage() {
             <div className="quota-item">
               <div className="quota-header">
                 <Clock size={14} />
-                <span className="quota-label">{t('githubCopilot.quota.hourly', 'Inline Suggestions')}</span>
+                <span className="quota-label">{t('common.shared.quota.hourly', 'Inline Suggestions')}</span>
                 <span className={`quota-pct ${getGitHubCopilotQuotaClass(account.quota?.hourly_percentage ?? 100)}`}>
                   {account.quota?.hourly_percentage ?? 100}%
                 </span>
@@ -849,7 +849,7 @@ export function GitHubCopilotAccountsPage() {
             <div className="quota-item">
               <div className="quota-header">
                 <Calendar size={14} />
-                <span className="quota-label">{t('githubCopilot.quota.weekly', 'Chat messages')}</span>
+                <span className="quota-label">{t('common.shared.quota.weekly', 'Chat messages')}</span>
                 <span className={`quota-pct ${getGitHubCopilotQuotaClass(account.quota?.weekly_percentage ?? 100)}`}>
                   {account.quota?.weekly_percentage ?? 100}%
                 </span>
@@ -868,7 +868,7 @@ export function GitHubCopilotAccountsPage() {
             </div>
 
             {!account.quota && (
-              <div className="quota-empty">{t('githubCopilot.quota.noData', '暂无配额数据')}</div>
+              <div className="quota-empty">{t('common.shared.quota.noData', '暂无配额数据')}</div>
             )}
           </div>
 
@@ -898,7 +898,7 @@ export function GitHubCopilotAccountsPage() {
                 className="card-action-btn"
                 onClick={() => handleRefresh(account.id)}
                 disabled={refreshing === account.id}
-                title={t('githubCopilot.refreshQuota', '刷新配额')}
+                title={t('common.shared.refreshQuota', '刷新配额')}
               >
                 <RotateCw
                   size={14}
@@ -950,7 +950,7 @@ export function GitHubCopilotAccountsPage() {
           <td>
             <div className="quota-item">
               <div className="quota-header">
-                <span className="quota-name">{t('githubCopilot.quota.hourly', 'Inline Suggestions')}</span>
+                <span className="quota-name">{t('common.shared.quota.hourly', 'Inline Suggestions')}</span>
                 <span className={`quota-value ${getGitHubCopilotQuotaClass(account.quota?.hourly_percentage ?? 100)}`}>
                   {account.quota?.hourly_percentage ?? 100}%
                 </span>
@@ -973,7 +973,7 @@ export function GitHubCopilotAccountsPage() {
           <td>
             <div className="quota-item">
               <div className="quota-header">
-                <span className="quota-name">{t('githubCopilot.quota.weekly', 'Chat messages')}</span>
+                <span className="quota-name">{t('common.shared.quota.weekly', 'Chat messages')}</span>
                 <span className={`quota-value ${getGitHubCopilotQuotaClass(account.quota?.weekly_percentage ?? 100)}`}>
                   {account.quota?.weekly_percentage ?? 100}%
                 </span>
@@ -1014,7 +1014,7 @@ export function GitHubCopilotAccountsPage() {
                 className="action-btn"
                 onClick={() => handleRefresh(account.id)}
                 disabled={refreshing === account.id}
-                title={t('githubCopilot.refreshQuota', '刷新配额')}
+                title={t('common.shared.refreshQuota', '刷新配额')}
               >
                 <RotateCw size={14} className={refreshing === account.id ? 'loading-spinner' : ''} />
               </button>
@@ -1091,7 +1091,7 @@ export function GitHubCopilotAccountsPage() {
             <Search size={16} className="search-icon" />
             <input
               type="text"
-              placeholder={t('githubCopilot.search', '搜索账号...')}
+              placeholder={t('common.shared.search', '搜索账号...')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -1101,14 +1101,14 @@ export function GitHubCopilotAccountsPage() {
             <button
               className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
               onClick={() => setViewMode('list')}
-              title={t('githubCopilot.view.list', '列表视图')}
+              title={t('common.shared.view.list', '列表视图')}
             >
               <List size={16} />
             </button>
             <button
               className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
               onClick={() => setViewMode('grid')}
-              title={t('githubCopilot.view.grid', '卡片视图')}
+              title={t('common.shared.view.grid', '卡片视图')}
             >
               <LayoutGrid size={16} />
             </button>
@@ -1118,31 +1118,31 @@ export function GitHubCopilotAccountsPage() {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as typeof filterType)}
-              aria-label={t('githubCopilot.filterLabel', '筛选')}
+              aria-label={t('common.shared.filterLabel', '筛选')}
             >
               <option value="all">
-                {t('githubCopilot.filter.all', { count: tierCounts.all, defaultValue: 'All ({{count}})' })}
+                {t('common.shared.filter.all', { count: tierCounts.all, defaultValue: 'All ({{count}})' })}
               </option>
               <option value="FREE">
-                {t('githubCopilot.filter.free', { count: tierCounts.FREE, defaultValue: 'FREE ({{count}})' })}
+                {t('common.shared.filter.free', { count: tierCounts.FREE, defaultValue: 'FREE ({{count}})' })}
               </option>
               <option value="INDIVIDUAL">
-                {t('githubCopilot.filter.individual', {
+                {t('common.shared.filter.individual', {
                   count: tierCounts.INDIVIDUAL,
                   defaultValue: 'INDIVIDUAL ({{count}})',
                 })}
               </option>
               <option value="PRO">
-                {t('githubCopilot.filter.pro', { count: tierCounts.PRO, defaultValue: 'PRO ({{count}})' })}
+                {t('common.shared.filter.pro', { count: tierCounts.PRO, defaultValue: 'PRO ({{count}})' })}
               </option>
               <option value="BUSINESS">
-                {t('githubCopilot.filter.business', {
+                {t('common.shared.filter.business', {
                   count: tierCounts.BUSINESS,
                   defaultValue: 'BUSINESS ({{count}})',
                 })}
               </option>
               <option value="ENTERPRISE">
-                {t('githubCopilot.filter.enterprise', {
+                {t('common.shared.filter.enterprise', {
                   count: tierCounts.ENTERPRISE,
                   defaultValue: 'ENTERPRISE ({{count}})',
                 })}
@@ -1216,9 +1216,9 @@ export function GitHubCopilotAccountsPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              aria-label={t('githubCopilot.sortLabel', '排序')}
+              aria-label={t('common.shared.sortLabel', '排序')}
             >
-              <option value="created_at">{t('githubCopilot.sort.createdAt', '按创建时间')}</option>
+              <option value="created_at">{t('common.shared.sort.createdAt', '按创建时间')}</option>
               <option value="weekly">{t('githubCopilot.sort.weekly', '按 Chat messages 使用量')}</option>
               <option value="hourly">{t('githubCopilot.sort.hourly', '按 Inline Suggestions 使用量')}</option>
               <option value="weekly_reset">{t('githubCopilot.sort.weeklyReset', '按 Chat messages 重置时间')}</option>
@@ -1231,10 +1231,10 @@ export function GitHubCopilotAccountsPage() {
             onClick={() => setSortDirection((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
             title={
               sortDirection === 'desc'
-                ? t('githubCopilot.sort.descTooltip', '当前：降序，点击切换为升序')
-                : t('githubCopilot.sort.ascTooltip', '当前：升序，点击切换为降序')
+                ? t('common.shared.sort.descTooltip', '当前：降序，点击切换为升序')
+                : t('common.shared.sort.ascTooltip', '当前：升序，点击切换为降序')
             }
-            aria-label={t('githubCopilot.sort.toggleDirection', '切换排序方向')}
+            aria-label={t('common.shared.sort.toggleDirection', '切换排序方向')}
           >
             {sortDirection === 'desc' ? '⬇' : '⬆'}
           </button>
@@ -1243,8 +1243,8 @@ export function GitHubCopilotAccountsPage() {
           <button
             className="btn btn-primary icon-only"
             onClick={() => openAddModal('oauth')}
-            title={t('githubCopilot.addAccount', '添加账号')}
-            aria-label={t('githubCopilot.addAccount', '添加账号')}
+            title={t('common.shared.addAccount', '添加账号')}
+            aria-label={t('common.shared.addAccount', '添加账号')}
           >
             <Plus size={14} />
           </button>
@@ -1252,8 +1252,8 @@ export function GitHubCopilotAccountsPage() {
             className="btn btn-secondary icon-only"
             onClick={handleRefreshAll}
             disabled={refreshingAll || accounts.length === 0}
-            title={t('githubCopilot.refreshAll', '刷新全部')}
-            aria-label={t('githubCopilot.refreshAll', '刷新全部')}
+            title={t('common.shared.refreshAll', '刷新全部')}
+            aria-label={t('common.shared.refreshAll', '刷新全部')}
           >
             <RefreshCw size={14} className={refreshingAll ? 'loading-spinner' : ''} />
           </button>
@@ -1277,8 +1277,8 @@ export function GitHubCopilotAccountsPage() {
             className="btn btn-secondary icon-only"
             onClick={() => openAddModal('token')}
             disabled={importing}
-            title={t('githubCopilot.import.label', '导入')}
-            aria-label={t('githubCopilot.import.label', '导入')}
+            title={t('common.shared.import.label', '导入')}
+            aria-label={t('common.shared.import.label', '导入')}
           >
             <Download size={14} />
           </button>
@@ -1286,8 +1286,8 @@ export function GitHubCopilotAccountsPage() {
             className="btn btn-secondary export-btn icon-only"
             onClick={handleExport}
             disabled={exporting}
-            title={selected.size > 0 ? `${t('githubCopilot.export', '导出')} (${selected.size})` : t('githubCopilot.export', '导出')}
-            aria-label={selected.size > 0 ? `${t('githubCopilot.export', '导出')} (${selected.size})` : t('githubCopilot.export', '导出')}
+            title={selected.size > 0 ? `${t('common.shared.export', '导出')} (${selected.size})` : t('common.shared.export', '导出')}
+            aria-label={selected.size > 0 ? `${t('common.shared.export', '导出')} (${selected.size})` : t('common.shared.export', '导出')}
           >
             <Upload size={14} />
           </button>
@@ -1313,17 +1313,17 @@ export function GitHubCopilotAccountsPage() {
       ) : accounts.length === 0 ? (
         <div className="empty-state">
           <Globe size={48} />
-          <h3>{t('githubCopilot.empty.title', '暂无账号')}</h3>
+          <h3>{t('common.shared.empty.title', '暂无账号')}</h3>
           <p>{t('githubCopilot.empty.description', '点击"添加账号"开始管理您的 GitHub Copilot 账号')}</p>
           <button className="btn btn-primary" onClick={() => openAddModal('oauth')}>
             <Plus size={16} />
-            {t('githubCopilot.addAccount', '添加账号')}
+            {t('common.shared.addAccount', '添加账号')}
           </button>
         </div>
       ) : filteredAccounts.length === 0 ? (
         <div className="empty-state">
-          <h3>{t('githubCopilot.noMatch.title', '没有匹配的账号')}</h3>
-          <p>{t('githubCopilot.noMatch.desc', '请尝试调整搜索或筛选条件')}</p>
+          <h3>{t('common.shared.noMatch.title', '没有匹配的账号')}</h3>
+          <p>{t('common.shared.noMatch.desc', '请尝试调整搜索或筛选条件')}</p>
         </div>
       ) : viewMode === 'grid' ? (
         groupByTag ? (
@@ -1357,11 +1357,11 @@ export function GitHubCopilotAccountsPage() {
                     onChange={toggleSelectAll}
                   />
                 </th>
-                <th style={{ width: 260 }}>{t('githubCopilot.columns.email', '账号')}</th>
-                <th style={{ width: 140 }}>{t('githubCopilot.columns.plan', '订阅')}</th>
+                <th style={{ width: 260 }}>{t('common.shared.columns.email', '账号')}</th>
+                <th style={{ width: 140 }}>{t('common.shared.columns.plan', '订阅')}</th>
                 <th>{t('githubCopilot.columns.hourly', 'Inline Suggestions')}</th>
                 <th>{t('githubCopilot.columns.weekly', 'Chat messages')}</th>
-                <th className="sticky-action-header table-action-header">{t('githubCopilot.columns.actions', '操作')}</th>
+                <th className="sticky-action-header table-action-header">{t('common.shared.columns.actions', '操作')}</th>
               </tr>
             </thead>
             <tbody>
@@ -1393,11 +1393,11 @@ export function GitHubCopilotAccountsPage() {
                     onChange={toggleSelectAll}
                   />
                 </th>
-                <th style={{ width: 260 }}>{t('githubCopilot.columns.email', '账号')}</th>
-                <th style={{ width: 140 }}>{t('githubCopilot.columns.plan', '订阅')}</th>
+                <th style={{ width: 260 }}>{t('common.shared.columns.email', '账号')}</th>
+                <th style={{ width: 140 }}>{t('common.shared.columns.plan', '订阅')}</th>
                 <th>{t('githubCopilot.columns.hourly', 'Inline Suggestions')}</th>
                 <th>{t('githubCopilot.columns.weekly', 'Chat messages')}</th>
-                <th className="sticky-action-header table-action-header">{t('githubCopilot.columns.actions', '操作')}</th>
+                <th className="sticky-action-header table-action-header">{t('common.shared.columns.actions', '操作')}</th>
               </tr>
             </thead>
             <tbody>
@@ -1423,21 +1423,21 @@ export function GitHubCopilotAccountsPage() {
                 onClick={() => openAddModal('oauth')}
               >
                 <Globe size={14} />
-                {t('githubCopilot.addModal.oauth', 'OAuth')}
+                {t('common.shared.addModal.oauth', 'OAuth')}
               </button>
               <button
                 className={`modal-tab ${addTab === 'token' ? 'active' : ''}`}
                 onClick={() => openAddModal('token')}
               >
                 <KeyRound size={14} />
-                {t('githubCopilot.addModal.token', 'Token / JSON')}
+                {t('common.shared.addModal.token', 'Token / JSON')}
               </button>
               <button
                 className={`modal-tab ${addTab === 'import' ? 'active' : ''}`}
                 onClick={() => openAddModal('import')}
               >
                 <Database size={14} />
-                {t('githubCopilot.addModal.import', '本地导入')}
+                {t('common.shared.addModal.import', '本地导入')}
               </button>
             </div>
 
@@ -1453,7 +1453,7 @@ export function GitHubCopilotAccountsPage() {
                       <CircleAlert size={16} />
                       <span>{oauthPrepareError}</span>
                       <button className="btn btn-sm btn-outline" onClick={handleRetryOauth}>
-                        {t('githubCopilot.oauth.retry', '重新生成授权信息')}
+                        {t('common.shared.oauth.retry', '重新生成授权信息')}
                       </button>
                     </div>
                   ) : oauthUrl ? (
@@ -1474,7 +1474,7 @@ export function GitHubCopilotAccountsPage() {
                       )}
                       {oauthMeta && (
                         <p className="oauth-hint">
-                          {t('githubCopilot.oauth.meta', '授权有效期：{{expires}}s；轮询间隔：{{interval}}s', {
+                          {t('common.shared.oauth.meta', '授权有效期：{{expires}}s；轮询间隔：{{interval}}s', {
                             expires: oauthMeta.expiresIn,
                             interval: oauthMeta.intervalSeconds,
                           })}
@@ -1485,12 +1485,12 @@ export function GitHubCopilotAccountsPage() {
                         onClick={handleOpenOauthUrl}
                       >
                         <Globe size={16} />
-                        {t('githubCopilot.oauth.openBrowser', '在浏览器中打开')}
+                        {t('common.shared.oauth.openBrowser', '在浏览器中打开')}
                       </button>
                       {oauthPolling && (
                         <div className="add-status loading">
                           <RefreshCw size={16} className="loading-spinner" />
-                          <span>{t('githubCopilot.oauth.waiting', '等待授权完成...')}</span>
+                          <span>{t('common.shared.oauth.waiting', '等待授权完成...')}</span>
                         </div>
                       )}
                       {oauthCompleteError && (
@@ -1499,19 +1499,19 @@ export function GitHubCopilotAccountsPage() {
                           <span>{oauthCompleteError}</span>
                           {oauthTimedOut && (
                             <button className="btn btn-sm btn-outline" onClick={handleRetryOauth}>
-                              {t('githubCopilot.oauth.timeoutRetry', '刷新授权链接')}
+                              {t('common.shared.oauth.timeoutRetry', '刷新授权链接')}
                             </button>
                           )}
                         </div>
                       )}
                       <p className="oauth-hint">
-                        {t('githubCopilot.oauth.hint', 'Once authorized, this window will update automatically')}
+                        {t('common.shared.oauth.hint', 'Once authorized, this window will update automatically')}
                       </p>
                     </div>
                   ) : (
                     <div className="oauth-loading">
                       <RefreshCw size={24} className="loading-spinner" />
-                      <span>{t('githubCopilot.oauth.preparing', '正在准备授权信息...')}</span>
+                      <span>{t('common.shared.oauth.preparing', '正在准备授权信息...')}</span>
                     </div>
                   )}
                 </div>
@@ -1526,7 +1526,7 @@ export function GitHubCopilotAccountsPage() {
                     className="token-input"
                     value={tokenInput}
                     onChange={(e) => setTokenInput(e.target.value)}
-                    placeholder={t('githubCopilot.token.placeholder', '粘贴 Token 或 JSON...')}
+                    placeholder={t('common.shared.token.placeholder', '粘贴 Token 或 JSON...')}
                   />
                   <button
                     className="btn btn-primary btn-full"
@@ -1534,7 +1534,7 @@ export function GitHubCopilotAccountsPage() {
                     disabled={importing || !tokenInput.trim()}
                   >
                     {importing ? <RefreshCw size={16} className="loading-spinner" /> : <Download size={16} />}
-                    {t('githubCopilot.token.import', 'Import')}
+                    {t('common.shared.token.import', 'Import')}
                   </button>
                 </div>
               )}
@@ -1559,7 +1559,7 @@ export function GitHubCopilotAccountsPage() {
                   />
                   <button className="btn btn-primary btn-full" onClick={handlePickImportFile} disabled={importing}>
                     {importing ? <RefreshCw size={16} className="loading-spinner" /> : <Database size={16} />}
-                    {t('githubCopilot.import.pickFile', '选择 JSON 文件导入')}
+                    {t('common.shared.import.pickFile', '选择 JSON 文件导入')}
                   </button>
                 </div>
               )}

@@ -20,7 +20,128 @@
     "none": "なし",
     "detail": "詳細",
     "editable": "編集可",
-    "preview": "プレビュー"
+    "preview": "プレビュー",
+    "shared": {
+      "addAccount": "アカウントを追加",
+      "columns": {
+        "actions": "操作",
+        "plan": "プラン",
+        "addOnPromptCredits": "追加プロンプトクレジット",
+        "credits": "クレジット",
+        "email": "メール",
+        "promptCredits": "プロンプトクレジット"
+      },
+      "empty": {
+        "title": "アカウントなし"
+      },
+      "export": "エクスポート",
+      "filter": {
+        "all": "すべて ({{count}})",
+        "enterprise": "エンタープライズ ({{count}})",
+        "free": "無料 ({{count}})",
+        "pro": "プロ ({{count}})",
+        "business": "ビジネス ({{count}})",
+        "individual": "個人 ({{count}})"
+      },
+      "filterLabel": "フィルター",
+      "import": {
+        "failedMsg": "インポート失敗: {{error}}",
+        "label": "インポート",
+        "importing": "ローカルアカウントをインポート中...",
+        "pickFile": "インポートする JSON ファイルを選択",
+        "orJson": "またはJSONファイルからインポート"
+      },
+      "instances": {
+        "unsupported": {
+          "title": "このシステムでは非対応"
+        },
+        "quota": {
+          "chat": "チャットメッセージ",
+          "inline": "インライン提案"
+        },
+        "subtitle": "インスタンスごとの独立設定、複数アカウントでの並列運用。",
+        "title": "マルチインスタンス"
+      },
+      "noMatch": {
+        "desc": "検索条件を変更してください",
+        "title": "一致するアカウントなし"
+      },
+      "oauth": {
+        "failed": "認可失敗",
+        "hint": "認可完了後、このウィンドウは自動更新されます",
+        "openBrowser": "ブラウザで開く",
+        "success": "認可成功",
+        "meta": "有効期限: {{expires}}s; ポーリング間隔: {{interval}}s",
+        "preparing": "認可リンクを準備中...",
+        "retry": "認可情報を再生成",
+        "timeoutRetry": "認可リンクを更新",
+        "waiting": "認可待ち..."
+      },
+      "refreshAll": "すべて更新",
+      "refreshQuota": "クォータ更新",
+      "search": "アカウントを検索...",
+      "sort": {
+        "ascTooltip": "昇順（クリックで降順へ）",
+        "createdAt": "作成日時",
+        "descTooltip": "降順（クリックで昇順へ）",
+        "toggleDirection": "順序を切り替え",
+        "credits": "残りのクレジットにより",
+        "planEnd": "サイクル終了時間まで"
+      },
+      "sortLabel": "並べ替え",
+      "token": {
+        "empty": "Token または JSON を入力してください",
+        "import": "インポート",
+        "importFailedMsg": "インポート失敗: {{error}}",
+        "importing": "インポート中...",
+        "importSuccessMsg": "{{count}} 件のアカウントをインポートしました",
+        "placeholder": "JSON を貼り付け..."
+      },
+      "view": {
+        "grid": "カード表示",
+        "list": "リスト表示"
+      },
+      "addModal": {
+        "import": "ローカルインポート",
+        "oauth": "OAuth ログイン",
+        "token": "JSON インポート"
+      },
+      "overview": {
+        "title": "アカウント概要"
+      },
+      "quota": {
+        "noData": "クォータデータなし",
+        "resetDone": "リセット済み",
+        "hourly": "5 時間クォータ",
+        "weekly": "週次クォータ"
+      },
+      "subtitle": "GitHub Copilot アカウントを管理します",
+      "time": {
+        "lessThanMinute": "<1分",
+        "relativeDays": "{{days}}日",
+        "relativeDaysHours": "{{days}}日{{hours}}時間",
+        "relativeHours": "{{hours}}時間",
+        "relativeHoursMinutes": "{{hours}}時間{{minutes}}分",
+        "relativeMinutes": "{{minutes}}分",
+        "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      },
+      "credits": {
+        "leftInline": "残り {{left}}",
+        "periodEndOnly": "サイクル終了: {{end}}",
+        "periodRange": "サイクル: {{start}} - {{end}}",
+        "planEndsIn": "{{days}} 日後にサイクルがリセットされます",
+        "planEndsUnknown": "サイクル時刻は利用できません",
+        "usedLine": "{{used}} / {{total}} 使用済み"
+      },
+      "flowNotice": {
+        "alternative": "代替案: マルチインスタンス分離（異なる --user-data-dir）を利用します。インスタンスごとに一度ログインすれば、以後はインスタンス単位で起動して目的のアカウント環境へ素早く切り替えられます。"
+      },
+      "injecting": "注入中...",
+      "usage": {
+        "resetLine": "利用枠は{{dateText}}にリセットされます。",
+        "resetUnknown": "利用枠のリセットまで -"
+      }
+    }
   },
   "nav": {
     "overview": "Antigravity アカウント",
@@ -31,8 +152,8 @@
     "codex": "Codex アカウント",
     "dashboard": "ダッシュボード",
     "instances": "マルチインスタンス",
-    "githubCopilot": "GitHub Copilot",
-    "windsurf": "Windsurf",
+    "githubCopilot": "GitHub コパイロット",
+    "windsurf": "ウィンドサーフィン",
     "morePlatforms": "その他のプラットフォーム"
   },
   "settings": {
@@ -64,7 +185,7 @@
       "every1hour": "1時間ごと",
       "minutes": "分",
       "refreshIntervalLimited": "クォータリセット時の起動が有効になっているため、リフレッシュ間隔の最小値は2分です。",
-      "storageTitle": "Directories & Storage",
+      "storageTitle": "ディレクトリとストレージ",
       "dataDir": "データディレクトリ",
       "dataDirDesc": "アカウントと設定ファイルの保存場所。",
       "fpDir": "Antigravityストレージ",
@@ -110,17 +231,17 @@
       "windsurfAppPathPlaceholder": "既定のパス",
       "windsurfPathSelect": "選択",
       "windsurfPathReset": "既定に戻す",
-      "kiroSettingsTitle": "Kiro Settings",
-      "kiroAutoRefresh": "Kiro Auto Refresh Quota",
-      "kiroAutoRefreshDesc": "Background update frequency",
-      "kiroAppPath": "Kiro App Path",
-      "kiroAppPathDesc": "Leave empty to use default path",
-      "kiroAppPathPlaceholder": "Default path",
-      "kiroPathSelect": "Select",
-      "kiroPathReset": "Reset to default"
+      "kiroSettingsTitle": "キロの設定",
+      "kiroAutoRefresh": "Kiro 自動更新クォータ",
+      "kiroAutoRefreshDesc": "バックグラウンド更新頻度",
+      "kiroAppPath": "Kiro アプリのパス",
+      "kiroAppPathDesc": "デフォルトのパスを使用するには空のままにしてください",
+      "kiroAppPathPlaceholder": "デフォルトのパス",
+      "kiroPathSelect": "選択",
+      "kiroPathReset": "デフォルトにリセットする"
     },
     "network": {
-      "apiTitle": "Antigravity Cockpit API",
+      "apiTitle": "反重力コックピット API",
       "wsService": "WebSocket サービス",
       "wsServiceDesc": "外部プログラム（VS Code 拡張機能など）からの接続を許可する",
       "preferredPort": "推奨ポート",
@@ -134,17 +255,17 @@
       "saveFailed": "保存に失敗しました: {{error}}"
     },
     "about": {
-      "appName": "Cockpit Tools",
+      "appName": "コックピットツール",
       "slogan": "プロフェッショナルなアカウント管理ソリューション",
       "author": "著者",
       "wechat": "WeChat 公衆号",
       "github": "GitHub リポジトリ",
-      "alipay": "Alipay",
-      "wechatpay": "WeChat Pay",
+      "alipay": "アリペイ",
+      "wechatpay": "ウィーチャットペイ",
       "sponsor": "スポンサー",
-      "sponsorDesc": "Support development",
+      "sponsorDesc": "サポート開発",
       "feedback": "フィードバック",
-      "feedbackDesc": "Report issues/suggestions",
+      "feedbackDesc": "問題点/提案を報告する",
       "supportDev": "開発を支援する",
       "checkUpdate": "アップデートを確認",
       "checking": "確認中...",
@@ -180,17 +301,17 @@
     "status": {
       "current": "現在",
       "disabled": "無効",
-      "authInvalid": "Invalid credentials",
-      "refreshFailed": "Refresh failed",
+      "authInvalid": "無効な認証情報",
+      "refreshFailed": "更新に失敗しました",
       "normal": "通常",
       "forbidden": "403",
       "forbidden_tooltip": "APIが403 Forbiddenを返しました。アカウントはGemini Code Assistにアクセスできません",
       "forbidden_msg": "アカウント禁止、自動更新をスキップしました"
     },
     "tier": {
-      "pro": "PRO",
-      "ultra": "ULTRA",
-      "free": "FREE"
+      "pro": "プロ",
+      "ultra": "ウルトラ",
+      "free": "無料"
     },
     "empty": {
       "title": "アカウントがありません",
@@ -209,9 +330,9 @@
     "filterLabel": "アカウントを絞り込み",
     "filter": {
       "all": "すべて ({{count}})",
-      "pro": "PRO ({{count}})",
-      "ultra": "ULTRA ({{count}})",
-      "free": "FREE ({{count}})"
+      "pro": "プロ ({{count}})",
+      "ultra": "ウルトラ ({{count}})",
+      "free": "無料 ({{count}})"
     },
     "sortLabel": "並べ替え",
     "sort": {
@@ -234,7 +355,7 @@
     },
     "tabs": {
       "oauth": "OAuth 認証",
-      "token": "Refresh Token",
+      "token": "リフレッシュトークン",
       "import": "インポート"
     },
     "oauth": {
@@ -487,8 +608,8 @@
     "format": {
       "noReply": "(返信なし)",
       "durationMs": "{{ms}}ms",
-      "tokens": "tokens={{prompt}}+{{completion}}={{total}}",
-      "traceId": "traceId={{traceId}}",
+      "tokens": "トークン={{prompt}}+{{completion}}={{total}}",
+      "traceId": "トレースId={{traceId}}",
       "detailJoiner": ", ",
       "message": "[[{{model}}]]: {{reply}}{{suffix}}",
       "none": "--",
@@ -540,7 +661,7 @@
     },
     "triggerSource": {
       "scheduled": "定時",
-      "crontab": "Crontab",
+      "crontab": "クロンタブ",
       "quotaReset": "クォータリセット",
       "manual": "すぐにテスト",
       "unknown": "不明"
@@ -568,7 +689,7 @@
       "triggerMode": "トリガー方式",
       "triggerModeHint": "1. 定時：設定した時間に実行。\\n2. Crontab：式で定義。\\n3. クォータリセット：満了時に一度実行。",
       "modeScheduled": "📅 定時",
-      "modeCrontab": "🧩 Crontab",
+      "modeCrontab": "🧩 クロンタブ",
       "modeQuotaReset": "🔄 クォータリセット",
       "modelSelect": "モデル選択",
       "modelHint": "同じクォータグループでは 1 つのモデルを推奨。複数選択すると順に実行されます。",
@@ -644,15 +765,11 @@
   "codex": {
     "title": "Codex アカウント管理",
     "subtitle": "OpenAI Codex アカウントを管理します",
-    "addAccount": "アカウントを追加",
-    "refreshAll": "すべて更新",
-    "refreshQuota": "クォータ更新",
     "switch": "切替",
     "switched": "{{email}} に切り替えました",
     "switchFailed": "切り替え失敗: {{error}}",
     "current": "現在",
     "empty": {
-      "title": "アカウントなし",
       "description": "「アカウントを追加」から Codex アカウントを管理できます"
     },
     "addModal": {
@@ -664,11 +781,7 @@
     "oauth": {
       "desc": "下のボタンをクリックしてブラウザで OpenAI 認可を完了してください",
       "preparing": "認可リンクを準備中...",
-      "openBrowser": "ブラウザで開く",
-      "hint": "認可完了後、このウィンドウは自動更新されます",
       "exchanging": "トークンを交換中...",
-      "success": "認可成功",
-      "failed": "認可失敗",
       "portInUse": "ポート {{port}} は既に使用中です。このポートを使用しているアプリを閉じて再試行してください。",
       "portInUseTitle": "ポートが使用中",
       "portInUseConfirm": "ポート {{port}} が使用中です。このポートを使用しているプロセスを終了しますか？",
@@ -678,87 +791,50 @@
     },
     "token": {
       "desc": "auth.json の内容またはアカウント JSON を貼り付けてください",
-      "placeholder": "JSON を貼り付け...",
-      "import": "インポート",
-      "importing": "インポート中...",
-      "importSuccessMsg": "{{count}} 件のアカウントをインポートしました",
-      "importFailedMsg": "インポート失敗: {{error}}",
-      "empty": "Token または JSON を入力してください"
+      "placeholder": "JSON を貼り付け..."
     },
     "local": {
       "desc": "~/.codex/auth.json から現在ログイン中のアカウントをインポート",
       "import": "ローカルアカウント取得"
     },
     "import": {
-      "label": "インポート",
       "importing": "ローカルアカウントをインポート中...",
       "successMsg": "インポート成功: {{email}}",
-      "failedMsg": "インポート失敗: {{error}}",
       "localDesc": "ローカルでログイン済みのセッションから Codex アカウントをインポート。"
     },
     "quota": {
       "hourly": "5 時間クォータ",
       "weekly": "週次クォータ",
-      "reset": "リセット",
-      "noData": "クォータデータなし",
-      "resetDone": "リセット済み"
+      "reset": "リセット"
     },
     "plan": {
-      "free": "FREE",
-      "plus": "PLUS",
-      "pro": "PRO",
-      "team": "TEAM",
-      "enterprise": "ENTERPRISE"
+      "free": "無料",
+      "plus": "プラス",
+      "pro": "プロ",
+      "team": "チーム",
+      "enterprise": "企業"
     },
     "time": {
-      "relativeDays": "{{days}}日",
-      "relativeDaysHours": "{{days}}日{{hours}}時間",
-      "relativeHours": "{{hours}}時間",
-      "relativeHoursMinutes": "{{hours}}時間{{minutes}}分",
-      "relativeMinutes": "{{minutes}}分",
-      "lessThanMinute": "<1分",
       "today": "今日 {{time}}",
       "tomorrow": "明日 {{time}}",
-      "dateTime": "{{date}} {{time}}",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      "dateTime": "{{date}} {{time}}"
     },
-    "search": "アカウントを検索...",
     "view": {
-      "compact": "コンパクト表示",
-      "list": "リスト表示",
-      "grid": "カード表示"
+      "compact": "コンパクト表示"
     },
     "filter": {
-      "all": "すべて ({{count}})",
-      "free": "FREE ({{count}})",
-      "plus": "PLUS ({{count}})",
-      "pro": "PRO ({{count}})",
-      "team": "TEAM ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
+      "plus": "プラス ({{count}})",
+      "team": "チーム ({{count}})"
     },
-    "filterLabel": "フィルター",
-    "sortLabel": "並べ替え",
     "sort": {
       "weekly": "週間クォータ",
       "hourly": "5時間クォータ",
       "weeklyReset": "週間クォータのリセット時間",
-      "hourlyReset": "5時間クォータのリセット時間",
-      "descTooltip": "降順（クリックで昇順へ）",
-      "ascTooltip": "昇順（クリックで降順へ）",
-      "toggleDirection": "順序を切り替え",
-      "createdAt": "作成日時"
-    },
-    "export": "エクスポート",
-    "noMatch": {
-      "title": "一致するアカウントなし",
-      "desc": "検索条件を変更してください"
+      "hourlyReset": "5時間クォータのリセット時間"
     },
     "columns": {
-      "email": "アカウント",
-      "plan": "プラン",
       "hourly": "5時間クォータ",
-      "weekly": "週間クォータ",
-      "actions": "操作"
+      "weekly": "週間クォータ"
     },
     "opencodeSwitch": "OpenCode 切り替えスイッチ",
     "opencodeSwitchDesc": "OpenCode 内の Codex アカウント情報を同期して切り替え",
@@ -773,7 +849,6 @@
       "comingSoon": "マルチインスタンス機能は近日公開",
       "comingSoonDesc": "異なるアカウントで複数のCodex.appインスタンスを同時に実行できます。お楽しみに。",
       "unsupported": {
-        "title": "このシステムでは非対応",
         "desc": "Codexマルチインスタンスは現在macOSでのみ利用可能です。"
       },
       "quota": {
@@ -819,9 +894,9 @@
       "totalAccounts": "総アカウント数"
     },
     "panels": {
-      "antigravity": "Antigravity",
-      "codex": "Codex",
-      "githubCopilot": "GitHub Copilot",
+      "antigravity": "反重力",
+      "codex": "コーデックス",
+      "githubCopilot": "GitHub コパイロット",
       "planDistribution": "プラン分布",
       "current": "現在のアカウント",
       "recommended": "おすすめアカウント",
@@ -892,7 +967,7 @@
       "running": "実行中",
       "stopped": "停止",
       "restarting": "再起動中",
-      "starting": "Starting"
+      "starting": "起動"
     },
     "labels": {
       "path": "ディレクトリ",
@@ -1036,129 +1111,44 @@
   },
   "githubCopilot": {
     "title": "GitHub Copilot アカウント管理",
-    "subtitle": "GitHub Copilot アカウントを管理します",
-    "overview": {
-      "title": "アカウント概要"
-    },
     "instances": {
-      "title": "マルチインスタンス",
-      "subtitle": "インスタンスごとの独立設定、複数アカウントでの並列運用。",
       "unsupported": {
-        "title": "このシステムでは非対応",
         "desc": "GitHub Copilotマルチインスタンスは現在macOSでのみ利用可能です。"
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "アカウントを追加",
-    "refreshAll": "すべて更新",
-    "refreshQuota": "クォータ更新",
     "empty": {
-      "title": "アカウントなし",
       "description": "「アカウントを追加」から GitHub Copilot アカウントを管理できます"
     },
-    "noMatch": {
-      "title": "一致するアカウントなし",
-      "desc": "検索条件を変更してください"
-    },
     "addModal": {
-      "title": "GitHub Copilot アカウントを追加",
-      "oauth": "OAuth ログイン",
-      "token": "JSON インポート",
-      "import": "ローカルインポート"
+      "title": "GitHub Copilot アカウントを追加"
     },
     "oauth": {
-      "desc": "下のボタンをクリックし、ブラウザで GitHub Copilot の認可を完了してください。",
-      "preparing": "認可リンクを準備中...",
-      "openBrowser": "ブラウザで開く",
-      "hint": "認可完了後、このウィンドウは自動更新されます",
-      "success": "認可成功",
-      "failed": "認可失敗",
-      "retry": "認可情報を再生成",
-      "timeoutRetry": "認可リンクを更新",
-      "waiting": "認可待ち...",
-      "meta": "有効期限: {{expires}}s; ポーリング間隔: {{interval}}s"
+      "desc": "下のボタンをクリックし、ブラウザで GitHub Copilot の認可を完了してください。"
     },
     "token": {
-      "desc": "GitHub Copilot のアクセストークン、またはエクスポートした JSON データを貼り付けてください。",
-      "placeholder": "JSON を貼り付け...",
-      "import": "インポート",
-      "importing": "インポート中...",
-      "importSuccessMsg": "{{count}} 件のアカウントをインポートしました",
-      "importFailedMsg": "インポート失敗: {{error}}",
-      "empty": "Token または JSON を入力してください"
+      "desc": "GitHub Copilot のアクセストークン、またはエクスポートした JSON データを貼り付けてください。"
     },
     "import": {
-      "label": "インポート",
-      "localDesc": "ローカルでログイン済みのセッションから GitHub Copilot アカウントをインポート。",
-      "importing": "ローカルアカウントをインポート中...",
-      "failedMsg": "インポート失敗: {{error}}",
-      "pickFile": "インポートする JSON ファイルを選択"
+      "localDesc": "ローカルでログイン済みのセッションから GitHub Copilot アカウントをインポート。"
     },
-    "quota": {
-      "hourly": "5 時間クォータ",
-      "weekly": "週次クォータ",
-      "noData": "クォータデータなし",
-      "resetDone": "リセット済み"
-    },
-    "usage": {
-      "resetUnknown": "利用枠のリセットまで -",
-      "resetLine": "利用枠は{{dateText}}にリセットされます。"
-    },
-    "time": {
-      "relativeDays": "{{days}}日",
-      "relativeDaysHours": "{{days}}日{{hours}}時間",
-      "relativeHours": "{{hours}}時間",
-      "relativeHoursMinutes": "{{hours}}時間{{minutes}}分",
-      "relativeMinutes": "{{minutes}}分",
-      "lessThanMinute": "<1分",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "アカウントを検索...",
-    "view": {
-      "list": "リスト表示",
-      "grid": "カード表示"
-    },
-    "filter": {
-      "all": "すべて ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "フィルター",
-    "sortLabel": "並べ替え",
     "sort": {
-      "createdAt": "作成日時",
       "weekly": "週間クォータ",
       "hourly": "5時間クォータ",
       "weeklyReset": "週間クォータのリセット時間",
-      "hourlyReset": "5時間クォータのリセット時間",
-      "descTooltip": "降順（クリックで昇順へ）",
-      "ascTooltip": "昇順（クリックで降順へ）",
-      "toggleDirection": "順序を切り替え"
+      "hourlyReset": "5時間クォータのリセット時間"
     },
     "columns": {
-      "email": "アカウント",
-      "plan": "プラン",
       "hourly": "5時間クォータ",
-      "weekly": "週間クォータ",
-      "actions": "操作"
+      "weekly": "週間クォータ"
     },
-    "export": "エクスポート",
     "flowNotice": {
       "title": "GitHub Copilot アカウントガイド（クリックで展開/折りたたみ）",
       "desc": "アカウント切り替えでは、VS Code のローカル認証ストレージを読み取り、システムの資格情報サービスを使って復号・再書き込みを行う必要があります。データは端末内のみで処理されます。",
       "reason": "必要な権限: VS Code 認証データベース（state.vscdb）を読み取り、システム暗号化機能（Windows DPAPI / macOS Keychain / Linux Secret Service）を呼び出して復号・再書き込みを行います。",
       "storage": "読み取り範囲: GitHub ログインセッション関連データのみを処理し、すべての処理はローカルで実行されます。",
-      "alternative": "代替案: マルチインスタンス分離（異なる --user-data-dir）を利用します。インスタンスごとに一度ログインすれば、以後はインスタンス単位で起動して目的のアカウント環境へ素早く切り替えられます。",
       "inject": "ワンクリック切り替え: このツールはローカルの VS Code 暗号化情報（DPAPI/Keychain/Secret Service）を読み取り、state.vscdb 内の認証セッションを復号して GitHub Copilot トークンを置き換え、再暗号化します。処理はすべて端末内で完結します。"
     },
     "injectToVSCode": "VS Codeに切り替え",
-    "injecting": "注入中...",
     "injectSuccess": "トークンをVS Codeに正常に注入しました。VS Codeを起動しています。",
     "injectRequireClose": "注入する前にVS Codeを閉じてください。"
   },
@@ -1202,10 +1192,10 @@
     },
     "windsurfRefreshInterval": "クォータ自動更新",
     "kiro": {
-      "title": "Kiro Settings",
-      "appPath": "Kiro Path"
+      "title": "キロの設定",
+      "appPath": "キロパス"
     },
-    "kiroRefreshInterval": "Auto refresh quota"
+    "kiroRefreshInterval": "自動更新クォータ"
   },
   "quotaAlert": {
     "bannerText": "{{email}} のクォータ警告（しきい値 {{threshold}}%、最低 {{lowest}}%、モデル: {{models}}）",
@@ -1236,145 +1226,47 @@
   },
   "windsurf": {
     "title": "Windsurf アカウント管理",
-    "subtitle": "Windsurf アカウントを管理します",
-    "overview": {
-      "title": "アカウント概要"
-    },
     "instances": {
-      "title": "マルチインスタンス",
-      "subtitle": "インスタンスごとの独立設定、複数アカウントでの並列運用。",
       "unsupported": {
-        "title": "このシステムでは非対応",
         "desc": "Windsurfマルチインスタンスは現在macOSでのみ利用可能です。"
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "アカウントを追加",
-    "refreshAll": "すべて更新",
-    "refreshQuota": "クォータ更新",
     "empty": {
-      "title": "アカウントなし",
       "description": "「アカウントを追加」から Windsurf アカウントを管理できます"
     },
-    "noMatch": {
-      "title": "一致するアカウントなし",
-      "desc": "検索条件を変更してください"
-    },
     "addModal": {
-      "title": "Windsurf アカウントを追加",
-      "oauth": "OAuth ログイン",
-      "token": "JSON インポート",
-      "import": "ローカルインポート"
+      "title": "Windsurf アカウントを追加"
     },
     "oauth": {
-      "desc": "下のボタンをクリックし、ブラウザで Windsurf の認可を完了してください。",
-      "preparing": "認可リンクを準備中...",
-      "openBrowser": "ブラウザで開く",
-      "hint": "認可完了後、このウィンドウは自動更新されます",
-      "success": "認可成功",
-      "failed": "認可失敗",
-      "retry": "認可情報を再生成",
-      "timeoutRetry": "認可リンクを更新",
-      "waiting": "認可待ち...",
-      "meta": "有効期限: {{expires}}s; ポーリング間隔: {{interval}}s"
+      "desc": "下のボタンをクリックし、ブラウザで Windsurf の認可を完了してください。"
     },
     "token": {
-      "desc": "Windsurf のアクセストークン、またはエクスポートした JSON データを貼り付けてください。",
-      "placeholder": "JSON を貼り付け...",
-      "import": "インポート",
-      "importing": "インポート中...",
-      "importSuccessMsg": "{{count}} 件のアカウントをインポートしました",
-      "importFailedMsg": "インポート失敗: {{error}}",
-      "empty": "Token または JSON を入力してください"
+      "desc": "Windsurf のアクセストークン、またはエクスポートした JSON データを貼り付けてください。"
     },
     "import": {
-      "label": "インポート",
       "localDesc": "ローカルでログイン済みのセッションから Windsurf アカウントをインポート。",
-      "localClient": "ローカル Windsurf からインポート",
-      "orJson": "または JSON ファイルからインポート",
-      "importing": "ローカルアカウントをインポート中...",
-      "failedMsg": "インポート失敗: {{error}}",
-      "pickFile": "インポートする JSON ファイルを選択"
-    },
-    "quota": {
-      "hourly": "5 時間クォータ",
-      "weekly": "週次クォータ",
-      "noData": "クォータデータなし",
-      "resetDone": "リセット済み"
+      "localClient": "ローカル Windsurf からインポート"
     },
     "credits": {
       "title": "プラン",
       "renewMonthly": "クレジットは毎月更新されます",
-      "planEndsIn": "{{days}} 日後にサイクルがリセットされます",
-      "planEndsUnknown": "サイクル時刻は利用できません",
-      "periodRange": "サイクル: {{start}} - {{end}}",
-      "periodEndOnly": "サイクル終了: {{end}}",
       "left": "残り {{count}} クレジット",
       "leftUnknown": "残りクレジット -",
       "promptLeft": "残り {{remaining}}/{{total}} プロンプトクレジット",
       "promptLeftNoTotal": "残り {{remaining}} プロンプトクレジット",
       "promptLeftUnknown": "残りプロンプトクレジット -",
-      "addOnAvailable": "追加クレジット {{count}} が利用可能",
-      "usedLine": "{{used}} / {{total}} 使用済み",
-      "leftInline": "残り {{left}}"
-    },
-    "usage": {
-      "resetUnknown": "利用枠のリセットまで -",
-      "resetLine": "利用枠は{{dateText}}にリセットされます。"
-    },
-    "time": {
-      "relativeDays": "{{days}}日",
-      "relativeDaysHours": "{{days}}日{{hours}}時間",
-      "relativeHours": "{{hours}}時間",
-      "relativeHoursMinutes": "{{hours}}時間{{minutes}}分",
-      "relativeMinutes": "{{minutes}}分",
-      "lessThanMinute": "<1分",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "アカウントを検索...",
-    "view": {
-      "list": "リスト表示",
-      "grid": "カード表示"
-    },
-    "filter": {
-      "all": "すべて ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "フィルター",
-    "sortLabel": "並べ替え",
-    "sort": {
-      "createdAt": "作成日時",
-      "credits": "残りクレジット順",
-      "planEnd": "サイクル終了時刻順",
-      "descTooltip": "降順（クリックで昇順へ）",
-      "ascTooltip": "昇順（クリックで降順へ）",
-      "toggleDirection": "順序を切り替え"
+      "addOnAvailable": "追加クレジット {{count}} が利用可能"
     },
     "columns": {
-      "email": "メール",
-      "plan": "タグ",
-      "promptCredits": "プロンプトクレジット",
-      "addOnPromptCredits": "追加プロンプトクレジット",
-      "credits": "クレジット",
-      "actions": "操作"
+      "plan": "タグ"
     },
-    "export": "エクスポート",
     "injectToVSCode": "Windsurfに切り替え",
-    "injecting": "注入中...",
     "injectSuccess": "切り替えが完了しました。Windsurf を起動しています。",
     "injectRequireClose": "切り替える前に Windsurf を閉じてください。",
     "flowNotice": {
       "title": "Windsurf アカウントガイド（クリックで展開/折りたたみ）",
       "desc": "アカウント切り替えでは、Windsurf のローカル認証ストレージを読み取り、システムの資格情報サービスを使って復号・再書き込みを行う必要があります。データは端末内のみで処理されます。",
       "inject": "ワンクリック切り替え: このツールはローカルの Windsurf 暗号化情報（DPAPI/Keychain/Secret Service）を読み取り、state.vscdb 内の認証セッションを復号して Windsurf トークンを置き換え、再暗号化します。処理はすべて端末内で完結します。",
-      "alternative": "代替案: マルチインスタンス分離（異なる --user-data-dir）を利用します。インスタンスごとに一度ログインすれば、以後はインスタンス単位で起動して目的のアカウント環境へ素早く切り替えられます。",
       "reason": "必要な権限: Windsurf 認証データベース（state.vscdb）を読み取り、システム暗号化機能（Windows DPAPI / macOS Keychain / Linux Secret Service）を呼び出して復号・再書き込みを行います。",
       "storage": "読み取り範囲: Windsurf ログインセッション関連データのみを処理し、すべての処理はローカルで実行されます。"
     }
@@ -1425,140 +1317,62 @@
   },
   "kiro": {
     "account": {
-      "signedInWith": "Signed in with {{provider}}",
-      "providerUnknown": "Unknown",
-      "userId": "User ID"
+      "signedInWith": "{{provider}} でサインインしました",
+      "providerUnknown": "未知",
+      "userId": "ユーザーID"
     },
     "credits": {
-      "planEndsIn": "{{days}} 日後にサイクルがリセットされます",
-      "planEndsUnknown": "サイクル時刻は利用できません",
-      "periodRange": "サイクル: {{start}} - {{end}}",
-      "periodEndOnly": "サイクル終了: {{end}}",
-      "estimatedResetOn": "Estimated Usage resets on {{date}}",
-      "bonusUsageLine": "{{used}} used / {{total}} total",
-      "planUsageCoveredLine": "{{used}} used / {{total}} covered in plan",
-      "usedLine": "{{used}} / {{total}} 使用済み",
-      "leftInline": "残り {{left}}",
-      "expiryDays": "{{days}} days",
+      "estimatedResetOn": "推定使用量は {{date}} にリセットされます",
+      "bonusUsageLine": "{{used}} 使用 / {{total}} 合計",
+      "planUsageCoveredLine": "{{used}} が使用されました / {{total}} は計画に含まれています",
+      "expiryDays": "{{days}}日",
       "expiryUnknown": "—",
-      "resetNow": "Reset soon",
-      "resetInHours": "Resets in {{hours}}h",
-      "resetInMinutes": "Resets in {{minutes}}m"
+      "resetNow": "すぐにリセットします",
+      "resetInHours": "{{hours}}h でリセット",
+      "resetInMinutes": "{{minutes}}m 後にリセットされます"
     },
     "columns": {
-      "email": "メール",
-      "plan": "タグ",
-      "credits": "クレジット",
-      "promptCredits": "プロンプトクレジット",
-      "addOnPromptCredits": "追加プロンプトクレジット",
-      "bonusCredits": "Bonus Credits",
-      "estimatedUsage": "Estimated Usage",
-      "expiry": "Expiry",
-      "estUsage": "Est. Usage",
-      "actions": "操作"
+      "bonusCredits": "ボーナスクレジット",
+      "estimatedUsage": "推定使用量",
+      "expiry": "有効期限",
+      "estUsage": "EST（東部基準時。使用法"
     },
     "plan": {
-      "free": "Kiro Free",
-      "individual": "Kiro Individual",
-      "pro": "Kiro Pro",
-      "business": "Kiro Business",
-      "enterprise": "Kiro Enterprise",
-      "unknown": "Unknown"
+      "free": "キロフリー",
+      "individual": "キロ個人",
+      "pro": "キロプロ",
+      "business": "キロ事業",
+      "enterprise": "キロエンタープライズ",
+      "unknown": "未知"
     },
     "flowNotice": {
-      "title": "Kiro アカウントガイド（クリックで展開/折りたたみ）",
-      "desc": "アカウント切り替えでは、Kiro のローカル認証ストレージを読み取り、システムの資格情報サービスを使って復号・再書き込みを行う必要があります。データは端末内のみで処理されます。",
-      "reason": "必要な権限: Kiro 認証データベース（state.vscdb）を読み取り、システム暗号化機能（Windows DPAPI / macOS Keychain / Linux Secret Service）を呼び出して復号・再書き込みを行います。",
-      "storage": "読み取り範囲: Kiro ログインセッション関連データのみを処理し、すべての処理はローカルで実行されます。"
+      "title": "Kiro アカウント管理ガイド（クリックで展開/折りたたみ）",
+      "desc": "アカウント切り替えでは、この端末上で Kiro のローカル認証ファイルとインスタンス設定を読み書きします。OAuth ログインとクォータ更新では Kiro 公式 API を呼び出します。",
+      "reason": "処理対象パスには、~/.aws/sso/cache/kiro-auth-token.json、インスタンスの profile.json、state.vscdb 内の kiro.kiroAgent エントリが含まれます。",
+      "storage": "処理されるデータには Kiro のセッション情報とクォータ情報が含まれます。Kiro 公式 API へのリクエスト時には、必要な認証フィールド（code、refreshToken、accessToken、profileArn など）を送信します。"
     },
-    "title": "Kiro Account Management",
-    "subtitle": "Monitor quota status for all accounts in real time.",
-    "overview": {
-      "title": "Account Overview"
-    },
+    "title": "キロアカウント管理",
     "instances": {
-      "title": "Multi-Instance",
-      "subtitle": "Independent configs per instance for parallel multi-account runs.",
       "unsupported": {
-        "title": "Unsupported on this system",
-        "descPlatform": "Kiro multi-instance is available only on macOS, Windows and Linux."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
+        "descPlatform": "Kiro マルチインスタンスは、macOS、Windows、および Linux でのみ使用できます。"
       }
     },
-    "addAccount": "Add Account",
-    "refreshAll": "Refresh All",
-    "refreshQuota": "Refresh Quota",
     "empty": {
-      "title": "No Accounts",
-      "description": "Click \"Add Account\" to start managing your Kiro accounts"
-    },
-    "noMatch": {
-      "title": "No matching accounts",
-      "desc": "Try adjusting your search or filters"
+      "description": "「アカウントを追加」をクリックして Kiro アカウントの管理を開始します"
     },
     "addModal": {
-      "title": "Add Kiro Account",
-      "oauth": "OAuth",
-      "token": "Token / JSON",
-      "import": "Local Import"
+      "title": "Kiroアカウントを追加する"
     },
     "oauth": {
-      "desc": "Click the button below and complete Kiro authorization in your browser.",
-      "preparing": "Preparing authorization info...",
-      "openBrowser": "Open in Browser",
-      "hint": "Once authorized, this window will update automatically",
-      "success": "Authorization successful",
-      "failed": "Authorization failed",
-      "retry": "Regenerate authorization info",
-      "timeoutRetry": "Refresh authorization link",
-      "waiting": "Waiting for authorization...",
-      "meta": "Expires in: {{expires}}s; Poll interval: {{interval}}s"
+      "desc": "下のボタンをクリックして、ブラウザで Kiro 認証を完了してください。"
     },
     "token": {
-      "desc": "Paste your Kiro access token or exported JSON data.",
-      "placeholder": "Paste token or JSON...",
-      "import": "Import",
-      "importing": "Importing...",
-      "importSuccessMsg": "Imported {{count}} account(s) successfully",
-      "importFailedMsg": "Import failed: {{error}}",
-      "empty": "Please enter a token or JSON"
+      "desc": "Kiro アクセス トークンまたはエクスポートされた JSON データを貼り付けます。"
     },
     "import": {
-      "label": "Import",
-      "localDesc": "Import Kiro account data from local Kiro client or a JSON file.",
-      "localClient": "Import from local Kiro",
-      "orJson": "Or import from JSON file",
-      "importing": "Importing...",
-      "failedMsg": "Import failed: {{error}}",
-      "pickFile": "Select JSON file to import"
+      "localDesc": "ローカル Kiro クライアントまたは JSON ファイルから Kiro アカウント データをインポートします。",
+      "localClient": "地元キロから輸入"
     },
-    "search": "Search accounts...",
-    "view": {
-      "list": "List view",
-      "grid": "Card view"
-    },
-    "filter": {
-      "all": "All ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Filter",
-    "sortLabel": "Sort",
-    "sort": {
-      "createdAt": "Created time",
-      "credits": "By remaining credits",
-      "planEnd": "By cycle end time",
-      "descTooltip": "Current: Descending. Click to switch to ascending",
-      "ascTooltip": "Current: Ascending. Click to switch to descending",
-      "toggleDirection": "Toggle sort direction"
-    },
-    "export": "Export",
-    "injectToVSCode": "Switch to Kiro"
+    "injectToVSCode": "キロに切り替えます"
   }
 }

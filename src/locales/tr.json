@@ -20,7 +20,128 @@
     "none": "Yok",
     "detail": "Detaylar",
     "editable": "Düzenlenebilir",
-    "preview": "Önizleme"
+    "preview": "Önizleme",
+    "shared": {
+      "addAccount": "Hesap ekle",
+      "columns": {
+        "actions": "İşlemler",
+        "plan": "Planı",
+        "addOnPromptCredits": "Ek istem kredileri",
+        "credits": "Krediler",
+        "email": "E-posta",
+        "promptCredits": "İstem kredileri"
+      },
+      "empty": {
+        "title": "Hesap yok"
+      },
+      "export": "Dışa aktar",
+      "filter": {
+        "all": "Tümü ({{count}})",
+        "enterprise": "KURUMSAL ({{count}})",
+        "free": "ÜCRETSİZ ({{count}})",
+        "pro": "PRO ({{count}})",
+        "business": "İŞ ({{count}})",
+        "individual": "BİREYSEL ({{count}})"
+      },
+      "filterLabel": "Filtre",
+      "import": {
+        "failedMsg": "İçe aktarma başarısız: {{error}}",
+        "label": "İçe aktar",
+        "importing": "Yerel hesap içe aktarılıyor...",
+        "pickFile": "İçe aktarılacak JSON dosyasını seçin",
+        "orJson": "Veya JSON dosyasından içe aktarın"
+      },
+      "instances": {
+        "unsupported": {
+          "title": "Bu sistemde desteklenmiyor"
+        },
+        "quota": {
+          "chat": "Sohbet mesajları",
+          "inline": "Satır İçi Öneriler"
+        },
+        "subtitle": "Örnek başına bağımsız yapılandırma, birden fazla hesapla paralel çalışma.",
+        "title": "Çoklu Örnek"
+      },
+      "noMatch": {
+        "desc": "Aramanızı veya filtrelerinizi ayarlamayı deneyin",
+        "title": "Eşleşen hesap yok"
+      },
+      "oauth": {
+        "failed": "Yetkilendirme başarısız",
+        "hint": "Yetkilendirme tamamlanınca bu pencere otomatik güncellenir",
+        "openBrowser": "Tarayıcıda aç",
+        "success": "Yetkilendirme başarılı",
+        "meta": "Süre bitimine: {{expires}}s; yoklama aralığı: {{interval}}s",
+        "preparing": "Yetkilendirme bağlantısı hazırlanıyor...",
+        "retry": "Yetkilendirme bilgisini yeniden oluştur",
+        "timeoutRetry": "Yetkilendirme bağlantısını yenile",
+        "waiting": "Yetkilendirme bekleniyor..."
+      },
+      "refreshAll": "Tümünü yenile",
+      "refreshQuota": "Kotayı yenile",
+      "search": "Hesap ara...",
+      "sort": {
+        "ascTooltip": "Artan (Azalan için tıkla)",
+        "createdAt": "Oluşturulma tarihi",
+        "descTooltip": "Azalan (Artan için tıkla)",
+        "toggleDirection": "Sıralama yönünü değiştir",
+        "credits": "Kalan kredilere göre",
+        "planEnd": "Döngü bitiş zamanına göre"
+      },
+      "sortLabel": "Sırala",
+      "token": {
+        "empty": "Token veya JSON girin",
+        "import": "İçe aktar",
+        "importFailedMsg": "İçe aktarma başarısız: {{error}}",
+        "importing": "İçe aktarılıyor...",
+        "importSuccessMsg": "{{count}} hesap içe aktarıldı",
+        "placeholder": "JSON içeriğini yapıştırın..."
+      },
+      "view": {
+        "grid": "Kart görünümü",
+        "list": "Liste görünümü"
+      },
+      "addModal": {
+        "import": "Yerel içe aktar",
+        "oauth": "OAuth girişi",
+        "token": "JSON içe aktar"
+      },
+      "overview": {
+        "title": "Hesap Genel Bakışı"
+      },
+      "quota": {
+        "noData": "Kota verisi yok",
+        "resetDone": "Sıfırlandı",
+        "hourly": "5 saatlik kota",
+        "weekly": "Haftalık kota"
+      },
+      "subtitle": "GitHub Copilot hesaplarınızı yönetin",
+      "time": {
+        "lessThanMinute": "<1 dk",
+        "relativeDays": "{{days}} g",
+        "relativeDaysHours": "{{days}} g {{hours}} sa",
+        "relativeHours": "{{hours}} sa",
+        "relativeHoursMinutes": "{{hours}} sa {{minutes}} dk",
+        "relativeMinutes": "{{minutes}} dk",
+        "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      },
+      "credits": {
+        "leftInline": "{{left}} kaldı",
+        "periodEndOnly": "Döngü sonu: {{end}}",
+        "periodRange": "Döngü: {{start}} - {{end}}",
+        "planEndsIn": "Döngü {{days}} gün içinde sıfırlanır",
+        "planEndsUnknown": "Döngü zamanı kullanılamıyor",
+        "usedLine": "{{used}} / {{total}} kullanıldı"
+      },
+      "flowNotice": {
+        "alternative": "Alternatif: çoklu örnek izolasyonunu kullanın (farklı --user-data-dir). Her örnek için bir kez giriş yapın, ardından hedef hesap ortamına hızlı geçiş için örnek bazında başlatın."
+      },
+      "injecting": "Enjekte ediliyor...",
+      "usage": {
+        "resetLine": "Kota {{dateText}} tarihinde sıfırlanır.",
+        "resetUnknown": "Kota sıfırlanmasına kalan -"
+      }
+    }
   },
   "nav": {
     "overview": "Antigravity Hesabı",
@@ -31,8 +152,8 @@
     "codex": "Codex Hesapları",
     "dashboard": "Gösterge Paneli",
     "instances": "Çoklu Örnek",
-    "githubCopilot": "GitHub Copilot",
-    "windsurf": "Windsurf",
+    "githubCopilot": "GitHub Yardımcı Pilotu",
+    "windsurf": "Rüzgar sörfü",
     "morePlatforms": "Daha Fazla Platform"
   },
   "settings": {
@@ -64,7 +185,7 @@
       "every1hour": "Her saat",
       "minutes": "dk",
       "refreshIntervalLimited": "Kota sıfırlama uyandırma özelliği etkin olduğundan, minimum yenileme aralığı 2 dakikadır.",
-      "storageTitle": "Directories & Storage",
+      "storageTitle": "Dizinler ve Depolama",
       "dataDir": "Veri dizini",
       "dataDirDesc": "Hesaplar ve yapılandırma dosyaları için depolama konumu.",
       "fpDir": "Antigravity Depolama",
@@ -110,17 +231,17 @@
       "windsurfAppPathPlaceholder": "Varsayılan yol",
       "windsurfPathSelect": "Seç",
       "windsurfPathReset": "Varsayılana sıfırla",
-      "kiroSettingsTitle": "Kiro Settings",
-      "kiroAutoRefresh": "Kiro Auto Refresh Quota",
-      "kiroAutoRefreshDesc": "Background update frequency",
-      "kiroAppPath": "Kiro App Path",
-      "kiroAppPathDesc": "Leave empty to use default path",
-      "kiroAppPathPlaceholder": "Default path",
-      "kiroPathSelect": "Select",
-      "kiroPathReset": "Reset to default"
+      "kiroSettingsTitle": "Kiro Ayarları",
+      "kiroAutoRefresh": "Kiro Otomatik Yenileme Kotası",
+      "kiroAutoRefreshDesc": "Arka planda güncelleme sıklığı",
+      "kiroAppPath": "Kiro Uygulama Yolu",
+      "kiroAppPathDesc": "Varsayılan yolu kullanmak için boş bırakın",
+      "kiroAppPathPlaceholder": "Varsayılan yol",
+      "kiroPathSelect": "Seçme",
+      "kiroPathReset": "Varsayılana sıfırla"
     },
     "network": {
-      "apiTitle": "Antigravity Cockpit API",
+      "apiTitle": "Yerçekimine Karşı Kokpit API'si",
       "wsService": "WebSocket Servisi",
       "wsServiceDesc": "Harici programların (örn. VS Code eklentisi) bağlanmasına izin ver",
       "preferredPort": "Tercih Edilen Port",
@@ -134,7 +255,7 @@
       "saveFailed": "Kaydetme hatası: {{error}}"
     },
     "about": {
-      "appName": "Cockpit Tools",
+      "appName": "Kokpit Araçları",
       "slogan": "Profesyonel Hesap Yönetimi Çözümü",
       "author": "Yazar",
       "wechat": "WeChat",
@@ -142,9 +263,9 @@
       "alipay": "Alipay",
       "wechatpay": "WeChat Pay",
       "sponsor": "Sponsor",
-      "sponsorDesc": "Support development",
+      "sponsorDesc": "Geliştirmeyi destekleyin",
       "feedback": "Geri bildirim",
-      "feedbackDesc": "Report issues/suggestions",
+      "feedbackDesc": "Sorunları/önerileri bildirin",
       "supportDev": "Geliştirmeyi Destekle",
       "checkUpdate": "Güncellemeleri Kontrol Et",
       "checking": "Kontrol ediliyor...",
@@ -180,8 +301,8 @@
     "status": {
       "current": "Mevcut",
       "disabled": "Devre Dışı",
-      "authInvalid": "Invalid credentials",
-      "refreshFailed": "Refresh failed",
+      "authInvalid": "Geçersiz kimlik bilgileri",
+      "refreshFailed": "Yenileme başarısız oldu",
       "normal": "Normal",
       "forbidden": "403",
       "forbidden_tooltip": "API 403 Forbidden döndürdü, hesabın Gemini Code Assist'e erişimi yok",
@@ -234,7 +355,7 @@
     },
     "tabs": {
       "oauth": "OAuth",
-      "token": "Refresh Token",
+      "token": "Jetonu Yenile",
       "import": "İçe Aktar"
     },
     "oauth": {
@@ -644,15 +765,11 @@
   "codex": {
     "title": "Codex Hesap Yönetimi",
     "subtitle": "OpenAI Codex hesaplarınızı yönetin",
-    "addAccount": "Hesap ekle",
-    "refreshAll": "Tümünü yenile",
-    "refreshQuota": "Kotayı yenile",
     "switch": "Değiştir",
     "switched": "{{email}} hesabına geçildi",
     "switchFailed": "Değiştirme başarısız: {{error}}",
     "current": "Geçerli",
     "empty": {
-      "title": "Hesap yok",
       "description": "\"Hesap ekle\"ye tıklayın"
     },
     "addModal": {
@@ -664,11 +781,7 @@
     "oauth": {
       "desc": "Aşağıdaki butona tıklayın ve tarayıcıda OpenAI yetkilendirmesini tamamlayın",
       "preparing": "Yetkilendirme bağlantısı hazırlanıyor...",
-      "openBrowser": "Tarayıcıda aç",
-      "hint": "Yetkilendirme tamamlanınca bu pencere otomatik güncellenir",
       "exchanging": "Token değiş tokuşu...",
-      "success": "Yetkilendirme başarılı",
-      "failed": "Yetkilendirme başarısız",
       "portInUse": "{{port}} portu zaten kullanımda. Bu portu kullanan uygulamayı kapatıp tekrar deneyin.",
       "portInUseTitle": "Port kullanımda",
       "portInUseConfirm": "Port {{port}} kullanımda. Bu portu kullanan işlemi kapatmak ister misiniz?",
@@ -678,87 +791,50 @@
     },
     "token": {
       "desc": "auth.json içeriğini veya hesap JSON verisini yapıştırın",
-      "placeholder": "JSON içeriğini yapıştırın...",
-      "import": "İçe aktar",
-      "importing": "İçe aktarılıyor...",
-      "importSuccessMsg": "{{count}} hesap içe aktarıldı",
-      "importFailedMsg": "İçe aktarma başarısız: {{error}}",
-      "empty": "Token veya JSON girin"
+      "placeholder": "JSON içeriğini yapıştırın..."
     },
     "local": {
       "desc": "~/.codex/auth.json'dan mevcut hesabı içe aktar",
       "import": "Yerel hesabı al"
     },
     "import": {
-      "label": "İçe aktar",
       "importing": "Yerel hesap içe aktarılıyor...",
       "successMsg": "İçe aktarma başarılı: {{email}}",
-      "failedMsg": "İçe aktarma başarısız: {{error}}",
       "localDesc": "Yerelde oturum açılmış oturumlardan Codex hesaplarını içe aktar."
     },
     "quota": {
       "hourly": "5 saatlik kota",
       "weekly": "Haftalık kota",
-      "reset": "Sıfırla",
-      "noData": "Kota verisi yok",
-      "resetDone": "Sıfırlandı"
+      "reset": "Sıfırla"
     },
     "plan": {
-      "free": "FREE",
-      "plus": "PLUS",
+      "free": "ÖZGÜR",
+      "plus": "ARTI",
       "pro": "PRO",
-      "team": "TEAM",
-      "enterprise": "ENTERPRISE"
+      "team": "TAKIM",
+      "enterprise": "GİRİŞİM"
     },
     "time": {
-      "relativeDays": "{{days}} g",
-      "relativeDaysHours": "{{days}} g {{hours}} sa",
-      "relativeHours": "{{hours}} sa",
-      "relativeHoursMinutes": "{{hours}} sa {{minutes}} dk",
-      "relativeMinutes": "{{minutes}} dk",
-      "lessThanMinute": "<1 dk",
       "today": "Bugün {{time}}",
       "tomorrow": "Yarın {{time}}",
-      "dateTime": "{{date}} {{time}}",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
+      "dateTime": "{{date}} {{time}}"
     },
-    "search": "Hesap ara...",
     "view": {
-      "compact": "Kompakt görünüm",
-      "list": "Liste görünümü",
-      "grid": "Kart görünümü"
+      "compact": "Kompakt görünüm"
     },
     "filter": {
-      "all": "Tümü ({{count}})",
-      "free": "FREE ({{count}})",
-      "plus": "PLUS ({{count}})",
-      "pro": "PRO ({{count}})",
-      "team": "TEAM ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
+      "plus": "ARTI ({{count}})",
+      "team": "TAKIM ({{count}})"
     },
-    "filterLabel": "Filtre",
-    "sortLabel": "Sırala",
     "sort": {
       "weekly": "Haftalık kota",
       "hourly": "5 saatlik kota",
       "weeklyReset": "Haftalık sıfırlama zamanı",
-      "hourlyReset": "5 saatlik sıfırlama zamanı",
-      "descTooltip": "Azalan (Artan için tıkla)",
-      "ascTooltip": "Artan (Azalan için tıkla)",
-      "toggleDirection": "Sıralama yönünü değiştir",
-      "createdAt": "Oluşturulma tarihi"
-    },
-    "export": "Dışa aktar",
-    "noMatch": {
-      "title": "Eşleşen hesap yok",
-      "desc": "Aramanızı veya filtrelerinizi ayarlamayı deneyin"
+      "hourlyReset": "5 saatlik sıfırlama zamanı"
     },
     "columns": {
-      "email": "Hesap",
-      "plan": "Plan",
       "hourly": "5 saatlik kota",
-      "weekly": "Haftalık kota",
-      "actions": "İşlemler"
+      "weekly": "Haftalık kota"
     },
     "opencodeSwitch": "OpenCode geçiş anahtarı",
     "opencodeSwitchDesc": "OpenCode içinde Codex hesap geçişini senkronize et",
@@ -773,7 +849,6 @@
       "comingSoon": "Çoklu Örnek Yakında",
       "comingSoonDesc": "Farklı hesaplarla birden fazla Codex.app örneğini aynı anda çalıştırın.",
       "unsupported": {
-        "title": "Bu sistemde desteklenmiyor",
         "desc": "Codex çoklu örnek şu anda yalnızca macOS'ta kullanılabilir."
       },
       "quota": {
@@ -819,9 +894,9 @@
       "totalAccounts": "Toplam hesap"
     },
     "panels": {
-      "antigravity": "Antigravity",
-      "codex": "Codex",
-      "githubCopilot": "GitHub Copilot",
+      "antigravity": "Yer çekimine karşı",
+      "codex": "Kodeks",
+      "githubCopilot": "GitHub Yardımcı Pilotu",
       "planDistribution": "Plan dağılımı",
       "current": "Mevcut hesap",
       "recommended": "Önerilen hesap",
@@ -892,7 +967,7 @@
       "running": "Çalışıyor",
       "stopped": "Durduruldu",
       "restarting": "Yeniden başlatılıyor",
-      "starting": "Starting"
+      "starting": "Başlangıç"
     },
     "labels": {
       "path": "Dizin",
@@ -1036,129 +1111,44 @@
   },
   "githubCopilot": {
     "title": "GitHub Copilot Hesap Yönetimi",
-    "subtitle": "GitHub Copilot hesaplarınızı yönetin",
-    "overview": {
-      "title": "Hesap Genel Bakışı"
-    },
     "instances": {
-      "title": "Çoklu Örnek",
-      "subtitle": "Örnek başına bağımsız yapılandırma, birden fazla hesapla paralel çalışma.",
       "unsupported": {
-        "title": "Bu sistemde desteklenmiyor",
         "desc": "GitHub Copilot çoklu örnek şu anda yalnızca macOS'ta kullanılabilir."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "Hesap ekle",
-    "refreshAll": "Tümünü yenile",
-    "refreshQuota": "Kotayı yenile",
     "empty": {
-      "title": "Hesap yok",
       "description": "\"Hesap ekle\"ye tıklayın"
     },
-    "noMatch": {
-      "title": "Eşleşen hesap yok",
-      "desc": "Aramanızı veya filtrelerinizi ayarlamayı deneyin"
-    },
     "addModal": {
-      "title": "GitHub Copilot hesabı ekle",
-      "oauth": "OAuth girişi",
-      "token": "JSON içe aktar",
-      "import": "Yerel içe aktar"
+      "title": "GitHub Copilot hesabı ekle"
     },
     "oauth": {
-      "desc": "Aşağıdaki düğmeye tıklayın ve tarayıcıda GitHub Copilot yetkilendirmesini tamamlayın.",
-      "preparing": "Yetkilendirme bağlantısı hazırlanıyor...",
-      "openBrowser": "Tarayıcıda aç",
-      "hint": "Yetkilendirme tamamlanınca bu pencere otomatik güncellenir",
-      "success": "Yetkilendirme başarılı",
-      "failed": "Yetkilendirme başarısız",
-      "retry": "Yetkilendirme bilgisini yeniden oluştur",
-      "timeoutRetry": "Yetkilendirme bağlantısını yenile",
-      "waiting": "Yetkilendirme bekleniyor...",
-      "meta": "Süre bitimine: {{expires}}s; yoklama aralığı: {{interval}}s"
+      "desc": "Aşağıdaki düğmeye tıklayın ve tarayıcıda GitHub Copilot yetkilendirmesini tamamlayın."
     },
     "token": {
-      "desc": "GitHub Copilot erişim belirtecini veya dışa aktarılan JSON verisini yapıştırın.",
-      "placeholder": "JSON içeriğini yapıştırın...",
-      "import": "İçe aktar",
-      "importing": "İçe aktarılıyor...",
-      "importSuccessMsg": "{{count}} hesap içe aktarıldı",
-      "importFailedMsg": "İçe aktarma başarısız: {{error}}",
-      "empty": "Token veya JSON girin"
+      "desc": "GitHub Copilot erişim belirtecini veya dışa aktarılan JSON verisini yapıştırın."
     },
     "import": {
-      "label": "İçe aktar",
-      "localDesc": "Yerelde oturum açılmış oturumlardan GitHub Copilot hesaplarını içe aktar.",
-      "importing": "Yerel hesap içe aktarılıyor...",
-      "failedMsg": "İçe aktarma başarısız: {{error}}",
-      "pickFile": "İçe aktarılacak JSON dosyasını seçin"
+      "localDesc": "Yerelde oturum açılmış oturumlardan GitHub Copilot hesaplarını içe aktar."
     },
-    "quota": {
-      "hourly": "5 saatlik kota",
-      "weekly": "Haftalık kota",
-      "noData": "Kota verisi yok",
-      "resetDone": "Sıfırlandı"
-    },
-    "usage": {
-      "resetUnknown": "Kota sıfırlanmasına kalan -",
-      "resetLine": "Kota {{dateText}} tarihinde sıfırlanır."
-    },
-    "time": {
-      "relativeDays": "{{days}} g",
-      "relativeDaysHours": "{{days}} g {{hours}} sa",
-      "relativeHours": "{{hours}} sa",
-      "relativeHoursMinutes": "{{hours}} sa {{minutes}} dk",
-      "relativeMinutes": "{{minutes}} dk",
-      "lessThanMinute": "<1 dk",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "Hesap ara...",
-    "view": {
-      "list": "Liste görünümü",
-      "grid": "Kart görünümü"
-    },
-    "filter": {
-      "all": "Tümü ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Filtre",
-    "sortLabel": "Sırala",
     "sort": {
-      "createdAt": "Oluşturulma tarihi",
       "weekly": "Haftalık kota",
       "hourly": "5 saatlik kota",
       "weeklyReset": "Haftalık sıfırlama zamanı",
-      "hourlyReset": "5 saatlik sıfırlama zamanı",
-      "descTooltip": "Azalan (Artan için tıkla)",
-      "ascTooltip": "Artan (Azalan için tıkla)",
-      "toggleDirection": "Sıralama yönünü değiştir"
+      "hourlyReset": "5 saatlik sıfırlama zamanı"
     },
     "columns": {
-      "email": "Hesap",
-      "plan": "Paket",
       "hourly": "5 saatlik kota",
-      "weekly": "Haftalık kota",
-      "actions": "İşlemler"
+      "weekly": "Haftalık kota"
     },
-    "export": "Dışa aktar",
     "flowNotice": {
       "title": "GitHub Copilot hesap kılavuzu (genişletmek/daraltmak için tıklayın)",
       "desc": "Hesap değiştirme, VS Code yerel kimlik doğrulama deposunun okunmasını ve şifre çözme/geri yazma için sistem kimlik bilgisi hizmetinin kullanılmasını gerektirir; veriler yalnızca yerelde işlenir.",
       "reason": "İzin kapsamı: VS Code kimlik doğrulama veritabanını (state.vscdb) okumak ve şifre çözme/geri yazma için sistem şifreleme yeteneklerini (Windows DPAPI / macOS Keychain / Linux Secret Service) çağırmak.",
       "storage": "Okuma kapsamı: yalnızca GitHub oturum açma oturumu ile ilgili veriler işlenir; tüm işlemler yerel olarak yürütülür.",
-      "alternative": "Alternatif: çoklu örnek izolasyonunu kullanın (farklı --user-data-dir). Her örnek için bir kez giriş yapın, ardından hedef hesap ortamına hızlı geçiş için örnek bazında başlatın.",
       "inject": "Tek tıkla geçiş: Bu araç VS Code'un yerel şifreleme materyalini (DPAPI/Keychain/Secret Service) okur, state.vscdb içindeki kimlik doğrulama oturumunu çözer, GitHub Copilot belirtecini değiştirir ve yeniden şifreler — tüm işlem cihazınızda yerel olarak yapılır."
     },
     "injectToVSCode": "VS Code'a geç",
-    "injecting": "Enjekte ediliyor...",
     "injectSuccess": "Belirteç VS Code'a başarıyla enjekte edildi. VS Code başlatılıyor.",
     "injectRequireClose": "Enjeksiyondan önce lütfen VS Code'u kapatın."
   },
@@ -1202,10 +1192,10 @@
     },
     "windsurfRefreshInterval": "Kotayı otomatik yenile",
     "kiro": {
-      "title": "Kiro Settings",
-      "appPath": "Kiro Path"
+      "title": "Kiro Ayarları",
+      "appPath": "Kiro Yolu"
     },
-    "kiroRefreshInterval": "Auto refresh quota"
+    "kiroRefreshInterval": "Otomatik yenileme kotası"
   },
   "quotaAlert": {
     "bannerText": "{{email}} için kota uyarısı (eşik {{threshold}}%, en düşük {{lowest}}%, modeller: {{models}})",
@@ -1236,145 +1226,47 @@
   },
   "windsurf": {
     "title": "Windsurf Hesap Yönetimi",
-    "subtitle": "Windsurf hesaplarınızı yönetin",
-    "overview": {
-      "title": "Hesap Genel Bakışı"
-    },
     "instances": {
-      "title": "Çoklu Örnek",
-      "subtitle": "Örnek başına bağımsız yapılandırma, birden fazla hesapla paralel çalışma.",
       "unsupported": {
-        "title": "Bu sistemde desteklenmiyor",
         "desc": "Windsurf çoklu örnek şu anda yalnızca macOS'ta kullanılabilir."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
       }
     },
-    "addAccount": "Hesap ekle",
-    "refreshAll": "Tümünü yenile",
-    "refreshQuota": "Kotayı yenile",
     "empty": {
-      "title": "Hesap yok",
       "description": "\"Hesap ekle\"ye tıklayın"
     },
-    "noMatch": {
-      "title": "Eşleşen hesap yok",
-      "desc": "Aramanızı veya filtrelerinizi ayarlamayı deneyin"
-    },
     "addModal": {
-      "title": "Windsurf hesabı ekle",
-      "oauth": "OAuth girişi",
-      "token": "JSON içe aktar",
-      "import": "Yerel içe aktar"
+      "title": "Windsurf hesabı ekle"
     },
     "oauth": {
-      "desc": "Aşağıdaki düğmeye tıklayın ve tarayıcıda Windsurf yetkilendirmesini tamamlayın.",
-      "preparing": "Yetkilendirme bağlantısı hazırlanıyor...",
-      "openBrowser": "Tarayıcıda aç",
-      "hint": "Yetkilendirme tamamlanınca bu pencere otomatik güncellenir",
-      "success": "Yetkilendirme başarılı",
-      "failed": "Yetkilendirme başarısız",
-      "retry": "Yetkilendirme bilgisini yeniden oluştur",
-      "timeoutRetry": "Yetkilendirme bağlantısını yenile",
-      "waiting": "Yetkilendirme bekleniyor...",
-      "meta": "Süre bitimine: {{expires}}s; yoklama aralığı: {{interval}}s"
+      "desc": "Aşağıdaki düğmeye tıklayın ve tarayıcıda Windsurf yetkilendirmesini tamamlayın."
     },
     "token": {
-      "desc": "Windsurf erişim belirtecini veya dışa aktarılan JSON verisini yapıştırın.",
-      "placeholder": "JSON içeriğini yapıştırın...",
-      "import": "İçe aktar",
-      "importing": "İçe aktarılıyor...",
-      "importSuccessMsg": "{{count}} hesap içe aktarıldı",
-      "importFailedMsg": "İçe aktarma başarısız: {{error}}",
-      "empty": "Token veya JSON girin"
+      "desc": "Windsurf erişim belirtecini veya dışa aktarılan JSON verisini yapıştırın."
     },
     "import": {
-      "label": "İçe aktar",
       "localDesc": "Yerelde oturum açılmış oturumlardan Windsurf hesaplarını içe aktar.",
-      "localClient": "Yerel Windsurf'ten içe aktar",
-      "orJson": "Veya JSON dosyasından içe aktar",
-      "importing": "Yerel hesap içe aktarılıyor...",
-      "failedMsg": "İçe aktarma başarısız: {{error}}",
-      "pickFile": "İçe aktarılacak JSON dosyasını seçin"
-    },
-    "quota": {
-      "hourly": "5 saatlik kota",
-      "weekly": "Haftalık kota",
-      "noData": "Kota verisi yok",
-      "resetDone": "Sıfırlandı"
+      "localClient": "Yerel Windsurf'ten içe aktar"
     },
     "credits": {
-      "title": "Plan",
+      "title": "Planı",
       "renewMonthly": "Krediler her ay yenilenir",
-      "planEndsIn": "Döngü {{days}} gün içinde sıfırlanır",
-      "planEndsUnknown": "Döngü zamanı kullanılamıyor",
-      "periodRange": "Döngü: {{start}} - {{end}}",
-      "periodEndOnly": "Döngü sonu: {{end}}",
       "left": "{{count}} kredi kaldı",
       "leftUnknown": "Kalan krediler -",
       "promptLeft": "{{remaining}}/{{total}} istem kredisi kaldı",
       "promptLeftNoTotal": "{{remaining}} istem kredisi kaldı",
       "promptLeftUnknown": "Kalan istem kredileri -",
-      "addOnAvailable": "{{count}} ek kredi kullanılabilir",
-      "usedLine": "{{used}} / {{total}} kullanıldı",
-      "leftInline": "{{left}} kaldı"
-    },
-    "usage": {
-      "resetUnknown": "Kota sıfırlanmasına kalan -",
-      "resetLine": "Kota {{dateText}} tarihinde sıfırlanır."
-    },
-    "time": {
-      "relativeDays": "{{days}} g",
-      "relativeDaysHours": "{{days}} g {{hours}} sa",
-      "relativeHours": "{{hours}} sa",
-      "relativeHoursMinutes": "{{hours}} sa {{minutes}} dk",
-      "relativeMinutes": "{{minutes}} dk",
-      "lessThanMinute": "<1 dk",
-      "relativeWithAbsolute": "{{relative}} ({{absolute}})"
-    },
-    "search": "Hesap ara...",
-    "view": {
-      "list": "Liste görünümü",
-      "grid": "Kart görünümü"
-    },
-    "filter": {
-      "all": "Tümü ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Filtre",
-    "sortLabel": "Sırala",
-    "sort": {
-      "createdAt": "Oluşturulma tarihi",
-      "credits": "Kalan kredilere göre",
-      "planEnd": "Döngü bitişine göre",
-      "descTooltip": "Azalan (Artan için tıkla)",
-      "ascTooltip": "Artan (Azalan için tıkla)",
-      "toggleDirection": "Sıralama yönünü değiştir"
+      "addOnAvailable": "{{count}} ek kredi kullanılabilir"
     },
     "columns": {
-      "email": "E-posta",
-      "plan": "Etiket",
-      "promptCredits": "İstem kredileri",
-      "addOnPromptCredits": "Ek istem kredileri",
-      "credits": "Krediler",
-      "actions": "İşlemler"
+      "plan": "Etiket"
     },
-    "export": "Dışa aktar",
     "injectToVSCode": "Windsurf'a geç",
-    "injecting": "Enjekte ediliyor...",
     "injectSuccess": "Geçiş tamamlandı. Windsurf başlatılıyor.",
     "injectRequireClose": "Geçiş yapmadan önce lütfen Windsurf'ü kapatın.",
     "flowNotice": {
       "title": "Windsurf hesap kılavuzu (genişletmek/daraltmak için tıklayın)",
       "desc": "Hesap değiştirme, Windsurf yerel kimlik doğrulama deposunun okunmasını ve şifre çözme/geri yazma için sistem kimlik bilgisi hizmetinin kullanılmasını gerektirir; veriler yalnızca yerelde işlenir.",
       "inject": "Tek tıkla geçiş: Bu araç Windsurf'un yerel şifreleme materyalini (DPAPI/Keychain/Secret Service) okur, state.vscdb içindeki kimlik doğrulama oturumunu çözer, Windsurf belirtecini değiştirir ve yeniden şifreler — tüm işlem cihazınızda yerel olarak yapılır.",
-      "alternative": "Alternatif: çoklu örnek izolasyonunu kullanın (farklı --user-data-dir). Her örnek için bir kez giriş yapın, ardından hedef hesap ortamına hızlı geçiş için örnek bazında başlatın.",
       "reason": "İzin kapsamı: Windsurf kimlik doğrulama veritabanını (state.vscdb) okumak ve şifre çözme/geri yazma için sistem şifreleme yeteneklerini (Windows DPAPI / macOS Keychain / Linux Secret Service) çağırmak.",
       "storage": "Okuma kapsamı: yalnızca Windsurf oturum açma oturumu ile ilgili veriler işlenir; tüm işlemler yerel olarak yürütülür."
     }
@@ -1425,140 +1317,62 @@
   },
   "kiro": {
     "account": {
-      "signedInWith": "Signed in with {{provider}}",
-      "providerUnknown": "Unknown",
-      "userId": "User ID"
+      "signedInWith": "{{provider}} ile oturum açıldı",
+      "providerUnknown": "Bilinmiyor",
+      "userId": "Kullanıcı kimliği"
     },
     "credits": {
-      "planEndsIn": "Döngü {{days}} gün içinde sıfırlanır",
-      "planEndsUnknown": "Döngü zamanı kullanılamıyor",
-      "periodRange": "Döngü: {{start}} - {{end}}",
-      "periodEndOnly": "Döngü sonu: {{end}}",
-      "estimatedResetOn": "Estimated Usage resets on {{date}}",
-      "bonusUsageLine": "{{used}} used / {{total}} total",
-      "planUsageCoveredLine": "{{used}} used / {{total}} covered in plan",
-      "usedLine": "{{used}} / {{total}} kullanıldı",
-      "leftInline": "{{left}} kaldı",
-      "expiryDays": "{{days}} days",
+      "estimatedResetOn": "Tahmini Kullanım {{date}} tarihinde sıfırlanır",
+      "bonusUsageLine": "{{used}} kullanılmış / {{total}} toplam",
+      "planUsageCoveredLine": "{{used}} kullanıldı / {{total}} planda yer aldı",
+      "expiryDays": "{{days}} gün",
       "expiryUnknown": "—",
-      "resetNow": "Reset soon",
-      "resetInHours": "Resets in {{hours}}h",
-      "resetInMinutes": "Resets in {{minutes}}m"
+      "resetNow": "Yakında sıfırla",
+      "resetInHours": "{{hours}}h içinde sıfırlanır",
+      "resetInMinutes": "{{minutes}}m içinde sıfırlanır"
     },
     "columns": {
-      "email": "E-posta",
-      "plan": "Etiket",
-      "credits": "Krediler",
-      "promptCredits": "İstem kredileri",
-      "addOnPromptCredits": "Ek istem kredileri",
-      "bonusCredits": "Bonus Credits",
-      "estimatedUsage": "Estimated Usage",
-      "expiry": "Expiry",
-      "estUsage": "Est. Usage",
-      "actions": "İşlemler"
+      "bonusCredits": "Bonus Kredileri",
+      "estimatedUsage": "Tahmini Kullanım",
+      "expiry": "Son kullanma tarihi",
+      "estUsage": "Avustralya, Brezilya ve Kuzey Amerika ülkelerinin kullandığı saat uygulaması. Kullanım"
     },
     "plan": {
-      "free": "Kiro Free",
-      "individual": "Kiro Individual",
-      "pro": "Kiro Pro",
-      "business": "Kiro Business",
-      "enterprise": "Kiro Enterprise",
-      "unknown": "Unknown"
+      "free": "Kiro'suz",
+      "individual": "Kiro Bireysel",
+      "pro": "KiroPro",
+      "business": "Kiro İş",
+      "enterprise": "Kiro Kurumsal",
+      "unknown": "Bilinmiyor"
     },
     "flowNotice": {
       "title": "Kiro hesap kılavuzu (genişletmek/daraltmak için tıklayın)",
-      "desc": "Hesap değiştirme, Kiro yerel kimlik doğrulama deposunun okunmasını ve şifre çözme/geri yazma için sistem kimlik bilgisi hizmetinin kullanılmasını gerektirir; veriler yalnızca yerelde işlenir.",
-      "reason": "İzin kapsamı: Kiro kimlik doğrulama veritabanını (state.vscdb) okumak ve şifre çözme/geri yazma için sistem şifreleme yeteneklerini (Windows DPAPI / macOS Keychain / Linux Secret Service) çağırmak.",
-      "storage": "Okuma kapsamı: yalnızca Kiro oturum açma oturumu ile ilgili veriler işlenir; tüm işlemler yerel olarak yürütülür."
+      "desc": "Hesap değiştirme bu cihazda Kiro yerel kimlik doğrulama dosyalarını ve örnek ayarlarını okur/yazar; OAuth girişi ve kota yenileme işlemleri Kiro resmi API’lerini çağırır.",
+      "reason": "İşlenen yollar arasında ~/.aws/sso/cache/kiro-auth-token.json, örnek profile.json dosyası ve state.vscdb içindeki kiro.kiroAgent girdisi bulunur.",
+      "storage": "İşlenen veriler Kiro oturum ve kota bilgilerini içerir; Kiro resmi API’lerine yapılan isteklerde gerekli kimlik doğrulama alanları gönderilir (ör. code, refreshToken, accessToken ve profileArn)."
     },
-    "title": "Kiro Account Management",
-    "subtitle": "Monitor quota status for all accounts in real time.",
-    "overview": {
-      "title": "Account Overview"
-    },
+    "title": "Kiro Hesap Yönetimi",
     "instances": {
-      "title": "Multi-Instance",
-      "subtitle": "Independent configs per instance for parallel multi-account runs.",
       "unsupported": {
-        "title": "Unsupported on this system",
-        "descPlatform": "Kiro multi-instance is available only on macOS, Windows and Linux."
-      },
-      "quota": {
-        "inline": "Inline Suggestions",
-        "chat": "Chat messages"
+        "descPlatform": "Kiro çoklu örneği yalnızca macOS, Windows ve Linux'ta mevcuttur."
       }
     },
-    "addAccount": "Add Account",
-    "refreshAll": "Refresh All",
-    "refreshQuota": "Refresh Quota",
     "empty": {
-      "title": "No Accounts",
-      "description": "Click \"Add Account\" to start managing your Kiro accounts"
-    },
-    "noMatch": {
-      "title": "No matching accounts",
-      "desc": "Try adjusting your search or filters"
+      "description": "Kiro hesaplarınızı yönetmeye başlamak için \"Hesap Ekle\"ye tıklayın"
     },
     "addModal": {
-      "title": "Add Kiro Account",
-      "oauth": "OAuth",
-      "token": "Token / JSON",
-      "import": "Local Import"
+      "title": "Kiro Hesabı Ekle"
     },
     "oauth": {
-      "desc": "Click the button below and complete Kiro authorization in your browser.",
-      "preparing": "Preparing authorization info...",
-      "openBrowser": "Open in Browser",
-      "hint": "Once authorized, this window will update automatically",
-      "success": "Authorization successful",
-      "failed": "Authorization failed",
-      "retry": "Regenerate authorization info",
-      "timeoutRetry": "Refresh authorization link",
-      "waiting": "Waiting for authorization...",
-      "meta": "Expires in: {{expires}}s; Poll interval: {{interval}}s"
+      "desc": "Aşağıdaki düğmeye tıklayın ve tarayıcınızda Kiro yetkilendirmesini tamamlayın."
     },
     "token": {
-      "desc": "Paste your Kiro access token or exported JSON data.",
-      "placeholder": "Paste token or JSON...",
-      "import": "Import",
-      "importing": "Importing...",
-      "importSuccessMsg": "Imported {{count}} account(s) successfully",
-      "importFailedMsg": "Import failed: {{error}}",
-      "empty": "Please enter a token or JSON"
+      "desc": "Kiro erişim belirtecinizi veya dışa aktarılan JSON verilerinizi yapıştırın."
     },
     "import": {
-      "label": "Import",
-      "localDesc": "Import Kiro account data from local Kiro client or a JSON file.",
-      "localClient": "Import from local Kiro",
-      "orJson": "Or import from JSON file",
-      "importing": "Importing...",
-      "failedMsg": "Import failed: {{error}}",
-      "pickFile": "Select JSON file to import"
+      "localDesc": "Kiro hesap verilerini yerel Kiro istemcisinden veya bir JSON dosyasından içe aktarın.",
+      "localClient": "Yerel Kiro'dan ithalat"
     },
-    "search": "Search accounts...",
-    "view": {
-      "list": "List view",
-      "grid": "Card view"
-    },
-    "filter": {
-      "all": "All ({{count}})",
-      "free": "FREE ({{count}})",
-      "individual": "INDIVIDUAL ({{count}})",
-      "pro": "PRO ({{count}})",
-      "business": "BUSINESS ({{count}})",
-      "enterprise": "ENTERPRISE ({{count}})"
-    },
-    "filterLabel": "Filter",
-    "sortLabel": "Sort",
-    "sort": {
-      "createdAt": "Created time",
-      "credits": "By remaining credits",
-      "planEnd": "By cycle end time",
-      "descTooltip": "Current: Descending. Click to switch to ascending",
-      "ascTooltip": "Current: Ascending. Click to switch to descending",
-      "toggleDirection": "Toggle sort direction"
-    },
-    "export": "Export",
-    "injectToVSCode": "Switch to Kiro"
+    "injectToVSCode": "Kiro'ya geç"
   }
 }
