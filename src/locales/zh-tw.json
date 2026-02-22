@@ -152,8 +152,8 @@
     "codex": "Codex 帳號",
     "dashboard": "儀表板",
     "instances": "多開實例",
-    "githubCopilot": "GitHub 副駕駛",
-    "windsurf": "風帆衝浪",
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
     "morePlatforms": "更多平台"
   },
   "settings": {
@@ -257,7 +257,7 @@
       "saveFailed": "儲存失敗: {{error}}"
     },
     "about": {
-      "appName": "駕駛艙工具",
+      "appName": "Cockpit Tools",
       "slogan": "專業帳號管理解決方案",
       "author": "主作者",
       "wechat": "微信公眾號",
@@ -311,9 +311,9 @@
       "forbidden_msg": "帳號無權限，已跳過自動刷新"
     },
     "tier": {
-      "pro": "專業版",
-      "ultra": "極端主義者",
-      "free": "自由的"
+      "pro": "PRO",
+      "ultra": "ULTRA",
+      "free": "FREE"
     },
     "empty": {
       "title": "暫無帳號",
@@ -810,11 +810,11 @@
       "reset": "重置"
     },
     "plan": {
-      "free": "自由的",
-      "plus": "加",
-      "pro": "專業版",
-      "team": "團隊",
-      "enterprise": "企業"
+      "free": "FREE",
+      "plus": "PLUS",
+      "pro": "PRO",
+      "team": "TEAM",
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "今天 {{time}}",
@@ -896,9 +896,9 @@
       "totalAccounts": "總帳戶數"
     },
     "panels": {
-      "antigravity": "反重力",
-      "codex": "法典",
-      "githubCopilot": "GitHub 副駕駛",
+      "antigravity": "Antigravity",
+      "codex": "Codex",
+      "githubCopilot": "GitHub Copilot",
       "planDistribution": "方案分佈",
       "current": "目前帳號",
       "recommended": "推薦帳號",
@@ -1351,11 +1351,11 @@
       "estUsage": "預計。用法"
     },
     "plan": {
-      "free": "基羅自由",
-      "individual": "基羅個人賽",
-      "pro": "基羅專業版",
-      "business": "基羅商務",
-      "enterprise": "基羅企業",
+      "free": "Kiro Free",
+      "individual": "Kiro Individual",
+      "pro": "Kiro Pro",
+      "business": "Kiro Business",
+      "enterprise": "Kiro Enterprise",
       "unknown": "未知"
     },
     "flowNotice": {

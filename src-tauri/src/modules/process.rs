@@ -66,6 +66,16 @@ fn powershell_output(args: &[&str]) -> std::io::Result<std::process::Output> {
 }
 
 #[cfg(target_os = "windows")]
+fn cmd_output(args: &[&str]) -> std::io::Result<std::process::Output> {
+    use std::os::windows::process::CommandExt;
+
+    Command::new("cmd")
+        .creation_flags(CREATE_NO_WINDOW)
+        .args(args)
+        .output()
+}
+
+#[cfg(target_os = "windows")]
 fn powershell_output_file(script: &str) -> std::io::Result<std::process::Output> {
     use std::os::windows::process::CommandExt;
     use std::time::{SystemTime, UNIX_EPOCH};
@@ -282,7 +292,7 @@ fn reg_query_value(key: &str, value_name: &str) -> Option<String> {
     } else {
         format!("reg query \"{}\" /v {}", key, value_name)
     };
-    let output = Command::new("cmd").args(["/u", "/c", &cmd]).output().ok()?;
+    let output = cmd_output(&["/u", "/c", &cmd]).ok()?;
     if !output.status.success() {
         return None;
     }
@@ -355,7 +365,7 @@ fn detect_vscode_exec_path_by_registry() -> Option<std::path::PathBuf> {
     let keywords = ["visual studio code", "vs code", "vscode"];
     for root in uninstall_roots {
         let cmd = format!("reg query \"{}\" /s /v DisplayName", root);
-        let output = match Command::new("cmd").args(["/u", "/c", &cmd]).output() {
+        let output = match cmd_output(&["/u", "/c", &cmd]) {
             Ok(o) => o,
             Err(_) => continue,
         };

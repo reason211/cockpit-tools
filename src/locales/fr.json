@@ -152,8 +152,8 @@
     "codex": "Comptes Codex",
     "dashboard": "Tableau de bord",
     "instances": "Multi-Instance",
-    "githubCopilot": "Copilote GitHub",
-    "windsurf": "Planche à voile",
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
     "morePlatforms": "Plus de plateformes"
   },
   "settings": {
@@ -257,7 +257,7 @@
       "saveFailed": "Échec de l'enregistrement : {{error}}"
     },
     "about": {
-      "appName": "Outils de cockpit",
+      "appName": "Cockpit Tools",
       "slogan": "Solution professionnelle de gestion de comptes",
       "author": "Auteur",
       "wechat": "WeChat",
@@ -313,7 +313,7 @@
     "tier": {
       "pro": "PRO",
       "ultra": "ULTRA",
-      "free": "GRATUIT"
+      "free": "FREE"
     },
     "empty": {
       "title": "Aucun compte",
@@ -810,11 +810,11 @@
       "reset": "Réinitialiser"
     },
     "plan": {
-      "free": "GRATUIT",
+      "free": "FREE",
       "plus": "PLUS",
       "pro": "PRO",
-      "team": "ÉQUIPE",
-      "enterprise": "ENTREPRISE"
+      "team": "TEAM",
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "Aujourd'hui {{time}}",
@@ -896,9 +896,9 @@
       "totalAccounts": "Total des comptes"
     },
     "panels": {
-      "antigravity": "Antigravité",
-      "codex": "Manuscrit",
-      "githubCopilot": "Copilote GitHub",
+      "antigravity": "Antigravity",
+      "codex": "Codex",
+      "githubCopilot": "GitHub Copilot",
       "planDistribution": "Répartition des plans",
       "current": "Compte actuel",
       "recommended": "Compte recommandé",
@@ -1351,11 +1351,11 @@
       "estUsage": "HNE. Usage"
     },
     "plan": {
-      "free": "Kiro gratuit",
-      "individual": "Kiro Individuel",
-      "pro": "KiroPro",
-      "business": "Entreprise Kiro",
-      "enterprise": "Kiro Entreprise",
+      "free": "Kiro Free",
+      "individual": "Kiro Individual",
+      "pro": "Kiro Pro",
+      "business": "Kiro Business",
+      "enterprise": "Kiro Enterprise",
       "unknown": "Inconnu"
     },
     "flowNotice": {

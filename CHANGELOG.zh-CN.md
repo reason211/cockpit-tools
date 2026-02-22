@@ -7,6 +7,21 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
 ---
+## [0.8.12] - 2026-02-22
+
+### 新增
+- **GitHub Release + Homebrew Cask 一键发布脚本**：新增 `scripts/release/publish_github_release_and_cask.cjs` 与 `npm run release:github-and-cask`，支持 `universal.dmg` 构建、GitHub Release 上传与 `Casks/cockpit-tools.rb` 更新（含 `--skip-build` / `--skip-gh` / `--skip-cask` / `--dry-run` 等参数）。
+
+### 变更
+- **启动路径探测策略优化**：应用启动时改为先读取本地配置，仅探测未配置路径的平台，并使用延迟 + 错峰执行，降低启动阶段集中调用系统探测命令的概率。
+- **发布流程文档补充 Homebrew 场景**：更新 `docs/release-process.md`，补充 `universal` 构建推荐方式、`SHA256SUMS` 生成示例、GitHub CLI/Rust target 前置条件及 cask 更新顺序说明。
+
+### 修复
+- **Windows 启动黑色命令行窗口闪烁**：修复 VS Code 路径注册表回退探测中 `cmd /c reg query` 未隐藏窗口的问题，后台命令改为隐藏执行，减少部分 Windows 用户启动时出现多个黑色窗口闪现。
+- **品牌名与套餐标签误翻译**：修复非英语语言中品牌名/产品名与原始套餐标签被本地化的问题，恢复 `Cockpit Tools`、`Antigravity`、`Codex`、`GitHub Copilot`、`Windsurf` 以及 `accounts.tier.*`、`codex.plan.*`、`kiro.plan.*` 的原始显示值。
+- **翻译校验误报品牌名**：为多语言校验脚本补充品牌名英文复用白名单，避免后续再次将品牌名误判为“未本地化”。
+
+---
 ## [0.8.11] - 2026-02-22
 
 ### 变更

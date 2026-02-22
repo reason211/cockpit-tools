@@ -150,7 +150,7 @@
     "fingerprints": "Impressões",
     "settings": "Configurações",
     "codex": "Contas Codex",
-    "githubCopilot": "Copiloto GitHub",
+    "githubCopilot": "GitHub Copilot",
     "dashboard": "Painel",
     "instances": "Multi-Instância",
     "windsurf": "Windsurf",
@@ -257,7 +257,7 @@
       "saveFailed": "Falha ao salvar: {{error}}"
     },
     "about": {
-      "appName": "Ferramentas de cabine",
+      "appName": "Cockpit Tools",
       "slogan": "Solução Profissional de Gerenciamento de Contas",
       "author": "Autor",
       "wechat": "WeChat",
@@ -311,9 +311,9 @@
       "forbidden_msg": "Conta proibida, atualização automática ignorada"
     },
     "tier": {
-      "pro": "PRÓ",
+      "pro": "PRO",
       "ultra": "ULTRA",
-      "free": "GRÁTIS"
+      "free": "FREE"
     },
     "empty": {
       "title": "Sem Contas",
@@ -810,11 +810,11 @@
       "reset": "Redefinir"
     },
     "plan": {
-      "free": "LIVRE",
-      "plus": "MAIS",
-      "pro": "PRÓ",
-      "team": "EQUIPE",
-      "enterprise": "EMPRESA"
+      "free": "FREE",
+      "plus": "PLUS",
+      "pro": "PRO",
+      "team": "TEAM",
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "Hoje {{time}}",
@@ -939,9 +939,9 @@
       "totalAccounts": "Total de contas"
     },
     "panels": {
-      "antigravity": "Antigravidade",
-      "codex": "Códice",
-      "githubCopilot": "Copiloto GitHub",
+      "antigravity": "Antigravity",
+      "codex": "Codex",
+      "githubCopilot": "GitHub Copilot",
       "planDistribution": "Distribuição de planos",
       "current": "Conta atual",
       "recommended": "Conta recomendada",
@@ -1351,10 +1351,10 @@
       "estUsage": "Husa. Uso"
     },
     "plan": {
-      "free": "Kiro grátis",
-      "individual": "Kiro Indivíduo",
+      "free": "Kiro Free",
+      "individual": "Kiro Individual",
       "pro": "Kiro Pro",
-      "business": "Kiro Negócios",
+      "business": "Kiro Business",
       "enterprise": "Kiro Enterprise",
       "unknown": "Desconhecido"
     },

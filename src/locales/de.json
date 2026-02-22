@@ -152,8 +152,8 @@
     "codex": "Codex-Konten",
     "dashboard": "Armaturenbrett",
     "instances": "Multi-Instanz",
-    "githubCopilot": "GitHub-Copilot",
-    "windsurf": "Windsurfen",
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
     "morePlatforms": "Weitere Plattformen"
   },
   "settings": {
@@ -257,7 +257,7 @@
       "saveFailed": "Speichern fehlgeschlagen: {{error}}"
     },
     "about": {
-      "appName": "Cockpit-Tools",
+      "appName": "Cockpit Tools",
       "slogan": "Professionelle Lösung zur Kontoverwaltung",
       "author": "Autor",
       "wechat": "WeChat",
@@ -313,7 +313,7 @@
     "tier": {
       "pro": "PRO",
       "ultra": "ULTRA",
-      "free": "KOSTENLOS"
+      "free": "FREE"
     },
     "empty": {
       "title": "Keine Konten",
@@ -810,11 +810,11 @@
       "reset": "Zurücksetzen"
     },
     "plan": {
-      "free": "FREI",
+      "free": "FREE",
       "plus": "PLUS",
       "pro": "PRO",
       "team": "TEAM",
-      "enterprise": "UNTERNEHMEN"
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "Heute {{time}}",
@@ -896,9 +896,9 @@
       "totalAccounts": "Gesamtanzahl"
     },
     "panels": {
-      "antigravity": "Antigravitation",
-      "codex": "Kodex",
-      "githubCopilot": "GitHub-Copilot",
+      "antigravity": "Antigravity",
+      "codex": "Codex",
+      "githubCopilot": "GitHub Copilot",
       "planDistribution": "Planverteilung",
       "current": "Aktuelles Konto",
       "recommended": "Empfohlenes Konto",
@@ -1352,9 +1352,9 @@
     },
     "plan": {
       "free": "Kiro Free",
-      "individual": "Kiro Einzelperson",
+      "individual": "Kiro Individual",
       "pro": "Kiro Pro",
-      "business": "Kiro-Geschäft",
+      "business": "Kiro Business",
       "enterprise": "Kiro Enterprise",
       "unknown": "Unbekannt"
     },

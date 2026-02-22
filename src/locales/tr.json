@@ -152,8 +152,8 @@
     "codex": "Codex Hesapları",
     "dashboard": "Gösterge Paneli",
     "instances": "Çoklu Örnek",
-    "githubCopilot": "GitHub Yardımcı Pilotu",
-    "windsurf": "Rüzgar sörfü",
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
     "morePlatforms": "Daha Fazla Platform"
   },
   "settings": {
@@ -257,7 +257,7 @@
       "saveFailed": "Kaydetme hatası: {{error}}"
     },
     "about": {
-      "appName": "Kokpit Araçları",
+      "appName": "Cockpit Tools",
       "slogan": "Profesyonel Hesap Yönetimi Çözümü",
       "author": "Yazar",
       "wechat": "WeChat",
@@ -313,7 +313,7 @@
     "tier": {
       "pro": "PRO",
       "ultra": "ULTRA",
-      "free": "ÜCRETSİZ"
+      "free": "FREE"
     },
     "empty": {
       "title": "Hesap Yok",
@@ -810,11 +810,11 @@
       "reset": "Sıfırla"
     },
     "plan": {
-      "free": "ÖZGÜR",
-      "plus": "ARTI",
+      "free": "FREE",
+      "plus": "PLUS",
       "pro": "PRO",
-      "team": "TAKIM",
-      "enterprise": "GİRİŞİM"
+      "team": "TEAM",
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "Bugün {{time}}",
@@ -896,9 +896,9 @@
       "totalAccounts": "Toplam hesap"
     },
     "panels": {
-      "antigravity": "Yer çekimine karşı",
-      "codex": "Kodeks",
-      "githubCopilot": "GitHub Yardımcı Pilotu",
+      "antigravity": "Antigravity",
+      "codex": "Codex",
+      "githubCopilot": "GitHub Copilot",
       "planDistribution": "Plan dağılımı",
       "current": "Mevcut hesap",
       "recommended": "Önerilen hesap",
@@ -1351,11 +1351,11 @@
       "estUsage": "Avustralya, Brezilya ve Kuzey Amerika ülkelerinin kullandığı saat uygulaması. Kullanım"
     },
     "plan": {
-      "free": "Kiro'suz",
-      "individual": "Kiro Bireysel",
-      "pro": "KiroPro",
-      "business": "Kiro İş",
-      "enterprise": "Kiro Kurumsal",
+      "free": "Kiro Free",
+      "individual": "Kiro Individual",
+      "pro": "Kiro Pro",
+      "business": "Kiro Business",
+      "enterprise": "Kiro Enterprise",
       "unknown": "Bilinmiyor"
     },
     "flowNotice": {

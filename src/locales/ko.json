@@ -152,8 +152,8 @@
     "codex": "Codex 계정",
     "dashboard": "대시보드",
     "instances": "멀티 인스턴스",
-    "githubCopilot": "GitHub 코파일럿",
-    "windsurf": "윈드서핑",
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
     "morePlatforms": "더 많은 플랫폼"
   },
   "settings": {
@@ -257,7 +257,7 @@
       "saveFailed": "저장 실패: {{error}}"
     },
     "about": {
-      "appName": "조종석 도구",
+      "appName": "Cockpit Tools",
       "slogan": "전문적인 계정 관리 솔루션",
       "author": "제작자",
       "wechat": "WeChat 플러스",
@@ -311,9 +311,9 @@
       "forbidden_msg": "계정 금지됨, 자동 새로고침 건너뜀"
     },
     "tier": {
-      "pro": "찬성",
-      "ultra": "극단론자",
-      "free": "무료"
+      "pro": "PRO",
+      "ultra": "ULTRA",
+      "free": "FREE"
     },
     "empty": {
       "title": "계정 없음",
@@ -810,11 +810,11 @@
       "reset": "재설정"
     },
     "plan": {
-      "free": "무료",
-      "plus": "을 더한",
-      "pro": "찬성",
-      "team": "팀",
-      "enterprise": "기업"
+      "free": "FREE",
+      "plus": "PLUS",
+      "pro": "PRO",
+      "team": "TEAM",
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "오늘 {{time}}",
@@ -896,9 +896,9 @@
       "totalAccounts": "전체 계정 수"
     },
     "panels": {
-      "antigravity": "반중력",
-      "codex": "사본",
-      "githubCopilot": "GitHub 코파일럿",
+      "antigravity": "Antigravity",
+      "codex": "Codex",
+      "githubCopilot": "GitHub Copilot",
       "planDistribution": "플랜 분포",
       "current": "현재 계정",
       "recommended": "추천 계정",
@@ -1351,11 +1351,11 @@
       "estUsage": "예상 용법"
     },
     "plan": {
-      "free": "키로 프리",
-      "individual": "키로 개인",
-      "pro": "키로 프로",
-      "business": "키로비즈니스",
-      "enterprise": "키로엔터프라이즈",
+      "free": "Kiro Free",
+      "individual": "Kiro Individual",
+      "pro": "Kiro Pro",
+      "business": "Kiro Business",
+      "enterprise": "Kiro Enterprise",
       "unknown": "알려지지 않은"
     },
     "flowNotice": {

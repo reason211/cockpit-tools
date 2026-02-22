@@ -152,7 +152,7 @@
     "codex": "Account Codex",
     "dashboard": "Pannello di controllo",
     "instances": "Multi-Istanza",
-    "githubCopilot": "Copilota GitHub",
+    "githubCopilot": "GitHub Copilot",
     "windsurf": "Windsurf",
     "morePlatforms": "Altre piattaforme"
   },
@@ -257,7 +257,7 @@
       "saveFailed": "Salvataggio fallito: {{error}}"
     },
     "about": {
-      "appName": "Strumenti della cabina di pilotaggio",
+      "appName": "Cockpit Tools",
       "slogan": "Soluzione Professionale per la Gestione degli Account",
       "author": "Autore",
       "wechat": "WeChat",
@@ -313,7 +313,7 @@
     "tier": {
       "pro": "PRO",
       "ultra": "ULTRA",
-      "free": "GRATUITO"
+      "free": "FREE"
     },
     "empty": {
       "title": "Nessun Account",
@@ -810,11 +810,11 @@
       "reset": "Reimposta"
     },
     "plan": {
-      "free": "GRATUITO",
-      "plus": "PIÙ",
+      "free": "FREE",
+      "plus": "PLUS",
       "pro": "PRO",
-      "team": "SQUADRA",
-      "enterprise": "IMPRESA"
+      "team": "TEAM",
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "Oggi {{time}}",
@@ -896,9 +896,9 @@
       "totalAccounts": "Totale account"
     },
     "panels": {
-      "antigravity": "Antigravità",
-      "codex": "Codice",
-      "githubCopilot": "Copilota GitHub",
+      "antigravity": "Antigravity",
+      "codex": "Codex",
+      "githubCopilot": "GitHub Copilot",
       "planDistribution": "Distribuzione piani",
       "current": "Account attuale",
       "recommended": "Account consigliato",
@@ -1351,11 +1351,11 @@
       "estUsage": "Est. Utilizzo"
     },
     "plan": {
-      "free": "Kiro Libero",
-      "individual": "Kiro Individuale",
+      "free": "Kiro Free",
+      "individual": "Kiro Individual",
       "pro": "Kiro Pro",
-      "business": "Kiro Affari",
-      "enterprise": "Kiro impresa",
+      "business": "Kiro Business",
+      "enterprise": "Kiro Enterprise",
       "unknown": "Sconosciuto"
     },
     "flowNotice": {

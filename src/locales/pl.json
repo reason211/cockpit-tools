@@ -152,8 +152,8 @@
     "codex": "Konta Codex",
     "dashboard": "Panel",
     "instances": "Multi-Instancja",
-    "githubCopilot": "Drugi pilot GitHuba",
-    "windsurf": "Windsurfing",
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
     "morePlatforms": "Więcej platform"
   },
   "settings": {
@@ -257,7 +257,7 @@
       "saveFailed": "Błąd zapisu: {{error}}"
     },
     "about": {
-      "appName": "Narzędzia w kokpicie",
+      "appName": "Cockpit Tools",
       "slogan": "Profesjonalne rozwiązanie do zarządzania kontami",
       "author": "Autor",
       "wechat": "WeChat",
@@ -311,9 +311,9 @@
       "forbidden_msg": "Konto zabronione, pominięto automatyczne odświeżanie"
     },
     "tier": {
-      "pro": "ZAWODOWIEC",
+      "pro": "PRO",
       "ultra": "ULTRA",
-      "free": "DARMOWE"
+      "free": "FREE"
     },
     "empty": {
       "title": "Brak kont",
@@ -810,11 +810,11 @@
       "reset": "Resetuj"
     },
     "plan": {
-      "free": "BEZPŁATNY",
+      "free": "FREE",
       "plus": "PLUS",
-      "pro": "ZAWODOWIEC",
-      "team": "ZESPÓŁ",
-      "enterprise": "PRZEDSIĘBIORSTWO"
+      "pro": "PRO",
+      "team": "TEAM",
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "Dzisiaj {{time}}",
@@ -896,9 +896,9 @@
       "totalAccounts": "Łącznie kont"
     },
     "panels": {
-      "antigravity": "Antygrawitacja",
-      "codex": "Kodeks",
-      "githubCopilot": "Drugi pilot GitHuba",
+      "antigravity": "Antigravity",
+      "codex": "Codex",
+      "githubCopilot": "GitHub Copilot",
       "planDistribution": "Rozkład planów",
       "current": "Bieżące konto",
       "recommended": "Polecane konto",
@@ -1351,11 +1351,11 @@
       "estUsage": "Szac. Stosowanie"
     },
     "plan": {
-      "free": "Kiro za darmo",
-      "individual": "Indywidualny Kiro",
+      "free": "Kiro Free",
+      "individual": "Kiro Individual",
       "pro": "Kiro Pro",
-      "business": "Firma Kiro",
-      "enterprise": "Firma Kiro",
+      "business": "Kiro Business",
+      "enterprise": "Kiro Enterprise",
       "unknown": "Nieznany"
     },
     "flowNotice": {

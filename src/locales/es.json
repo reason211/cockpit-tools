@@ -150,10 +150,10 @@
     "fingerprints": "Huellas",
     "settings": "Ajustes",
     "codex": "Cuentas de Codex",
-    "githubCopilot": "Copiloto de GitHub",
+    "githubCopilot": "GitHub Copilot",
     "dashboard": "Panel",
     "instances": "Multi-Instancia",
-    "windsurf": "windsurf",
+    "windsurf": "Windsurf",
     "morePlatforms": "Más plataformas"
   },
   "settings": {
@@ -257,7 +257,7 @@
       "saveFailed": "Error al guardar: {{error}}"
     },
     "about": {
-      "appName": "Herramientas de cabina",
+      "appName": "Cockpit Tools",
       "slogan": "Solución Profesional de Gestión de Cuentas",
       "author": "Autor",
       "wechat": "WeChat",
@@ -313,7 +313,7 @@
     "tier": {
       "pro": "PRO",
       "ultra": "ULTRA",
-      "free": "GRATIS"
+      "free": "FREE"
     },
     "empty": {
       "title": "Sin Cuentas",
@@ -810,11 +810,11 @@
       "reset": "Reinicio"
     },
     "plan": {
-      "free": "GRATIS",
-      "plus": "MÁS",
+      "free": "FREE",
+      "plus": "PLUS",
       "pro": "PRO",
-      "team": "EQUIPO",
-      "enterprise": "EMPRESA"
+      "team": "TEAM",
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "Hoy {{time}}",
@@ -939,9 +939,9 @@
       "totalAccounts": "Total de cuentas"
     },
     "panels": {
-      "antigravity": "antigravedad",
-      "codex": "Códice",
-      "githubCopilot": "Copiloto de GitHub",
+      "antigravity": "Antigravity",
+      "codex": "Codex",
+      "githubCopilot": "GitHub Copilot",
       "planDistribution": "Distribución de planes",
       "current": "Cuenta actual",
       "recommended": "Cuenta recomendada",
@@ -1351,11 +1351,11 @@
       "estUsage": "Est. Uso"
     },
     "plan": {
-      "free": "Kiro libre",
-      "individual": "kiro individual",
+      "free": "Kiro Free",
+      "individual": "Kiro Individual",
       "pro": "Kiro Pro",
-      "business": "Kiro Negocios",
-      "enterprise": "Empresa Kiro",
+      "business": "Kiro Business",
+      "enterprise": "Kiro Enterprise",
       "unknown": "Desconocido"
     },
     "flowNotice": {

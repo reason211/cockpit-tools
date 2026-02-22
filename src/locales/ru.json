@@ -152,8 +152,8 @@
     "codex": "Аккаунты Codex",
     "dashboard": "Панель",
     "instances": "Мульти-инстанс",
-    "githubCopilot": "GitHub второй пилот",
-    "windsurf": "Виндсерфинг",
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
     "morePlatforms": "Другие платформы"
   },
   "settings": {
@@ -257,7 +257,7 @@
       "saveFailed": "Ошибка сохранения: {{error}}"
     },
     "about": {
-      "appName": "Инструменты кабины",
+      "appName": "Cockpit Tools",
       "slogan": "Профессиональное решение для управления аккаунтами",
       "author": "Автор",
       "wechat": "Вичат",
@@ -311,9 +311,9 @@
       "forbidden_msg": "Аккаунт запрещён, автообновление пропущено"
     },
     "tier": {
-      "pro": "ПРО",
-      "ultra": "УЛЬТРА",
-      "free": "БЕСПЛАТНО"
+      "pro": "PRO",
+      "ultra": "ULTRA",
+      "free": "FREE"
     },
     "empty": {
       "title": "Нет аккаунтов",
@@ -810,11 +810,11 @@
       "reset": "Сброс"
     },
     "plan": {
-      "free": "БЕСПЛАТНО",
-      "plus": "ПЛЮС",
-      "pro": "ПРО",
-      "team": "КОМАНДА",
-      "enterprise": "ПРЕДПРИЯТИЕ"
+      "free": "FREE",
+      "plus": "PLUS",
+      "pro": "PRO",
+      "team": "TEAM",
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "Сегодня {{time}}",
@@ -896,9 +896,9 @@
       "totalAccounts": "Всего аккаунтов"
     },
     "panels": {
-      "antigravity": "Антигравитация",
-      "codex": "Кодекс",
-      "githubCopilot": "GitHub второй пилот",
+      "antigravity": "Antigravity",
+      "codex": "Codex",
+      "githubCopilot": "GitHub Copilot",
       "planDistribution": "Распределение планов",
       "current": "Текущий аккаунт",
       "recommended": "Рекомендуемый аккаунт",
@@ -1351,11 +1351,11 @@
       "estUsage": "Стандартное восточное время. Использование"
     },
     "plan": {
-      "free": "Киро Бесплатно",
-      "individual": "Киро Индивидуальный",
-      "pro": "Киро Про",
-      "business": "Киро Бизнес",
-      "enterprise": "Киро Энтерпрайз",
+      "free": "Kiro Free",
+      "individual": "Kiro Individual",
+      "pro": "Kiro Pro",
+      "business": "Kiro Business",
+      "enterprise": "Kiro Enterprise",
       "unknown": "Неизвестный"
     },
     "flowNotice": {

@@ -152,8 +152,8 @@
     "codex": "Codex アカウント",
     "dashboard": "ダッシュボード",
     "instances": "マルチインスタンス",
-    "githubCopilot": "GitHub コパイロット",
-    "windsurf": "ウィンドサーフィン",
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
     "morePlatforms": "その他のプラットフォーム"
   },
   "settings": {
@@ -257,7 +257,7 @@
       "saveFailed": "保存に失敗しました: {{error}}"
     },
     "about": {
-      "appName": "コックピットツール",
+      "appName": "Cockpit Tools",
       "slogan": "プロフェッショナルなアカウント管理ソリューション",
       "author": "著者",
       "wechat": "WeChat 公衆号",
@@ -311,9 +311,9 @@
       "forbidden_msg": "アカウント禁止、自動更新をスキップしました"
     },
     "tier": {
-      "pro": "プロ",
-      "ultra": "ウルトラ",
-      "free": "無料"
+      "pro": "PRO",
+      "ultra": "ULTRA",
+      "free": "FREE"
     },
     "empty": {
       "title": "アカウントがありません",
@@ -810,11 +810,11 @@
       "reset": "リセット"
     },
     "plan": {
-      "free": "無料",
-      "plus": "プラス",
-      "pro": "プロ",
-      "team": "チーム",
-      "enterprise": "企業"
+      "free": "FREE",
+      "plus": "PLUS",
+      "pro": "PRO",
+      "team": "TEAM",
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "今日 {{time}}",
@@ -896,9 +896,9 @@
       "totalAccounts": "総アカウント数"
     },
     "panels": {
-      "antigravity": "反重力",
-      "codex": "コーデックス",
-      "githubCopilot": "GitHub コパイロット",
+      "antigravity": "Antigravity",
+      "codex": "Codex",
+      "githubCopilot": "GitHub Copilot",
       "planDistribution": "プラン分布",
       "current": "現在のアカウント",
       "recommended": "おすすめアカウント",
@@ -1351,11 +1351,11 @@
       "estUsage": "EST（東部基準時。使用法"
     },
     "plan": {
-      "free": "キロフリー",
-      "individual": "キロ個人",
-      "pro": "キロプロ",
-      "business": "キロ事業",
-      "enterprise": "キロエンタープライズ",
+      "free": "Kiro Free",
+      "individual": "Kiro Individual",
+      "pro": "Kiro Pro",
+      "business": "Kiro Business",
+      "enterprise": "Kiro Enterprise",
       "unknown": "未知"
     },
     "flowNotice": {

@@ -152,8 +152,8 @@
     "codex": "Tài khoản Codex",
     "dashboard": "Bảng điều khiển",
     "instances": "Đa Phiên Bản",
-    "githubCopilot": "Phi công phụ GitHub",
-    "windsurf": "Lướt ván buồm",
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
     "morePlatforms": "Thêm nền tảng"
   },
   "settings": {
@@ -257,7 +257,7 @@
       "saveFailed": "Lưu thất bại: {{error}}"
     },
     "about": {
-      "appName": "Công cụ buồng lái",
+      "appName": "Cockpit Tools",
       "slogan": "Giải pháp quản lý tài khoản chuyên nghiệp",
       "author": "Tác giả chính",
       "wechat": "Tài khoản WeChat chính thức",
@@ -311,9 +311,9 @@
       "forbidden_msg": "Tài khoản không có quyền, đã bỏ qua tự động làm mới"
     },
     "tier": {
-      "pro": "CHUYÊN NGHIỆP",
-      "ultra": "SIÊU",
-      "free": "MIỄN PHÍ"
+      "pro": "PRO",
+      "ultra": "ULTRA",
+      "free": "FREE"
     },
     "empty": {
       "title": "Chưa có tài khoản",
@@ -810,11 +810,11 @@
       "reset": "Đặt lại"
     },
     "plan": {
-      "free": "MIỄN PHÍ",
-      "plus": "CỘNG VỚI",
-      "pro": "CHUYÊN NGHIỆP",
-      "team": "ĐỘI",
-      "enterprise": "DOANH NGHIỆP"
+      "free": "FREE",
+      "plus": "PLUS",
+      "pro": "PRO",
+      "team": "TEAM",
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "Hôm nay {{time}}",
@@ -896,9 +896,9 @@
       "totalAccounts": "Tổng tài khoản"
     },
     "panels": {
-      "antigravity": "phản trọng lực",
+      "antigravity": "Antigravity",
       "codex": "Codex",
-      "githubCopilot": "Phi công phụ GitHub",
+      "githubCopilot": "GitHub Copilot",
       "planDistribution": "Phân bố gói",
       "current": "Tài khoản hiện tại",
       "recommended": "Tài khoản đề xuất",
@@ -1351,11 +1351,11 @@
       "estUsage": "Ước tính. Cách sử dụng"
     },
     "plan": {
-      "free": "Kiro miễn phí",
-      "individual": "Kiro Cá Nhân",
+      "free": "Kiro Free",
+      "individual": "Kiro Individual",
       "pro": "Kiro Pro",
-      "business": "kinh doanh kiro",
-      "enterprise": "Doanh nghiệp Kiro",
+      "business": "Kiro Business",
+      "enterprise": "Kiro Enterprise",
       "unknown": "Không xác định"
     },
     "flowNotice": {

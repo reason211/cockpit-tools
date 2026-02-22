@@ -151,8 +151,8 @@
     "fingerprints": "设备指纹",
     "settings": "设置",
     "codex": "Codex 账号",
-    "githubCopilot": "GitHub 副驾驶",
-    "windsurf": "风帆冲浪",
+    "githubCopilot": "GitHub Copilot",
+    "windsurf": "Windsurf",
     "morePlatforms": "更多平台",
     "instances": "多开实例"
   },
@@ -468,7 +468,7 @@
       "saveFailed": "保存失败: {{error}}"
     },
     "about": {
-      "appName": "驾驶舱工具",
+      "appName": "Cockpit Tools",
       "slogan": "专业账号管理解决方案",
       "author": "主作者",
       "wechat": "微信公众号",
@@ -529,9 +529,9 @@
       "forbidden_msg": "账号无权限，已跳过自动刷新"
     },
     "tier": {
-      "pro": "专业版",
-      "ultra": "极端主义者",
-      "free": "自由的"
+      "pro": "PRO",
+      "ultra": "ULTRA",
+      "free": "FREE"
     },
     "empty": {
       "title": "暂无账号",
@@ -1061,11 +1061,11 @@
       "deactivatedWorkspace": "工作区已停用，请切换账号或重新授权"
     },
     "plan": {
-      "free": "自由的",
-      "plus": "加",
-      "pro": "专业版",
-      "team": "团队",
-      "enterprise": "企业"
+      "free": "FREE",
+      "plus": "PLUS",
+      "pro": "PRO",
+      "team": "TEAM",
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "今天 {{time}}",
@@ -1166,9 +1166,9 @@
       "totalAccounts": "账号总数"
     },
     "panels": {
-      "antigravity": "反重力",
-      "codex": "法典",
-      "githubCopilot": "GitHub 副驾驶",
+      "antigravity": "Antigravity",
+      "codex": "Codex",
+      "githubCopilot": "GitHub Copilot",
       "planDistribution": "订阅分布",
       "current": "当前账号",
       "recommended": "推荐账号",
@@ -1351,11 +1351,11 @@
       "estUsage": "预计。用法"
     },
     "plan": {
-      "free": "基罗自由",
-      "individual": "基罗个人赛",
-      "pro": "基罗专业版",
-      "business": "基罗商务",
-      "enterprise": "基罗企业",
+      "free": "Kiro Free",
+      "individual": "Kiro Individual",
+      "pro": "Kiro Pro",
+      "business": "Kiro Business",
+      "enterprise": "Kiro Enterprise",
       "unknown": "未知"
     },
     "flowNotice": {

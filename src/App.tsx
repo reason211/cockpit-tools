@@ -280,21 +280,62 @@ function App() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    const delayMs = 200;
+    const hasConfiguredPath = (value?: string) => Boolean(value?.trim());
+    const sleep = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+
     const detectAppPathsOnStartup = async () => {
       try {
-        await invoke('detect_app_path', { app: 'antigravity' });
-        await invoke('detect_app_path', { app: 'vscode' });
-        await invoke('detect_app_path', { app: 'windsurf' });
-        await invoke('detect_app_path', { app: 'kiro' });
+        const config = await invoke<GeneralConfig>('get_general_config');
+        if (cancelled) {
+          return;
+        }
+
         const userAgent = navigator.userAgent.toLowerCase();
-        if (userAgent.includes('mac')) {
-          await invoke('detect_app_path', { app: 'codex' });
+        const queue: Array<AppPathMissingDetail['app']> = [];
+
+        if (!hasConfiguredPath(config.antigravity_app_path)) {
+          queue.push('antigravity');
+        }
+        if (!hasConfiguredPath(config.vscode_app_path)) {
+          queue.push('vscode');
+        }
+        if (!hasConfiguredPath(config.windsurf_app_path)) {
+          queue.push('windsurf');
+        }
+        if (!hasConfiguredPath(config.kiro_app_path)) {
+          queue.push('kiro');
+        }
+        if (userAgent.includes('mac') && !hasConfiguredPath(config.codex_app_path)) {
+          queue.push('codex');
+        }
+
+        for (let i = 0; i < queue.length; i += 1) {
+          if (cancelled) {
+            return;
+          }
+          if (i > 0) {
+            await sleep(delayMs);
+            if (cancelled) {
+              return;
+            }
+          }
+          await invoke('detect_app_path', { app: queue[i] });
         }
       } catch (error) {
         console.error('启动路径探测失败:', error);
       }
     };
-    detectAppPathsOnStartup();
+
+    const timer = window.setTimeout(() => {
+      void detectAppPathsOnStartup();
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, []);
 
   useEffect(() => {

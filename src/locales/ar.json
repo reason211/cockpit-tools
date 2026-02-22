@@ -150,10 +150,10 @@
     "fingerprints": "بصمات الجهاز",
     "settings": "الإعدادات",
     "codex": "حسابات Codex",
-    "githubCopilot": "جيثب مساعد الطيار",
+    "githubCopilot": "GitHub Copilot",
     "dashboard": "لوحة التحكم",
     "instances": "مثيلات متعددة",
-    "windsurf": "ركوب الأمواج",
+    "windsurf": "Windsurf",
     "morePlatforms": "المزيد من المنصات"
   },
   "settings": {
@@ -257,7 +257,7 @@
       "saveFailed": "فشل الحفظ: {{error}}"
     },
     "about": {
-      "appName": "أدوات قمرة القيادة",
+      "appName": "Cockpit Tools",
       "slogan": "حل احترافي لإدارة الحسابات",
       "author": "المؤلف الرئيسي",
       "wechat": "حساب WeChat الرسمي",
@@ -311,9 +311,9 @@
       "forbidden_msg": "الحساب لا يملك صلاحية، تم تخطي التحديث التلقائي"
     },
     "tier": {
-      "pro": "للمحترفين",
-      "ultra": "الترا",
-      "free": "مجاني"
+      "pro": "PRO",
+      "ultra": "ULTRA",
+      "free": "FREE"
     },
     "empty": {
       "title": "لا توجد حسابات",
@@ -810,11 +810,11 @@
       "reset": "إعادة ضبط"
     },
     "plan": {
-      "free": "حر",
-      "plus": "زائد",
-      "pro": "للمحترفين",
-      "team": "فريق",
-      "enterprise": "مَشرُوع"
+      "free": "FREE",
+      "plus": "PLUS",
+      "pro": "PRO",
+      "team": "TEAM",
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "اليوم {{time}}",
@@ -939,9 +939,9 @@
       "totalAccounts": "إجمالي الحسابات"
     },
     "panels": {
-      "antigravity": "مضاد الجاذبية",
-      "codex": "الدستور الغذائي",
-      "githubCopilot": "جيثب مساعد الطيار",
+      "antigravity": "Antigravity",
+      "codex": "Codex",
+      "githubCopilot": "GitHub Copilot",
       "planDistribution": "توزيع الخطط",
       "current": "الحساب الحالي",
       "recommended": "الحساب الموصى به",
@@ -1351,11 +1351,11 @@
       "estUsage": "EST. الاستخدام"
     },
     "plan": {
-      "free": "كيرو مجاني",
-      "individual": "كيرو فردي",
-      "pro": "كيرو برو",
-      "business": "كيرو بيزنس",
-      "enterprise": "مؤسسة كيرو",
+      "free": "Kiro Free",
+      "individual": "Kiro Individual",
+      "pro": "Kiro Pro",
+      "business": "Kiro Business",
+      "enterprise": "Kiro Enterprise",
       "unknown": "مجهول"
     },
     "flowNotice": {

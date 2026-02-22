@@ -153,7 +153,7 @@
     "dashboard": "Dashboard",
     "instances": "Více instancí",
     "githubCopilot": "GitHub Copilot",
-    "windsurf": "Windsurfing",
+    "windsurf": "Windsurf",
     "morePlatforms": "Další platformy"
   },
   "settings": {
@@ -257,7 +257,7 @@
       "saveFailed": "Uložení selhalo: {{error}}"
     },
     "about": {
-      "appName": "Nástroje pro kokpit",
+      "appName": "Cockpit Tools",
       "slogan": "Profesionální řešení pro správu účtů",
       "author": "Autor",
       "wechat": "WeChat",
@@ -313,7 +313,7 @@
     "tier": {
       "pro": "PRO",
       "ultra": "ULTRA",
-      "free": "ZDARMA"
+      "free": "FREE"
     },
     "empty": {
       "title": "Žádné účty",
@@ -810,11 +810,11 @@
       "reset": "Reset"
     },
     "plan": {
-      "free": "UVOLNIT",
+      "free": "FREE",
       "plus": "PLUS",
       "pro": "PRO",
-      "team": "TÝM",
-      "enterprise": "PODNIK"
+      "team": "TEAM",
+      "enterprise": "ENTERPRISE"
     },
     "time": {
       "today": "Dnes {{time}}",
@@ -896,8 +896,8 @@
       "totalAccounts": "Celkem účtů"
     },
     "panels": {
-      "antigravity": "Antigravitace",
-      "codex": "Kodex",
+      "antigravity": "Antigravity",
+      "codex": "Codex",
       "githubCopilot": "GitHub Copilot",
       "planDistribution": "Rozložení plánů",
       "current": "Aktuální účet",
@@ -1351,8 +1351,8 @@
       "estUsage": "Odhad. Používání"
     },
     "plan": {
-      "free": "Kiro zdarma",
-      "individual": "Kiro jednotlivec",
+      "free": "Kiro Free",
+      "individual": "Kiro Individual",
       "pro": "Kiro Pro",
       "business": "Kiro Business",
       "enterprise": "Kiro Enterprise",

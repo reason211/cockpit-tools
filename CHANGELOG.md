@@ -7,6 +7,21 @@ All notable changes to Cockpit Tools will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
+## [0.8.12] - 2026-02-22
+
+### Added
+- **One-command GitHub Release + Homebrew Cask publisher**: Added `scripts/release/publish_github_release_and_cask.cjs` and `npm run release:github-and-cask` to build a `universal.dmg`, upload assets to GitHub Release, and update `Casks/cockpit-tools.rb` (with `--skip-build` / `--skip-gh` / `--skip-cask` / `--dry-run` support).
+
+### Changed
+- **Startup app-path detection strategy**: On startup, the app now loads local config first, probes only platforms without configured paths, and staggers detection calls with a small delay to reduce bursts of system path-detection commands.
+- **Release-process docs expanded for Homebrew flow**: Updated `docs/release-process.md` with recommended `universal` build flow, checksum generation examples, GitHub CLI/Rust target prerequisites, and cask update ordering notes.
+
+### Fixed
+- **Windows black console flashes during startup**: Fixed unhidden `cmd /c reg query` calls in the VS Code registry fallback path detection flow. Background commands now run hidden, reducing startup black-window flashes for some Windows users.
+- **Brand names and plan/tier labels incorrectly localized**: Restored original brand/product names and raw plan labels in non-English locales, including `Cockpit Tools`, `Antigravity`, `Codex`, `GitHub Copilot`, `Windsurf`, plus `accounts.tier.*`, `codex.plan.*`, and `kiro.plan.*`.
+- **Locale-check false positives for brand names**: Added brand-name allowlist entries to the locale validation script so English brand strings are not flagged as missing localization.
+
+---
 ## [0.8.11] - 2026-02-22
 
 ### Changed
