@@ -1165,7 +1165,7 @@ fn focus_window_by_pid(pid: u32) -> Result<(), String> {
 fn focus_window_by_pid(pid: u32) -> Result<(), String> {
     use std::os::windows::process::CommandExt;
     let command = format!(
-        r#"$pid={pid};$p=Get-Process -Id $pid -ErrorAction Stop;$h=$p.MainWindowHandle;if ($h -eq 0) {{ throw 'MAIN_WINDOW_HANDLE_EMPTY' }};Add-Type @'
+        r#"$targetPid={pid};$h=[IntPtr]::Zero;for($i=0;$i -lt 20;$i++){{$p=Get-Process -Id $targetPid -ErrorAction Stop;$h=$p.MainWindowHandle;if ($h -ne 0) {{ break }};Start-Sleep -Milliseconds 150}};if ($h -eq 0) {{ throw 'MAIN_WINDOW_HANDLE_EMPTY' }};Add-Type @'
 using System;
 using System.Runtime.InteropServices;
 public class Win32 {{
