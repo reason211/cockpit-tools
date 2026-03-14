@@ -515,7 +515,9 @@
       "reportTokenRequired": "Access token cannot be empty when report service is enabled.",
       "generateToken": "Generate",
       "reportUrlPreview": "Endpoint Preview",
-      "reportUrlPreviewDesc": "Supports format=md or format=yaml",
+      "reportUrlPreviewDesc": "Supports format=md / format=yaml, and render=true for HTML view",
+      "reportUrlRaw": "Raw Output",
+      "reportUrlRendered": "Rendered View",
       "firewallHintTitle": "Firewall Tip",
       "firewallHint": "If the URL is unreachable, check your system firewall settings."
     },

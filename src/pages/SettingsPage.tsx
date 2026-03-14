@@ -326,6 +326,10 @@ export function SettingsPage() {
   const [reportActualPort, setReportActualPort] = useState<number | null>(null);
   const [reportDefaultPort, setReportDefaultPort] = useState(18081);
   const [reportToken, setReportToken] = useState('');
+  const reportPreviewPort = reportActualPort ?? (parseInt(reportPort, 10) || reportDefaultPort);
+  const reportPreviewToken = encodeURIComponent((reportToken || 'your-token').trim() || 'your-token');
+  const reportRawPreviewUrl = `http://<当前IP>:${reportPreviewPort}/report?token=${reportPreviewToken}`;
+  const reportRenderedPreviewUrl = `${reportRawPreviewUrl}&render=true`;
   const [needsRestart, setNeedsRestart] = useState(false);
   const [networkSaving, setNetworkSaving] = useState(false);
   
@@ -3336,14 +3340,19 @@ export function SettingsPage() {
                       </div>
                     </div>
                     <div className="row-control">
-                      <span style={{
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '6px',
+                        alignItems: 'flex-start',
                         fontFamily: 'var(--font-mono)',
                         fontSize: '12px',
                         color: 'var(--text-secondary)',
                         wordBreak: 'break-all',
                       }}>
-                        {`http://<当前IP>:${reportActualPort ?? (parseInt(reportPort, 10) || reportDefaultPort)}/report?token=${encodeURIComponent((reportToken || 'your-token').trim() || 'your-token')}`}
-                      </span>
+                        <span>{`${t('settings.network.reportUrlRaw')}: ${reportRawPreviewUrl}`}</span>
+                        <span>{`${t('settings.network.reportUrlRendered')}: ${reportRenderedPreviewUrl}`}</span>
+                      </div>
                     </div>
                   </div>
 

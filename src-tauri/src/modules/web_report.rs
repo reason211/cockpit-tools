@@ -126,13 +126,7 @@ async fn handle_connection(mut stream: TcpStream, port: u16) -> Result<(), Strin
     let (method, target) = parse_request_target(&raw_request)?;
 
     if method.eq_ignore_ascii_case("OPTIONS") {
-        write_response(
-            &mut stream,
-            "200 OK",
-            "text/plain; charset=utf-8",
-            "",
-        )
-        .await?;
+        write_response(&mut stream, "200 OK", "text/plain; charset=utf-8", "").await?;
         return Ok(());
     }
 
@@ -164,7 +158,10 @@ async fn handle_connection(mut stream: TcpStream, port: u16) -> Result<(), Strin
         .find(|(key, _)| key == "token")
         .map(|(_, value)| value.into_owned())
         .unwrap_or_default();
-    let config_token = super::config::get_user_config().report_token.trim().to_string();
+    let config_token = super::config::get_user_config()
+        .report_token
+        .trim()
+        .to_string();
     if config_token.is_empty() || request_token != config_token {
         write_response(
             &mut stream,
@@ -181,6 +178,11 @@ async fn handle_connection(mut stream: TcpStream, port: u16) -> Result<(), Strin
         .find(|(key, _)| key == "format")
         .map(|(_, value)| value.to_string())
         .unwrap_or_else(|| "md".to_string());
+    let render = parsed_url
+        .query_pairs()
+        .find(|(key, _)| key == "render")
+        .map(|(_, value)| parse_bool_query(value.as_ref()))
+        .unwrap_or(false);
     let report_format = if format.eq_ignore_ascii_case("yaml") || format.eq_ignore_ascii_case("yml")
     {
         ReportFormat::Yaml
@@ -197,9 +199,16 @@ async fn handle_connection(mut stream: TcpStream, port: u16) -> Result<(), Strin
             .then(left.metric.cmp(&right.metric))
     });
 
-    let (content_type, body) = match report_format {
-        ReportFormat::Markdown => ("text/markdown; charset=utf-8", render_markdown(&now, &rows)),
-        ReportFormat::Yaml => ("application/x-yaml; charset=utf-8", render_yaml(&now, &rows)),
+    let (content_type, body) = if render {
+        ("text/html; charset=utf-8", render_html(&now, &rows))
+    } else {
+        match report_format {
+            ReportFormat::Markdown => ("text/markdown; charset=utf-8", render_markdown(&now, &rows)),
+            ReportFormat::Yaml => (
+                "application/x-yaml; charset=utf-8",
+                render_yaml(&now, &rows),
+            ),
+        }
     };
 
     write_response(&mut stream, "200 OK", content_type, &body).await?;
@@ -285,6 +294,13 @@ fn parse_request_url(target: &str, port: u16) -> Result<Url, String> {
         .map_err(|err| format!("URL 解析失败: {}", err))
 }
 
+fn parse_bool_query(value: &str) -> bool {
+    matches!(
+        value.trim().to_ascii_lowercase().as_str(),
+        "1" | "true" | "yes" | "on" | "y"
+    )
+}
+
 fn build_report_rows() -> Vec<ReportRow> {
     let mut rows = Vec::new();
     append_antigravity_rows(&mut rows);
@@ -294,7 +310,11 @@ fn build_report_rows() -> Vec<ReportRow> {
     append_kiro_rows(&mut rows);
     append_cursor_rows(&mut rows);
     append_gemini_rows(&mut rows);
-    append_codebuddy_rows(&mut rows, "CodeBuddy", super::codebuddy_account::list_accounts());
+    append_codebuddy_rows(
+        &mut rows,
+        "CodeBuddy",
+        super::codebuddy_account::list_accounts(),
+    );
     append_codebuddy_rows(
         &mut rows,
         "CodeBuddy CN",
@@ -323,7 +343,11 @@ fn append_antigravity_rows(rows: &mut Vec<ReportRow>) {
     match super::account::list_accounts() {
         Ok(accounts) => {
             for account in accounts {
-                let status = if account.disabled { "disabled" } else { "normal" };
+                let status = if account.disabled {
+                    "disabled"
+                } else {
+                    "normal"
+                };
                 let account_name = account.email.clone();
                 if let Some(quota) = account.quota {
                     if quota.models.is_empty() {
@@ -514,6 +538,18 @@ fn append_windsurf_rows(rows: &mut Vec<ReportRow>) {
         }
 
         if pushed == 0 {
+            pushed = append_windsurf_plan_status_rows(
+                rows,
+                &account_name,
+                account.copilot_quota_snapshots.as_ref(),
+                account.windsurf_user_status.as_ref(),
+                account.windsurf_plan_status.as_ref(),
+                &reset,
+                "normal",
+            );
+        }
+
+        if pushed == 0 {
             rows.push(make_row(
                 "Windsurf",
                 &account_name,
@@ -526,6 +562,195 @@ fn append_windsurf_rows(rows: &mut Vec<ReportRow>) {
             ));
         }
     }
+}
+
+fn append_windsurf_plan_status_rows(
+    rows: &mut Vec<ReportRow>,
+    account: &str,
+    snapshots: Option<&Value>,
+    windsurf_user_status: Option<&Value>,
+    windsurf_plan_status: Option<&Value>,
+    reset_fallback: &str,
+    status: &str,
+) -> usize {
+    let mut candidates: Vec<&Value> = Vec::new();
+
+    if let Some(snapshot_value) = snapshots {
+        if let Some(plan_status) = get_nested_value(snapshot_value, &["windsurfPlanStatus"]) {
+            candidates.push(plan_status);
+        }
+        if let Some(plan_status) =
+            get_nested_value(snapshot_value, &["windsurfUserStatus", "planStatus"])
+        {
+            candidates.push(plan_status);
+        }
+    }
+
+    if let Some(user_status) = windsurf_user_status {
+        if let Some(plan_status) = get_nested_value(user_status, &["userStatus", "planStatus"]) {
+            candidates.push(plan_status);
+        }
+        if let Some(plan_status) = get_nested_value(user_status, &["planStatus"]) {
+            candidates.push(plan_status);
+        }
+    }
+
+    if let Some(plan_status) = windsurf_plan_status {
+        candidates.push(plan_status);
+    }
+
+    for candidate in candidates {
+        let appended = append_windsurf_plan_status_candidate_rows(
+            rows,
+            account,
+            candidate,
+            reset_fallback,
+            status,
+        );
+        if appended > 0 {
+            return appended;
+        }
+    }
+
+    0
+}
+
+fn append_windsurf_plan_status_candidate_rows(
+    rows: &mut Vec<ReportRow>,
+    account: &str,
+    plan_status: &Value,
+    reset_fallback: &str,
+    status: &str,
+) -> usize {
+    let prompt_total = pick_first_number(
+        plan_status,
+        &[
+            &["availablePromptCredits"],
+            &["available_prompt_credits"],
+            &["promptCredits"],
+            &["prompt_credits"],
+        ],
+    );
+    let prompt_used = pick_first_number(
+        plan_status,
+        &[
+            &["usedPromptCredits"],
+            &["used_prompt_credits"],
+            &["promptCreditsUsed"],
+            &["prompt_credits_used"],
+            &["consumedPromptCredits"],
+            &["consumed_prompt_credits"],
+        ],
+    );
+
+    let flow_total = pick_first_number(
+        plan_status,
+        &[
+            &["availableFlowCredits"],
+            &["available_flow_credits"],
+            &["flowCredits"],
+            &["flow_credits"],
+        ],
+    );
+    let flow_used = pick_first_number(
+        plan_status,
+        &[
+            &["usedFlowCredits"],
+            &["used_flow_credits"],
+            &["flowCreditsUsed"],
+            &["flow_credits_used"],
+            &["consumedFlowCredits"],
+            &["consumed_flow_credits"],
+        ],
+    );
+
+    let reset = pick_first_reset_value(
+        plan_status,
+        &[
+            &["planEnd"],
+            &["plan_end"],
+            &["cycleEnd"],
+            &["cycle_end"],
+            &["resetAt"],
+            &["reset_at"],
+        ],
+        reset_fallback,
+    );
+
+    let mut count = 0usize;
+    count += push_windsurf_credit_row(
+        rows,
+        account,
+        "Prompt",
+        prompt_total,
+        prompt_used,
+        &reset,
+        status,
+    );
+    count += push_windsurf_credit_row(rows, account, "Flow", flow_total, flow_used, &reset, status);
+    count
+}
+
+fn push_windsurf_credit_row(
+    rows: &mut Vec<ReportRow>,
+    account: &str,
+    metric: &str,
+    total: Option<f64>,
+    used: Option<f64>,
+    reset: &str,
+    status: &str,
+) -> usize {
+    let Some(total) = total else {
+        return 0;
+    };
+    if total <= 0.0 {
+        return 0;
+    }
+
+    if let Some(used_value) = used {
+        let used_normalized = used_value.max(0.0);
+        let remaining = (total - used_normalized).max(0.0);
+        let used_percent = clamp_percent((used_normalized / total) * 100.0);
+        rows.push(make_row(
+            "Windsurf",
+            account,
+            metric,
+            &format!(
+                "{:.0}/{:.0} ({})",
+                used_normalized,
+                total,
+                percent_text(used_percent)
+            ),
+            &format!("{:.0}", remaining),
+            reset,
+            status,
+            "",
+        ));
+    } else {
+        rows.push(make_row(
+            "Windsurf",
+            account,
+            metric,
+            "-",
+            &format!("{:.0}", total),
+            reset,
+            status,
+            "Used credits unavailable",
+        ));
+    }
+
+    1
+}
+
+fn pick_first_reset_value(value: &Value, paths: &[&[&str]], fallback: &str) -> String {
+    for path in paths {
+        let parsed = parse_reset_value(get_nested_value(value, path));
+        if parsed != "-" {
+            return parsed;
+        }
+    }
+
+    normalize_reset_text(fallback)
 }
 
 fn append_kiro_rows(rows: &mut Vec<ReportRow>) {
@@ -622,7 +847,10 @@ fn append_qoder_rows(rows: &mut Vec<ReportRow>) {
             "-",
             "-",
             "normal",
-            account.plan_type.as_deref().unwrap_or("Credits data unavailable"),
+            account
+                .plan_type
+                .as_deref()
+                .unwrap_or("Credits data unavailable"),
         ));
     }
 }
@@ -646,11 +874,9 @@ fn append_cursor_rows(rows: &mut Vec<ReportRow>) {
             let fallback_used = compute_cursor_used_percent_from_amount(raw_usage);
             let resolved_used = used_percent.or(fallback_used);
 
-            let reset = pick_first_string(
-                raw_usage,
-                &[&["billingCycleEnd"], &["billing_cycle_end"]],
-            )
-            .unwrap_or_else(|| "-".to_string());
+            let reset =
+                pick_first_string(raw_usage, &[&["billingCycleEnd"], &["billing_cycle_end"]])
+                    .unwrap_or_else(|| "-".to_string());
 
             if let Some(percent) = resolved_used {
                 let normalized = clamp_percent(percent);
@@ -692,7 +918,8 @@ fn append_gemini_rows(rows: &mut Vec<ReportRow>) {
         let mut pushed = false;
 
         if let Some(raw_usage) = account.gemini_usage_raw.as_ref() {
-            if let Some(buckets) = get_nested_value(raw_usage, &["buckets"]).and_then(Value::as_array)
+            if let Some(buckets) =
+                get_nested_value(raw_usage, &["buckets"]).and_then(Value::as_array)
             {
                 for bucket in buckets {
                     let Some(model_id) = get_nested_value(bucket, &["modelId"])
@@ -703,8 +930,8 @@ fn append_gemini_rows(rows: &mut Vec<ReportRow>) {
                         continue;
                     };
 
-                    let Some(remaining_fraction) = get_nested_value(bucket, &["remainingFraction"])
-                        .and_then(as_f64)
+                    let Some(remaining_fraction) =
+                        get_nested_value(bucket, &["remainingFraction"]).and_then(as_f64)
                     else {
                         continue;
                     };
@@ -746,7 +973,11 @@ fn append_gemini_rows(rows: &mut Vec<ReportRow>) {
     }
 }
 
-fn append_codebuddy_rows(rows: &mut Vec<ReportRow>, service: &str, accounts: Vec<CodebuddyAccount>) {
+fn append_codebuddy_rows(
+    rows: &mut Vec<ReportRow>,
+    service: &str,
+    accounts: Vec<CodebuddyAccount>,
+) {
     for account in accounts {
         let account_name = account.email.clone();
         let status = account.status.as_deref().unwrap_or("normal");
@@ -905,8 +1136,11 @@ fn extract_codebuddy_resources(account: &CodebuddyAccount) -> Vec<&serde_json::M
     let mut out = Vec::new();
 
     if let Some(quota_raw) = account.quota_raw.as_ref() {
-        if let Some(list) = get_nested_value(quota_raw, &["userResource", "data", "Response", "Data", "Accounts"])
-            .and_then(Value::as_array)
+        if let Some(list) = get_nested_value(
+            quota_raw,
+            &["userResource", "data", "Response", "Data", "Accounts"],
+        )
+        .and_then(Value::as_array)
         {
             for item in list {
                 if let Some(obj) = item.as_object() {
@@ -918,8 +1152,9 @@ fn extract_codebuddy_resources(account: &CodebuddyAccount) -> Vec<&serde_json::M
 
     if out.is_empty() {
         if let Some(usage_raw) = account.usage_raw.as_ref() {
-            if let Some(list) = get_nested_value(usage_raw, &["data", "Response", "Data", "Accounts"])
-                .and_then(Value::as_array)
+            if let Some(list) =
+                get_nested_value(usage_raw, &["data", "Response", "Data", "Accounts"])
+                    .and_then(Value::as_array)
             {
                 for item in list {
                     if let Some(obj) = item.as_object() {
@@ -933,10 +1168,7 @@ fn extract_codebuddy_resources(account: &CodebuddyAccount) -> Vec<&serde_json::M
     out
 }
 
-fn pick_number_in_item(
-    item: &serde_json::Map<String, Value>,
-    keys: &[&str],
-) -> Option<f64> {
+fn pick_number_in_item(item: &serde_json::Map<String, Value>, keys: &[&str]) -> Option<f64> {
     for key in keys {
         if let Some(value) = item.get(*key).and_then(as_f64) {
             return Some(value);
@@ -945,10 +1177,7 @@ fn pick_number_in_item(
     None
 }
 
-fn pick_string_in_item(
-    item: &serde_json::Map<String, Value>,
-    keys: &[&str],
-) -> Option<String> {
+fn pick_string_in_item(item: &serde_json::Map<String, Value>, keys: &[&str]) -> Option<String> {
     for key in keys {
         if let Some(value) = item.get(*key).and_then(Value::as_str) {
             let trimmed = value.trim();
@@ -1076,8 +1305,7 @@ fn normalize_reset_text(value: &str) -> String {
         return parsed.with_timezone(&chrono::Utc).to_rfc3339();
     }
     if let Ok(naive) = chrono::NaiveDateTime::parse_from_str(trimmed, "%Y-%m-%d %H:%M:%S") {
-        let parsed =
-            chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(naive, chrono::Utc);
+        let parsed = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(naive, chrono::Utc);
         return parsed.to_rfc3339();
     }
 
@@ -1106,7 +1334,11 @@ fn format_unix_timestamp(value: Option<i64>) -> String {
         return "-".to_string();
     }
 
-    let seconds = if raw > 10_000_000_000 { raw / 1000 } else { raw };
+    let seconds = if raw > 10_000_000_000 {
+        raw / 1000
+    } else {
+        raw
+    };
     let Some(naive) = chrono::NaiveDateTime::from_timestamp_opt(seconds, 0) else {
         return "-".to_string();
     };
@@ -1117,14 +1349,15 @@ fn format_unix_timestamp(value: Option<i64>) -> String {
 fn render_markdown(generated_at: &str, rows: &[ReportRow]) -> String {
     let mut output = String::new();
     output.push_str("# Cockpit Tools Usage Report\n\n");
-    output.push_str(&format!("- Generated at: {}\n", markdown_cell(generated_at)));
+    output.push_str(&format!(
+        "- Generated at: {}\n",
+        markdown_cell(generated_at)
+    ));
     output.push_str(&format!("- Rows: {}\n\n", rows.len()));
     output.push_str(
         "| Service | Account | Metric | Used | Remaining | Reset Cycle | Status | Note |\n",
     );
-    output.push_str(
-        "| --- | --- | --- | --- | --- | --- | --- | --- |\n",
-    );
+    output.push_str("| --- | --- | --- | --- | --- | --- | --- | --- |\n");
 
     for row in rows {
         output.push_str(&format!(
@@ -1182,6 +1415,65 @@ fn render_yaml(generated_at: &str, rows: &[ReportRow]) -> String {
         output.push('\n');
     }
     output
+}
+
+fn render_html(generated_at: &str, rows: &[ReportRow]) -> String {
+    let mut output = String::new();
+    output.push_str(
+        "<!DOCTYPE html><html><head><meta charset=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/>",
+    );
+    output.push_str("<title>Cockpit Tools Usage Report</title>");
+    output.push_str(
+        "<style>body{margin:0;background:#f6f8fb;color:#0f172a;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}main{max-width:1120px;margin:24px auto;padding:0 16px 24px}h1{font-size:22px;margin:0 0 12px}p{margin:4px 0 0;color:#334155}table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-top:16px}th,td{font-size:13px;padding:10px 12px;border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:top}th{background:#f8fafc;color:#334155;font-weight:600}tr:last-child td{border-bottom:none}.status-disabled{color:#b45309}.status-normal{color:#166534}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}</style>",
+    );
+    output.push_str("</head><body><main>");
+    output.push_str("<h1>Cockpit Tools Usage Report</h1>");
+    output.push_str(&format!(
+        "<p>Generated at: <span class=\"mono\">{}</span></p>",
+        html_escape(generated_at)
+    ));
+    output.push_str(&format!("<p>Rows: {}</p>", rows.len()));
+    output.push_str("<table><thead><tr><th>Service</th><th>Account</th><th>Metric</th><th>Used</th><th>Remaining</th><th>Reset Cycle</th><th>Status</th><th>Note</th></tr></thead><tbody>");
+
+    for row in rows {
+        let status_class = if row.status.eq_ignore_ascii_case("disabled") {
+            "status-disabled"
+        } else {
+            "status-normal"
+        };
+        output.push_str("<tr>");
+        output.push_str(&format!("<td>{}</td>", html_escape(&row.service)));
+        output.push_str(&format!("<td>{}</td>", html_escape(&row.account)));
+        output.push_str(&format!("<td>{}</td>", html_escape(&row.metric)));
+        output.push_str(&format!("<td class=\"mono\">{}</td>", html_escape(&row.used)));
+        output.push_str(&format!(
+            "<td class=\"mono\">{}</td>",
+            html_escape(&row.remaining)
+        ));
+        output.push_str(&format!(
+            "<td class=\"mono\">{}</td>",
+            html_escape(&row.reset_cycle)
+        ));
+        output.push_str(&format!(
+            "<td class=\"{}\">{}</td>",
+            status_class,
+            html_escape(&row.status)
+        ));
+        output.push_str(&format!("<td>{}</td>", html_escape(&row.note)));
+        output.push_str("</tr>");
+    }
+
+    output.push_str("</tbody></table></main></body></html>");
+    output
+}
+
+fn html_escape(input: &str) -> String {
+    input
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
+        .replace('\'', "&#39;")
 }
 
 fn yaml_quote(value: &str) -> String {

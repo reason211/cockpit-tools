@@ -515,7 +515,9 @@
       "reportTokenRequired": "启用网页查询服务时，访问 Token 不能为空。",
       "generateToken": "生成",
       "reportUrlPreview": "地址预览",
-      "reportUrlPreviewDesc": "支持 format=md 或 format=yaml",
+      "reportUrlPreviewDesc": "支持 format=md / format=yaml，也支持 render=true 网页渲染",
+      "reportUrlRaw": "原始输出",
+      "reportUrlRendered": "网页渲染",
       "firewallHintTitle": "防火墙提示",
       "firewallHint": "如果访问不了，请检查系统防火墙设置。"
     },
