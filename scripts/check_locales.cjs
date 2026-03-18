@@ -661,7 +661,7 @@ function generateReport(
     report += '| Key | 英文值（基准） | 复用语言 |\n';
     report += '|-----|----------------|---------|\n';
     for (const issue of englishReuseIssues) {
-      const safeValue = issue.value.replace(/\|/g, '\\|');
+      const safeValue = issue.value.replace(/\r?\n/g, ' ').replace(/\|/g, '\\|');
       report += `| \`${issue.key}\` | ${safeValue} | ${issue.locales.join(', ')} |\n`;
     }
     report += '\n';
@@ -678,8 +678,8 @@ function generateReport(
     report += '| suffix | 文案值（en-US） | 平台 | 当前 key | 建议 common key |\n';
     report += '|--------|----------------|------|----------|------------------|\n';
     for (const issue of platformCommonIssues) {
-      const safeValue = issue.value.replace(/\|/g, '\\|');
-      const safeKeys = issue.keys.join(', ').replace(/\|/g, '\\|');
+      const safeValue = issue.value.replace(/\r?\n/g, ' ').replace(/\|/g, '\\|');
+      const safeKeys = issue.keys.join(', ').replace(/\r?\n/g, ' ').replace(/\|/g, '\\|');
       report += `| \`${issue.suffix}\` | ${safeValue} | ${issue.roots.join(', ')} | ${safeKeys} | \`${issue.suggestedCommonKey}\` |\n`;
     }
     report += '\n';

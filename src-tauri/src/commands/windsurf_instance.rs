@@ -29,9 +29,13 @@ fn inject_bound_account_for_instance_start(
 
     let account = modules::windsurf_account::load_account(bind_id)
         .ok_or_else(|| format!("绑定账号不存在: {}", bind_id))?;
+    let safe_dir = std::path::Path::new(user_data_dir)
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_else(|| "...".to_string());
     modules::logger::log_info(&format!(
-        "实例启动检测到绑定账号，准备注入: bind_account_id={}, login={}, user_data_dir={}",
-        bind_id, account.github_login, user_data_dir
+        "实例启动检测到绑定账号，准备注入: bind_account_id={}, dir_name={}",
+        bind_id, safe_dir
     ));
 
     modules::windsurf_instance::close_windsurf(&[user_data_dir.to_string()], 20)?;

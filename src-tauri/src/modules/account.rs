@@ -28,6 +28,19 @@ const LIST_ACCOUNTS_CACHE_TTL_MS: u64 = 800;
 
 // 使用与 AntigravityCockpit 插件相同的数据目录
 const DATA_DIR: &str = ".antigravity_cockpit";
+
+/// 对邮箱地址进行脱敏，仅保留首字符和域名，例如 "u***@example.com"
+#[inline]
+fn mask_email(email: &str) -> String {
+    if let Some(at_pos) = email.find('@') {
+        let local = &email[..at_pos];
+        let domain = &email[at_pos..];
+        let first = local.chars().next().map(|c| c.to_string()).unwrap_or_default();
+        format!("{}***{}", first, domain)
+    } else {
+        "***".to_string()
+    }
+}
 const ACCOUNTS_INDEX: &str = "accounts.json";
 const ACCOUNTS_DIR: &str = "accounts";
 const DELETED_ACCOUNT_FP_BINDINGS: &str = "deleted_account_fingerprint_bindings.json";
@@ -125,7 +138,7 @@ fn remember_deleted_account_fingerprint(account: &Account) -> Result<(), String>
     if crate::modules::fingerprint::get_fingerprint(fp_id).is_err() {
         modules::logger::log_warn(&format!(
             "删除账号时发现指纹不存在，跳过映射记录: email={}, fingerprint_id={}",
-            account.email, fp_id
+            mask_email(&account.email), fp_id
         ));
         return Ok(());
     }
@@ -152,7 +165,7 @@ fn lookup_deleted_account_fingerprint(email: &str) -> Result<Option<String>, Str
     } else {
         modules::logger::log_warn(&format!(
             "账号重建时命中过期指纹映射，已忽略: email={}, fingerprint_id={}",
-            email, fp_id
+            mask_email(email), fp_id
         ));
         let _ = clear_deleted_account_fingerprint(email);
         Ok(None)
@@ -410,7 +423,7 @@ pub fn add_account(
         Err(e) => {
             modules::logger::log_warn(&format!(
                 "读取已删除账号指纹映射失败，回退为新建指纹: email={}, error={}",
-                email, e
+                mask_email(&email), e
             ));
             None
         }
@@ -420,7 +433,7 @@ pub fn add_account(
         account.fingerprint_id = Some(fp_id.clone());
         modules::logger::log_info(&format!(
             "账号复用已删除映射指纹: email={}, fingerprint_id={}",
-            email, fp_id
+            mask_email(&email), fp_id
         ));
     } else {
         let fingerprint = crate::modules::fingerprint::generate_fingerprint(email.clone())?;
@@ -447,7 +460,7 @@ pub fn add_account(
         if let Err(e) = clear_deleted_account_fingerprint(&email) {
             modules::logger::log_warn(&format!(
                 "清理已删除账号指纹映射失败: email={}, error={}",
-                email, e
+                mask_email(&email), e
             ));
         }
     }
@@ -521,7 +534,7 @@ pub fn delete_account(account_id: &str) -> Result<(), String> {
         if let Err(e) = remember_deleted_account_fingerprint(&account) {
             modules::logger::log_warn(&format!(
                 "记录删除账号指纹映射失败: account_id={}, email={}, error={}",
-                account_id, account.email, e
+                account_id, mask_email(&account.email), e
             ));
         }
     }
@@ -563,7 +576,7 @@ pub fn delete_accounts(account_ids: &[String]) -> Result<(), String> {
             if let Err(e) = remember_deleted_account_fingerprint(&account) {
                 modules::logger::log_warn(&format!(
                     "批量删除时记录账号指纹映射失败: account_id={}, email={}, error={}",
-                    account_id, account.email, e
+                    account_id, mask_email(&account.email), e
                 ));
             }
         }

@@ -492,6 +492,7 @@ fn build_gateway_client(base_url: &str, timeout_secs: u64) -> Result<reqwest::Cl
     builder = builder.no_proxy();
     if base_url.starts_with("https://127.0.0.1:") || base_url.starts_with("https://localhost:") {
         // 本地自签名网关证书（协议形态对齐客户端，校验在此放宽）
+        // lgtm[rs/disabled-certificate-check] 仅用于本地回环（127.0.0.1/localhost）自签名网关证书，非生产 TLS 校验放宽
         builder = builder
             .danger_accept_invalid_certs(true)
             // 回环地址使用 IP 时不发送 SNI，避免 rustls 告警 Illegal SNI extension。

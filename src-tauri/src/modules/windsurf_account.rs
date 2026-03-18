@@ -639,6 +639,7 @@ pub fn upsert_account(payload: WindsurfOAuthCompletePayload) -> Result<WindsurfA
     let mut index = load_account_index();
     let normalized_login = normalize_login(&payload);
     let payload_api_key = resolve_payload_api_key(&payload);
+    // lgtm[rs/weak-cryptographic-algorithm] 仅用于生成本地稳定账号 ID（非密码学用途，不参与认证/签名/加密）
     let generated_id = format!(
         "windsurf_{:x}",
         md5::compute(format!("{}:{}", normalized_login, payload.github_id))

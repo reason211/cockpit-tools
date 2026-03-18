@@ -978,6 +978,7 @@ fn build_official_ls_local_client(timeout_secs: u64) -> Result<reqwest::Client, 
     reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(timeout_secs))
         .no_proxy()
+        // lgtm[rs/disabled-certificate-check] 仅连接官方 LS 的本地 HTTPS（127.0.0.1），使用自签名证书，非公网 TLS 校验放宽
         .danger_accept_invalid_certs(true)
         // 本地回环 HTTPS 连接统一关闭 SNI，避免服务端记录 IP-SNI 非法告警。
         .tls_sni(false)

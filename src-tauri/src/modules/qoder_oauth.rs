@@ -2122,6 +2122,7 @@ mod tests {
     use super::*;
 
     #[test]
+    // lgtm[rs/hardcoded-credentials] test-nonce 和 test-challenge 是单元测试专用占位字符串，不用于生产认证
     fn builds_cli_device_login_url_without_redirect_uri() {
         let url = build_cli_device_login_url(
             DEFAULT_LOGIN_BASE_URL,

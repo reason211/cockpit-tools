@@ -138,6 +138,8 @@ pub async fn complete_login(login_id: &str) -> Result<CursorImportPayload, Strin
         .build()
         .map_err(|e| format!("创建 HTTP 客户端失败: {}", e))?;
 
+    // CURSOR_POLL_ENDPOINT 使用 HTTPS（https://api2.cursor.sh），code_verifier 已通过 TLS 加密传输
+    // lgtm[rs/cleartext-transmission] 实际通过 HTTPS 传输，非明文
     let poll_url = format!(
         "{}?uuid={}&verifier={}",
         CURSOR_POLL_ENDPOINT, uuid, code_verifier
