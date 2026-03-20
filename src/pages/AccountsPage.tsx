@@ -93,13 +93,14 @@ import {
   persistPrivacyModeEnabled
 } from '../utils/privacy'
 import { useExportJsonModal } from '../hooks/useExportJsonModal'
+import { MultiSelectFilterDropdown, type MultiSelectFilterOption } from '../components/MultiSelectFilterDropdown'
 
 interface AccountsPageProps {
   onNavigate?: (page: Page) => void
 }
 
 type ViewMode = 'grid' | 'list' | 'compact'
-type FilterType = 'all' | 'PRO' | 'ULTRA' | 'FREE' | 'UNKNOWN' | 'VERIFICATION_REQUIRED' | 'TOS_VIOLATION'
+type FilterType = 'PRO' | 'ULTRA' | 'FREE' | 'UNKNOWN' | 'VERIFICATION_REQUIRED' | 'TOS_VIOLATION'
 
 interface VerificationDetailRecord {
   status: string
@@ -261,10 +262,23 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
 
   // 筛选
   const [searchQuery, setSearchQuery] = useState('')
-  const [filterType, setFilterType] = useState<FilterType>('all')
+  const [filterTypes, setFilterTypes] = useState<FilterType[]>([])
   const [tagFilter, setTagFilter] = useState<string[]>([])
   const [groupByTag, setGroupByTag] = useState(false)
   const [showTagFilter, setShowTagFilter] = useState(false)
+
+  const toggleFilterTypeValue = useCallback((value: FilterType) => {
+    setFilterTypes((prev) => {
+      if (prev.includes(value)) {
+        return prev.filter((item) => item !== value)
+      }
+      return [...prev, value]
+    })
+  }, [])
+
+  const clearFilterTypes = useCallback(() => {
+    setFilterTypes([])
+  }, [])
 
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [showAddModal, setShowAddModal] = useState(false)
@@ -537,21 +551,26 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
       result = result.filter((acc) => acc.email.toLowerCase().includes(query))
     }
 
-    // 类型过滤
-    if (filterType !== 'all') {
-      if (filterType === 'VERIFICATION_REQUIRED') {
-        result = result.filter((acc) =>
-          (acc.disabled_reason || verificationStatusMap[acc.id]) === 'verification_required'
-        )
-      } else if (filterType === 'TOS_VIOLATION') {
-        result = result.filter((acc) =>
-          (acc.disabled_reason || verificationStatusMap[acc.id]) === 'tos_violation'
-        )
-      } else {
-        result = result.filter(
-          (acc) => getSubscriptionTier(acc.quota) === filterType
-        )
-      }
+    // 类型过滤（多选）
+    if (filterTypes.length > 0) {
+      const selectedTypes = new Set(filterTypes)
+      result = result.filter((acc) => {
+        const verificationStatus = acc.disabled_reason || verificationStatusMap[acc.id]
+        const tier = getSubscriptionTier(acc.quota) as FilterType
+        if (
+          selectedTypes.has('VERIFICATION_REQUIRED') &&
+          verificationStatus === 'verification_required'
+        ) {
+          return true
+        }
+        if (
+          selectedTypes.has('TOS_VIOLATION') &&
+          verificationStatus === 'tos_violation'
+        ) {
+          return true
+        }
+        return selectedTypes.has(tier)
+      })
     }
 
     // 标签过滤
@@ -567,7 +586,7 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
   }, [
     accounts,
     searchQuery,
-    filterType,
+    filterTypes,
     tagFilter,
     accountSortComparator,
     verificationStatusMap,
@@ -620,6 +639,24 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
     })
     return counts
   }, [accounts, verificationStatusMap])
+
+  const tierFilterOptions = useMemo<MultiSelectFilterOption[]>(
+    () => [
+      { value: 'PRO', label: `PRO (${tierCounts.PRO})` },
+      { value: 'ULTRA', label: `ULTRA (${tierCounts.ULTRA})` },
+      { value: 'FREE', label: `FREE (${tierCounts.FREE})` },
+      {
+        value: 'VERIFICATION_REQUIRED',
+        label: `${t('wakeup.errorUi.verificationRequiredTitle')} (${tierCounts.VERIFICATION_REQUIRED})`,
+      },
+      {
+        value: 'TOS_VIOLATION',
+        label: `${t('wakeup.errorUi.tosViolationTitle')} (${tierCounts.TOS_VIOLATION})`,
+      },
+      { value: 'UNKNOWN', label: `UNKNOWN (${tierCounts.UNKNOWN})` },
+    ],
+    [t, tierCounts.FREE, tierCounts.PRO, tierCounts.TOS_VIOLATION, tierCounts.ULTRA, tierCounts.UNKNOWN, tierCounts.VERIFICATION_REQUIRED]
+  )
 
   const loadFingerprints = async () => {
     try {
@@ -2553,23 +2590,17 @@ export function AccountsPage({ onNavigate }: AccountsPageProps) {
               </button>
             </div>
 
-            <div className="filter-select">
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value as FilterType)}
-                aria-label={t('accounts.filterLabel')}
-              >
-                <option value="all">
-                  {t('accounts.filter.all', { count: tierCounts.all })}
-                </option>
-                <option value="PRO">{`PRO (${tierCounts.PRO})`}</option>
-                <option value="ULTRA">{`ULTRA (${tierCounts.ULTRA})`}</option>
-                <option value="FREE">{`FREE (${tierCounts.FREE})`}</option>
-                <option value="VERIFICATION_REQUIRED">{`${t('wakeup.errorUi.verificationRequiredTitle')} (${tierCounts.VERIFICATION_REQUIRED})`}</option>
-                <option value="TOS_VIOLATION">{`${t('wakeup.errorUi.tosViolationTitle')} (${tierCounts.TOS_VIOLATION})`}</option>
-                <option value="UNKNOWN">{`UNKNOWN (${tierCounts.UNKNOWN})`}</option>
-              </select>
-            </div>
+            <MultiSelectFilterDropdown
+              options={tierFilterOptions}
+              selectedValues={filterTypes}
+              allLabel={t('accounts.filter.all', { count: tierCounts.all })}
+              filterLabel={t('accounts.filterLabel', '筛选')}
+              clearLabel={t('accounts.clearFilter', '清空筛选')}
+              emptyLabel={t('common.none', '暂无')}
+              ariaLabel={t('accounts.filterLabel', '筛选')}
+              onToggleValue={(value) => toggleFilterTypeValue(value as FilterType)}
+              onClear={clearFilterTypes}
+            />
 
             <div className="tag-filter" ref={tagFilterRef}>
               <button

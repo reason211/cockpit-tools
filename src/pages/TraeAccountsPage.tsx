@@ -32,6 +32,7 @@ import {
   PlatformOverviewTabsHeader,
 } from '../components/platform/PlatformOverviewTabsHeader';
 import { useProviderAccountsPage } from '../hooks/useProviderAccountsPage';
+import { MultiSelectFilterDropdown, type MultiSelectFilterOption } from '../components/MultiSelectFilterDropdown';
 import { TraeInstancesContent } from './TraeInstancesPage';
 import { useTraeAccountStore } from '../stores/useTraeAccountStore';
 import * as traeService from '../services/traeService';
@@ -92,6 +93,7 @@ function formatTraeMoney(value: number | null | undefined): string {
 
 export function TraeAccountsPage() {
   const [activeTab, setActiveTab] = useState<PlatformOverviewTab>('overview');
+  const [filterTypes, setFilterTypes] = useState<string[]>([]);
   const untaggedKey = '__untagged__';
 
   const store = useTraeAccountStore();
@@ -136,8 +138,6 @@ export function TraeAccountsPage() {
     setViewMode,
     searchQuery,
     setSearchQuery,
-    filterType,
-    setFilterType,
     sortBy,
     setSortBy,
     sortDirection,
@@ -231,6 +231,19 @@ export function TraeAccountsPage() {
     normalizeTag,
   } = page;
 
+  const toggleFilterTypeValue = useCallback((value: string) => {
+    setFilterTypes((prev) => {
+      if (prev.includes(value)) {
+        return prev.filter((item) => item !== value);
+      }
+      return [...prev, value];
+    });
+  }, []);
+
+  const clearFilterTypes = useCallback(() => {
+    setFilterTypes([]);
+  }, []);
+
   const accounts = store.accounts;
   const loading = store.loading;
 
@@ -248,10 +261,21 @@ export function TraeAccountsPage() {
   }, [accounts]);
 
   useEffect(() => {
-    if (filterType === 'all') return;
-    if (tierSummary.entries.some(([plan]) => plan === filterType)) return;
-    setFilterType('all');
-  }, [filterType, setFilterType, tierSummary.entries]);
+    const allowed = new Set(tierSummary.entries.map(([plan]) => plan));
+    setFilterTypes((prev) => {
+      const next = prev.filter((value) => allowed.has(value));
+      return next.length === prev.length ? prev : next;
+    });
+  }, [tierSummary.entries]);
+
+  const tierFilterOptions = useMemo<MultiSelectFilterOption[]>(
+    () =>
+      tierSummary.entries.map(([plan, count]) => ({
+        value: plan,
+        label: `${plan} (${count})`,
+      })),
+    [tierSummary.entries],
+  );
 
   const compareAccountsBySort = useCallback(
     (left: TraeAccount, right: TraeAccount) => {
@@ -298,8 +322,9 @@ export function TraeAccountsPage() {
       });
     }
 
-    if (filterType !== 'all') {
-      result = result.filter((account) => getTraePlanBadge(account) === filterType);
+    if (filterTypes.length > 0) {
+      const selectedTypes = new Set(filterTypes);
+      result = result.filter((account) => selectedTypes.has(getTraePlanBadge(account)));
     }
 
     if (tagFilter.length > 0) {
@@ -311,7 +336,7 @@ export function TraeAccountsPage() {
 
     result.sort(compareAccountsBySort);
     return result;
-  }, [accounts, compareAccountsBySort, filterType, normalizeTag, searchQuery, tagFilter]);
+  }, [accounts, compareAccountsBySort, filterTypes, normalizeTag, searchQuery, tagFilter]);
 
   const groupedAccounts = useMemo(() => {
     if (!groupByTag) return [] as Array<[string, TraeAccount[]]>;
@@ -887,24 +912,17 @@ export function TraeAccountsPage() {
                 </button>
               </div>
 
-              <div className="filter-select">
-                <select
-                  value={filterType}
-                  onChange={(event) => setFilterType(event.target.value)}
-                  aria-label={t('common.shared.filterLabel', '筛选')}
-                >
-                  <option value="all">
-                    {t('common.shared.filter.all', '全部 ({{count}})', {
-                      count: tierSummary.all,
-                    })}
-                  </option>
-                  {tierSummary.entries.map(([plan, count]) => (
-                    <option key={plan} value={plan}>
-                      {`${plan} (${count})`}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <MultiSelectFilterDropdown
+                options={tierFilterOptions}
+                selectedValues={filterTypes}
+                allLabel={t('common.shared.filter.all', '全部 ({{count}})', { count: tierSummary.all })}
+                filterLabel={t('common.shared.filterLabel', '筛选')}
+                clearLabel={t('accounts.clearFilter', '清空筛选')}
+                emptyLabel={t('common.none', '暂无')}
+                ariaLabel={t('common.shared.filterLabel', '筛选')}
+                onToggleValue={toggleFilterTypeValue}
+                onClear={clearFilterTypes}
+              />
 
               <div className="tag-filter" ref={tagFilterRef}>
                 <button

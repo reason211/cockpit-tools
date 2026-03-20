@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { TagEditModal } from '../components/TagEditModal';
 import { ExportJsonModal } from '../components/ExportJsonModal';
 import { QuickSettingsPopover } from '../components/QuickSettingsPopover';
+import { MultiSelectFilterDropdown, type MultiSelectFilterOption } from '../components/MultiSelectFilterDropdown';
 import {
   PlatformOverviewTab,
   PlatformOverviewTabsHeader,
@@ -213,7 +214,7 @@ export function QoderAccountsPage() {
   const [activeTab, setActiveTab] = useState<PlatformOverviewTab>('overview');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState<string>('all');
+  const [filterTypes, setFilterTypes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortBy>('created_at');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -253,6 +254,19 @@ export function QoderAccountsPage() {
   const [privacyModeEnabled, setPrivacyModeEnabled] = useState<boolean>(() =>
     isPrivacyModeEnabledByDefault(),
   );
+
+  const toggleFilterTypeValue = useCallback((value: string) => {
+    setFilterTypes((prev) => {
+      if (prev.includes(value)) {
+        return prev.filter((item) => item !== value);
+      }
+      return [...prev, value];
+    });
+  }, []);
+
+  const clearFilterTypes = useCallback(() => {
+    setFilterTypes([]);
+  }, []);
 
   const accounts = store.accounts;
   const loading = store.loading;
@@ -411,6 +425,23 @@ export function QoderAccountsPage() {
     return text.replace('{{count}}', String(tierSummary.all));
   }, [t, tierSummary.all]);
 
+  const tierFilterOptions = useMemo<MultiSelectFilterOption[]>(
+    () =>
+      tierSummary.entries.map(([plan, count]) => ({
+        value: plan,
+        label: `${plan} (${count})`,
+      })),
+    [tierSummary.entries],
+  );
+
+  useEffect(() => {
+    const allowed = new Set(tierSummary.entries.map(([plan]) => plan));
+    setFilterTypes((prev) => {
+      const next = prev.filter((value) => allowed.has(value));
+      return next.length === prev.length ? prev : next;
+    });
+  }, [tierSummary.entries]);
+
   const availableTags = useMemo(() => {
     const tagSet = new Set<string>();
     for (const account of accounts) {
@@ -453,8 +484,9 @@ export function QoderAccountsPage() {
       });
     }
 
-    if (filterType !== 'all') {
-      result = result.filter((account) => getQoderPlanBadge(account) === filterType);
+    if (filterTypes.length > 0) {
+      const selectedTypes = new Set(filterTypes);
+      result = result.filter((account) => selectedTypes.has(getQoderPlanBadge(account)));
     }
 
     if (tagFilter.length > 0) {
@@ -466,7 +498,7 @@ export function QoderAccountsPage() {
 
     result.sort(compareAccountsBySort);
     return result;
-  }, [accounts, compareAccountsBySort, filterType, searchQuery, tagFilter]);
+  }, [accounts, compareAccountsBySort, filterTypes, searchQuery, tagFilter]);
 
   const groupedAccounts = useMemo(() => {
     if (!groupByTag) return [] as Array<[string, QoderAccount[]]>;
@@ -1564,16 +1596,17 @@ export function QoderAccountsPage() {
                   <LayoutGrid size={16} />
                 </button>
               </div>
-              <div className="filter-select">
-                <select value={filterType} onChange={(event) => setFilterType(event.target.value)}>
-                  <option value="all">{allFilterLabel}</option>
-                  {tierSummary.entries.map(([plan, count]) => (
-                    <option key={plan} value={plan}>
-                      {plan} ({count})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <MultiSelectFilterDropdown
+                options={tierFilterOptions}
+                selectedValues={filterTypes}
+                allLabel={allFilterLabel}
+                filterLabel={t('common.shared.filterLabel', '筛选')}
+                clearLabel={t('accounts.clearFilter', '清空筛选')}
+                emptyLabel={t('common.none', '暂无')}
+                ariaLabel={t('common.shared.filterLabel', '筛选')}
+                onToggleValue={toggleFilterTypeValue}
+                onClear={clearFilterTypes}
+              />
               <div className="tag-filter" ref={tagFilterRef}>
                 <button
                   type="button"

@@ -38,6 +38,7 @@ import { KiroOverviewTabsHeader, KiroTab } from '../components/KiroOverviewTabsH
 import { KiroInstancesContent } from './KiroInstancesPage';
 import { QuickSettingsPopover } from '../components/QuickSettingsPopover';
 import { useProviderAccountsPage } from '../hooks/useProviderAccountsPage';
+import { MultiSelectFilterDropdown, type MultiSelectFilterOption } from '../components/MultiSelectFilterDropdown';
 import type { KiroAccount } from '../types/kiro';
 
 const KIRO_FLOW_NOTICE_COLLAPSED_KEY = 'agtools.kiro.flow_notice_collapsed';
@@ -51,6 +52,7 @@ const KIRO_TOKEN_BATCH_EXAMPLE = `[
 
 export function KiroAccountsPage() {
   const [activeTab, setActiveTab] = useState<KiroTab>('overview');
+  const [filterTypes, setFilterTypes] = useState<string[]>([]);
   const untaggedKey = '__untagged__';
 
   const store = useKiroAccountStore();
@@ -89,7 +91,7 @@ export function KiroAccountsPage() {
 
   const {
     t, locale, privacyModeEnabled, togglePrivacyMode, maskAccountText,
-    viewMode, setViewMode, searchQuery, setSearchQuery, filterType, setFilterType,
+    viewMode, setViewMode, searchQuery, setSearchQuery,
     sortBy, setSortBy, sortDirection, setSortDirection,
     selected, toggleSelect, toggleSelectAll,
     tagFilter, groupByTag, setGroupByTag, showTagFilter, setShowTagFilter,
@@ -119,6 +121,19 @@ export function KiroAccountsPage() {
     currentAccountId,
     formatDate, normalizeTag,
   } = page;
+
+  const toggleFilterTypeValue = useCallback((value: string) => {
+    setFilterTypes((prev) => {
+      if (prev.includes(value)) {
+        return prev.filter((item) => item !== value);
+      }
+      return [...prev, value];
+    });
+  }, []);
+
+  const clearFilterTypes = useCallback(() => {
+    setFilterTypes([]);
+  }, []);
 
   const accounts = store.accounts;
   const loading = store.loading;
@@ -329,10 +344,11 @@ export function KiroAccountsPage() {
   }, [accounts, resolvePlanKey, resolvePlanLabel]);
 
   useEffect(() => {
-    if (filterType === 'all') return;
-    if (tierSummary.dynamicCounts.has(filterType)) return;
-    setFilterType('all');
-  }, [filterType, tierSummary.dynamicCounts, setFilterType]);
+    setFilterTypes((prev) => {
+      const next = prev.filter((value) => tierSummary.dynamicCounts.has(value));
+      return next.length === prev.length ? prev : next;
+    });
+  }, [tierSummary.dynamicCounts]);
 
   const resolveFilterLabel = useCallback(
     (planKey: string, count: number) => {
@@ -341,6 +357,23 @@ export function KiroAccountsPage() {
     },
     [tierSummary.displayLabels],
   );
+
+  const tierFilterOptions = useMemo<MultiSelectFilterOption[]>(() => {
+    const options: MultiSelectFilterOption[] = [
+      { value: 'FREE', label: resolveFilterLabel('FREE', tierSummary.knownCounts.FREE) },
+      { value: 'INDIVIDUAL', label: resolveFilterLabel('INDIVIDUAL', tierSummary.knownCounts.INDIVIDUAL) },
+      { value: 'PRO', label: resolveFilterLabel('PRO', tierSummary.knownCounts.PRO) },
+      { value: 'BUSINESS', label: resolveFilterLabel('BUSINESS', tierSummary.knownCounts.BUSINESS) },
+      { value: 'ENTERPRISE', label: resolveFilterLabel('ENTERPRISE', tierSummary.knownCounts.ENTERPRISE) },
+    ];
+    tierSummary.extraKeys.forEach((planKey) => {
+      options.push({
+        value: planKey,
+        label: resolveFilterLabel(planKey, tierSummary.dynamicCounts.get(planKey) ?? 0),
+      });
+    });
+    return options;
+  }, [resolveFilterLabel, tierSummary.dynamicCounts, tierSummary.extraKeys, tierSummary.knownCounts.BUSINESS, tierSummary.knownCounts.ENTERPRISE, tierSummary.knownCounts.FREE, tierSummary.knownCounts.INDIVIDUAL, tierSummary.knownCounts.PRO]);
 
   // ─── Filtering & Sorting ────────────────────────────────────────────
   const compareAccountsBySort = useCallback((a: KiroAccount, b: KiroAccount) => {
@@ -383,8 +416,9 @@ export function KiroAccountsPage() {
       });
     }
 
-    if (filterType !== 'all') {
-      result = result.filter((account) => resolvePlanKey(account) === filterType);
+    if (filterTypes.length > 0) {
+      const selectedTypes = new Set(filterTypes);
+      result = result.filter((account) => selectedTypes.has(resolvePlanKey(account)));
     }
 
     if (tagFilter.length > 0) {
@@ -398,7 +432,7 @@ export function KiroAccountsPage() {
     result.sort(compareAccountsBySort);
 
     return result;
-  }, [accounts, compareAccountsBySort, filterType, normalizeTag, resolvePlanKey, resolvePresentation, searchQuery, tagFilter]);
+  }, [accounts, compareAccountsBySort, filterTypes, normalizeTag, resolvePlanKey, resolvePresentation, searchQuery, tagFilter]);
 
   const groupedAccounts = useMemo(() => {
     if (!groupByTag) return [] as Array<[string, typeof filteredAccounts]>;
@@ -738,19 +772,17 @@ export function KiroAccountsPage() {
             <button className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')} title={t('common.shared.view.grid', '卡片视图')}><LayoutGrid size={16} /></button>
           </div>
 
-          <div className="filter-select">
-            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} aria-label={t('common.shared.filterLabel', '筛选')}>
-              <option value="all">{`ALL (${tierSummary.all})`}</option>
-              <option value="FREE">{resolveFilterLabel('FREE', tierSummary.knownCounts.FREE)}</option>
-              <option value="INDIVIDUAL">{resolveFilterLabel('INDIVIDUAL', tierSummary.knownCounts.INDIVIDUAL)}</option>
-              <option value="PRO">{resolveFilterLabel('PRO', tierSummary.knownCounts.PRO)}</option>
-              <option value="BUSINESS">{resolveFilterLabel('BUSINESS', tierSummary.knownCounts.BUSINESS)}</option>
-              <option value="ENTERPRISE">{resolveFilterLabel('ENTERPRISE', tierSummary.knownCounts.ENTERPRISE)}</option>
-              {tierSummary.extraKeys.map((planKey) => (
-                <option key={planKey} value={planKey}>{resolveFilterLabel(planKey, tierSummary.dynamicCounts.get(planKey) ?? 0)}</option>
-              ))}
-            </select>
-          </div>
+          <MultiSelectFilterDropdown
+            options={tierFilterOptions}
+            selectedValues={filterTypes}
+            allLabel={`ALL (${tierSummary.all})`}
+            filterLabel={t('common.shared.filterLabel', '筛选')}
+            clearLabel={t('accounts.clearFilter', '清空筛选')}
+            emptyLabel={t('common.none', '暂无')}
+            ariaLabel={t('common.shared.filterLabel', '筛选')}
+            onToggleValue={toggleFilterTypeValue}
+            onClear={clearFilterTypes}
+          />
 
           <div className="tag-filter" ref={tagFilterRef}>
             <button type="button" className={`tag-filter-btn ${tagFilter.length > 0 ? 'active' : ''}`} onClick={() => setShowTagFilter((prev) => !prev)} aria-label={t('accounts.filterTags', '标签筛选')}>

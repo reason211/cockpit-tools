@@ -30,6 +30,7 @@ import * as cursorService from '../services/cursorService';
 import { TagEditModal } from '../components/TagEditModal';
 import { ExportJsonModal } from '../components/ExportJsonModal';
 import { QuickSettingsPopover } from '../components/QuickSettingsPopover';
+import { MultiSelectFilterDropdown, type MultiSelectFilterOption } from '../components/MultiSelectFilterDropdown';
 import {
   getCursorPlanBadge,
   getCursorPlanDisplayName,
@@ -81,6 +82,7 @@ function normalizeCursorPercent(raw: number | null | undefined): {
 
 export function CursorAccountsPage() {
   const [activeTab, setActiveTab] = useState<CursorTab>('overview');
+  const [filterTypes, setFilterTypes] = useState<string[]>([]);
   const untaggedKey = '__untagged__';
 
   const store = useCursorAccountStore();
@@ -125,7 +127,7 @@ export function CursorAccountsPage() {
 
   const {
     t, locale, privacyModeEnabled, togglePrivacyMode, maskAccountText,
-    viewMode, setViewMode, searchQuery, setSearchQuery, filterType, setFilterType,
+    viewMode, setViewMode, searchQuery, setSearchQuery,
     sortBy, setSortBy, sortDirection, setSortDirection,
     selected, toggleSelect, toggleSelectAll,
     tagFilter, groupByTag, setGroupByTag, showTagFilter, setShowTagFilter,
@@ -152,6 +154,19 @@ export function CursorAccountsPage() {
     currentAccountId,
     formatDate, normalizeTag,
   } = page;
+
+  const toggleFilterTypeValue = useCallback((value: string) => {
+    setFilterTypes((prev) => {
+      if (prev.includes(value)) {
+        return prev.filter((item) => item !== value);
+      }
+      return [...prev, value];
+    });
+  }, []);
+
+  const clearFilterTypes = useCallback(() => {
+    setFilterTypes([]);
+  }, []);
 
   const accounts = store.accounts;
   const loading = store.loading;
@@ -340,10 +355,11 @@ export function CursorAccountsPage() {
   }, [accounts, resolvePlanKey, resolvePlanLabel]);
 
   useEffect(() => {
-    if (filterType === 'all') return;
-    if (tierSummary.dynamicCounts.has(filterType)) return;
-    setFilterType('all');
-  }, [filterType, tierSummary.dynamicCounts, setFilterType]);
+    setFilterTypes((prev) => {
+      const next = prev.filter((value) => tierSummary.dynamicCounts.has(value));
+      return next.length === prev.length ? prev : next;
+    });
+  }, [tierSummary.dynamicCounts]);
 
   const resolveFilterLabel = useCallback(
     (planKey: string, count: number) => {
@@ -352,6 +368,24 @@ export function CursorAccountsPage() {
     },
     [tierSummary.displayLabels],
   );
+
+  const tierFilterOptions = useMemo<MultiSelectFilterOption[]>(() => {
+    const options: MultiSelectFilterOption[] = [
+      { value: 'FREE', label: resolveFilterLabel('FREE', tierSummary.knownCounts.FREE) },
+      { value: 'PRO', label: resolveFilterLabel('PRO', tierSummary.knownCounts.PRO) },
+      { value: 'PRO_PLUS', label: resolveFilterLabel('PRO_PLUS', tierSummary.knownCounts.PRO_PLUS) },
+      { value: 'ENTERPRISE', label: resolveFilterLabel('ENTERPRISE', tierSummary.knownCounts.ENTERPRISE) },
+      { value: 'FREE_TRIAL', label: resolveFilterLabel('FREE_TRIAL', tierSummary.knownCounts.FREE_TRIAL) },
+      { value: 'ULTRA', label: resolveFilterLabel('ULTRA', tierSummary.knownCounts.ULTRA) },
+    ];
+    tierSummary.extraKeys.forEach((planKey) => {
+      options.push({
+        value: planKey,
+        label: resolveFilterLabel(planKey, tierSummary.dynamicCounts.get(planKey) ?? 0),
+      });
+    });
+    return options;
+  }, [resolveFilterLabel, tierSummary.dynamicCounts, tierSummary.extraKeys, tierSummary.knownCounts.ENTERPRISE, tierSummary.knownCounts.FREE, tierSummary.knownCounts.FREE_TRIAL, tierSummary.knownCounts.PRO, tierSummary.knownCounts.PRO_PLUS, tierSummary.knownCounts.ULTRA]);
 
   // ─── Filtering & Sorting ──────────────────────────────────────────
 
@@ -399,8 +433,9 @@ export function CursorAccountsPage() {
       });
     }
 
-    if (filterType !== 'all') {
-      result = result.filter((account) => resolvePlanKey(account) === filterType);
+    if (filterTypes.length > 0) {
+      const selectedTypes = new Set(filterTypes);
+      result = result.filter((account) => selectedTypes.has(resolvePlanKey(account)));
     }
 
     if (tagFilter.length > 0) {
@@ -414,7 +449,7 @@ export function CursorAccountsPage() {
     result.sort(compareAccountsBySort);
 
     return result;
-  }, [accounts, compareAccountsBySort, filterType, normalizeTag, resolvePlanKey, searchQuery, tagFilter]);
+  }, [accounts, compareAccountsBySort, filterTypes, normalizeTag, resolvePlanKey, searchQuery, tagFilter]);
 
   const groupedAccounts = useMemo(() => {
     if (!groupByTag) return [] as Array<[string, typeof filteredAccounts]>;
@@ -780,20 +815,17 @@ export function CursorAccountsPage() {
             <button className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')} title={t('common.shared.view.grid', '卡片视图')}><LayoutGrid size={16} /></button>
           </div>
 
-          <div className="filter-select">
-            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} aria-label={t('common.shared.filterLabel', '筛选')}>
-              <option value="all">{`ALL (${tierSummary.all})`}</option>
-              <option value="FREE">{resolveFilterLabel('FREE', tierSummary.knownCounts.FREE)}</option>
-              <option value="PRO">{resolveFilterLabel('PRO', tierSummary.knownCounts.PRO)}</option>
-              <option value="PRO_PLUS">{resolveFilterLabel('PRO_PLUS', tierSummary.knownCounts.PRO_PLUS)}</option>
-              <option value="ENTERPRISE">{resolveFilterLabel('ENTERPRISE', tierSummary.knownCounts.ENTERPRISE)}</option>
-              <option value="FREE_TRIAL">{resolveFilterLabel('FREE_TRIAL', tierSummary.knownCounts.FREE_TRIAL)}</option>
-              <option value="ULTRA">{resolveFilterLabel('ULTRA', tierSummary.knownCounts.ULTRA)}</option>
-              {tierSummary.extraKeys.map((planKey) => (
-                <option key={planKey} value={planKey}>{resolveFilterLabel(planKey, tierSummary.dynamicCounts.get(planKey) ?? 0)}</option>
-              ))}
-            </select>
-          </div>
+          <MultiSelectFilterDropdown
+            options={tierFilterOptions}
+            selectedValues={filterTypes}
+            allLabel={`ALL (${tierSummary.all})`}
+            filterLabel={t('common.shared.filterLabel', '筛选')}
+            clearLabel={t('accounts.clearFilter', '清空筛选')}
+            emptyLabel={t('common.none', '暂无')}
+            ariaLabel={t('common.shared.filterLabel', '筛选')}
+            onToggleValue={toggleFilterTypeValue}
+            onClear={clearFilterTypes}
+          />
 
           <div className="tag-filter" ref={tagFilterRef}>
             <button type="button" className={`tag-filter-btn ${tagFilter.length > 0 ? 'active' : ''}`} onClick={() => setShowTagFilter((prev) => !prev)} aria-label={t('accounts.filterTags', '标签筛选')}>

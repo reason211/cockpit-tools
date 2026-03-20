@@ -7,6 +7,13 @@ All notable changes to Cockpit Tools will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
+## [0.17.4] - 2026-03-20
+
+### Changed
+- **Account plan filtering now supports multi-select across major account pages**: Accounts, Codex, Cursor, Gemini, GitHub Copilot, Kiro, Qoder, Trae, Windsurf, CodeBuddy, CodeBuddy CN, and WorkBuddy pages now allow selecting multiple plan/status types in one pass.
+- **Plan filter interaction is now unified through a shared dropdown component**: introduced reusable multi-select filter UI with selected-count indicator, one-click clear, and consistent filtering behavior across provider pages.
+
+---
 ## [0.17.3] - 2026-03-20
 
 ### Added

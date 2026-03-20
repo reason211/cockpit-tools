@@ -7,6 +7,13 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
 ---
+## [0.17.4] - 2026-03-20
+
+### 变更
+- **主要账号页的套餐筛选现已支持多选**：Accounts、Codex、Cursor、Gemini、GitHub Copilot、Kiro、Qoder、Trae、Windsurf、CodeBuddy、CodeBuddy CN、WorkBuddy 页面现可一次选择多个套餐/状态类型进行筛选。
+- **套餐筛选交互已统一为复用下拉组件**：新增通用多选筛选下拉，统一支持已选数量提示、一键清空与跨页面一致的筛选行为。
+
+---
 ## [0.17.3] - 2026-03-20
 
 ### 新增

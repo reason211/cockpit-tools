@@ -40,6 +40,7 @@ import { WindsurfOverviewTabsHeader, WindsurfTab } from '../components/WindsurfO
 import { WindsurfInstancesContent } from './WindsurfInstancesPage';
 import { QuickSettingsPopover } from '../components/QuickSettingsPopover';
 import { useProviderAccountsPage } from '../hooks/useProviderAccountsPage';
+import { MultiSelectFilterDropdown, type MultiSelectFilterOption } from '../components/MultiSelectFilterDropdown';
 import type { WindsurfAccount, WindsurfPlanBadge } from '../types/windsurf';
 
 const WINDSURF_FLOW_NOTICE_COLLAPSED_KEY = 'agtools.windsurf.flow_notice_collapsed';
@@ -71,6 +72,7 @@ const WINDSURF_PLAN_FILTERS: WindsurfPlanBadge[] = [
 
 export function WindsurfAccountsPage() {
   const [activeTab, setActiveTab] = useState<WindsurfTab>('overview');
+  const [filterTypes, setFilterTypes] = useState<string[]>([]);
   const untaggedKey = '__untagged__';
 
   const store = useWindsurfAccountStore();
@@ -109,7 +111,7 @@ export function WindsurfAccountsPage() {
 
   const {
     t, locale, privacyModeEnabled, togglePrivacyMode, maskAccountText,
-    viewMode, setViewMode, searchQuery, setSearchQuery, filterType, setFilterType,
+    viewMode, setViewMode, searchQuery, setSearchQuery,
     sortBy, setSortBy, sortDirection, setSortDirection,
     selected, toggleSelect, toggleSelectAll,
     tagFilter, groupByTag, setGroupByTag, showTagFilter, setShowTagFilter,
@@ -139,6 +141,19 @@ export function WindsurfAccountsPage() {
     currentAccountId,
     formatDate, normalizeTag,
   } = page;
+
+  const toggleFilterTypeValue = useCallback((value: string) => {
+    setFilterTypes((prev) => {
+      if (prev.includes(value)) {
+        return prev.filter((item) => item !== value);
+      }
+      return [...prev, value];
+    });
+  }, []);
+
+  const clearFilterTypes = useCallback(() => {
+    setFilterTypes([]);
+  }, []);
 
   const accounts = store.accounts;
   const loading = store.loading;
@@ -300,6 +315,15 @@ export function WindsurfAccountsPage() {
     return counts;
   }, [accounts, resolvePlanKey]);
 
+  const tierFilterOptions = useMemo<MultiSelectFilterOption[]>(
+    () =>
+      WINDSURF_PLAN_FILTERS.map((planKey) => ({
+        value: planKey,
+        label: `${getWindsurfPlanLabel(planKey)} (${tierCounts[planKey] ?? 0})`,
+      })),
+    [tierCounts],
+  );
+
   // ─── Filtering & Sorting ────────────────────────────────────────────
   const compareAccountsBySort = useCallback((a: WindsurfAccount, b: WindsurfAccount) => {
     if (sortBy === 'created_at') {
@@ -331,8 +355,9 @@ export function WindsurfAccountsPage() {
       const query = searchQuery.toLowerCase();
       result = result.filter((account) => resolvePresentation(account).displayName.toLowerCase().includes(query));
     }
-    if (filterType !== 'all') {
-      result = result.filter((account) => resolvePlanKey(account) === filterType);
+    if (filterTypes.length > 0) {
+      const selectedTypes = new Set(filterTypes);
+      result = result.filter((account) => selectedTypes.has(resolvePlanKey(account)));
     }
     if (tagFilter.length > 0) {
       const selectedTags = new Set(tagFilter.map(normalizeTag));
@@ -340,7 +365,7 @@ export function WindsurfAccountsPage() {
     }
     result.sort(compareAccountsBySort);
     return result;
-  }, [accounts, compareAccountsBySort, filterType, normalizeTag, resolvePlanKey, resolvePresentation, searchQuery, tagFilter]);
+  }, [accounts, compareAccountsBySort, filterTypes, normalizeTag, resolvePlanKey, resolvePresentation, searchQuery, tagFilter]);
 
   const groupedAccounts = useMemo(() => {
     if (!groupByTag) return [] as Array<[string, typeof filteredAccounts]>;
@@ -554,16 +579,17 @@ export function WindsurfAccountsPage() {
             <button className={`view-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')} title={t('common.shared.view.list', '列表视图')}><List size={16} /></button>
             <button className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')} title={t('common.shared.view.grid', '卡片视图')}><LayoutGrid size={16} /></button>
           </div>
-          <div className="filter-select">
-            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} aria-label={t('common.shared.filterLabel', '筛选')}>
-              <option value="all">{`ALL (${tierCounts.all})`}</option>
-              {WINDSURF_PLAN_FILTERS.map((planKey) => (
-                <option key={planKey} value={planKey}>
-                  {`${getWindsurfPlanLabel(planKey)} (${tierCounts[planKey] ?? 0})`}
-                </option>
-              ))}
-            </select>
-          </div>
+          <MultiSelectFilterDropdown
+            options={tierFilterOptions}
+            selectedValues={filterTypes}
+            allLabel={`ALL (${tierCounts.all})`}
+            filterLabel={t('common.shared.filterLabel', '筛选')}
+            clearLabel={t('accounts.clearFilter', '清空筛选')}
+            emptyLabel={t('common.none', '暂无')}
+            ariaLabel={t('common.shared.filterLabel', '筛选')}
+            onToggleValue={toggleFilterTypeValue}
+            onClear={clearFilterTypes}
+          />
           <div className="tag-filter" ref={tagFilterRef}>
             <button type="button" className={`tag-filter-btn ${tagFilter.length > 0 ? 'active' : ''}`} onClick={() => setShowTagFilter((prev) => !prev)} aria-label={t('accounts.filterTags', '标签筛选')}>
               <Tag size={14} />{tagFilter.length > 0 ? `${t('accounts.filterTagsCount', '标签')}(${tagFilter.length})` : t('accounts.filterTags', '标签筛选')}

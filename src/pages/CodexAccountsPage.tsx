@@ -51,6 +51,7 @@ import { CodexOverviewTabsHeader, CodexTab } from '../components/CodexOverviewTa
 import { CodexInstancesContent } from './CodexInstancesPage';
 import { QuickSettingsPopover } from '../components/QuickSettingsPopover';
 import { useProviderAccountsPage } from '../hooks/useProviderAccountsPage';
+import { MultiSelectFilterDropdown, type MultiSelectFilterOption } from '../components/MultiSelectFilterDropdown';
 import type { CodexAccount } from '../types/codex';
 import {
   CODEX_CODE_REVIEW_QUOTA_VISIBILITY_CHANGED_EVENT,
@@ -82,6 +83,7 @@ const CODEX_USAGE_URL = 'https://platform.openai.com/usage';
 export function CodexAccountsPage() {
   const [activeTab, setActiveTab] = useState<CodexTab>('overview');
   const untaggedKey = '__untagged__';
+  const [filterTypes, setFilterTypes] = useState<string[]>([]);
 
   const store = useCodexAccountStore();
 
@@ -108,7 +110,7 @@ export function CodexAccountsPage() {
 
   const {
     t, maskAccountText, privacyModeEnabled, togglePrivacyMode,
-    viewMode, setViewMode, searchQuery, setSearchQuery, filterType, setFilterType,
+    viewMode, setViewMode, searchQuery, setSearchQuery,
     sortBy, setSortBy, sortDirection, setSortDirection,
     selected, toggleSelect, toggleSelectAll,
     tagFilter, groupByTag, setGroupByTag, showTagFilter, setShowTagFilter,
@@ -128,6 +130,19 @@ export function CodexAccountsPage() {
     importing, openAddModal, closeAddModal,
     formatDate, normalizeTag,
   } = page;
+
+  const toggleFilterTypeValue = useCallback((value: string) => {
+    setFilterTypes((prev) => {
+      if (prev.includes(value)) {
+        return prev.filter((item) => item !== value);
+      }
+      return [...prev, value];
+    });
+  }, []);
+
+  const clearFilterTypes = useCallback(() => {
+    setFilterTypes([]);
+  }, []);
 
   const {
     accounts,
@@ -941,6 +956,15 @@ export function CodexAccountsPage() {
     return counts;
   }, [accounts, resolvePlanKey]);
 
+  const tierFilterOptions = useMemo<MultiSelectFilterOption[]>(() => [
+    { value: 'FREE', label: `FREE (${tierCounts.FREE})` },
+    { value: 'PLUS', label: `PLUS (${tierCounts.PLUS})` },
+    { value: 'PRO', label: `PRO (${tierCounts.PRO})` },
+    { value: 'TEAM', label: `TEAM (${tierCounts.TEAM})` },
+    { value: 'ENTERPRISE', label: `ENTERPRISE (${tierCounts.ENTERPRISE})` },
+    { value: 'ERROR', label: `ERROR (${tierCounts.ERROR})` },
+  ], [tierCounts]);
+
   // ─── Filtering & Sorting ────────────────────────────────────────────
   const compareAccountsBySort = useCallback((a: CodexAccount, b: CodexAccount) => {
     if (sortBy === 'created_at') {
@@ -971,10 +995,14 @@ export function CodexAccountsPage() {
       const query = searchQuery.toLowerCase();
       result = result.filter((a) => resolvePresentation(a).displayName.toLowerCase().includes(query));
     }
-    if (filterType === 'ERROR') {
-      result = result.filter((a) => !!a.quota_error);
-    } else if (filterType !== 'all') {
-      result = result.filter((a) => resolvePlanKey(a) === filterType);
+    if (filterTypes.length > 0) {
+      const selectedTypes = new Set(filterTypes);
+      result = result.filter((a) => {
+        if (selectedTypes.has('ERROR') && a.quota_error) {
+          return true;
+        }
+        return selectedTypes.has(resolvePlanKey(a));
+      });
     }
     if (tagFilter.length > 0) {
       const selectedTags = new Set(tagFilter.map(normalizeTag));
@@ -982,7 +1010,7 @@ export function CodexAccountsPage() {
     }
     result.sort(compareAccountsBySort);
     return result;
-  }, [accounts, compareAccountsBySort, filterType, normalizeTag, resolvePlanKey, resolvePresentation, searchQuery, tagFilter]);
+  }, [accounts, compareAccountsBySort, filterTypes, normalizeTag, resolvePlanKey, resolvePresentation, searchQuery, tagFilter]);
 
   const groupedAccounts = useMemo(() => {
     if (!groupByTag) return [] as Array<[string, typeof filteredAccounts]>;
@@ -1354,17 +1382,17 @@ export function CodexAccountsPage() {
               <button className={`view-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')} title={t('common.shared.view.list', '列表视图')}><List size={16} /></button>
               <button className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')} title={t('common.shared.view.grid', '卡片视图')}><LayoutGrid size={16} /></button>
             </div>
-            <div className="filter-select">
-              <select value={filterType} onChange={(e) => setFilterType(e.target.value)} aria-label={t('common.shared.filterLabel', '筛选')}>
-                <option value="all">{t('common.shared.filter.all', { count: tierCounts.all })}</option>
-                <option value="FREE">{`FREE (${tierCounts.FREE})`}</option>
-                <option value="PLUS">{`PLUS (${tierCounts.PLUS})`}</option>
-                <option value="PRO">{`PRO (${tierCounts.PRO})`}</option>
-                <option value="TEAM">{`TEAM (${tierCounts.TEAM})`}</option>
-                <option value="ENTERPRISE">{`ENTERPRISE (${tierCounts.ENTERPRISE})`}</option>
-                <option value="ERROR">{`ERROR (${tierCounts.ERROR})`}</option>
-              </select>
-            </div>
+            <MultiSelectFilterDropdown
+              options={tierFilterOptions}
+              selectedValues={filterTypes}
+              allLabel={t('common.shared.filter.all', { count: tierCounts.all })}
+              filterLabel={t('common.shared.filterLabel', '筛选')}
+              clearLabel={t('accounts.clearFilter', '清空筛选')}
+              emptyLabel={t('common.none', '暂无')}
+              ariaLabel={t('common.shared.filterLabel', '筛选')}
+              onToggleValue={toggleFilterTypeValue}
+              onClear={clearFilterTypes}
+            />
             <div className="tag-filter" ref={tagFilterRef}>
               <button type="button" className={`tag-filter-btn ${tagFilter.length > 0 ? 'active' : ''}`} onClick={() => setShowTagFilter((prev) => !prev)} aria-label={t('accounts.filterTags', '标签筛选')}>
                 <Tag size={14} />{tagFilter.length > 0 ? `${t('accounts.filterTagsCount', '标签')}(${tagFilter.length})` : t('accounts.filterTags', '标签筛选')}

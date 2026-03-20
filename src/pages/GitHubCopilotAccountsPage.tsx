@@ -36,6 +36,7 @@ import { GitHubCopilotOverviewTabsHeader, GitHubCopilotTab } from '../components
 import { GitHubCopilotInstancesContent } from './GitHubCopilotInstancesPage';
 import { QuickSettingsPopover } from '../components/QuickSettingsPopover';
 import { useProviderAccountsPage } from '../hooks/useProviderAccountsPage';
+import { MultiSelectFilterDropdown, type MultiSelectFilterOption } from '../components/MultiSelectFilterDropdown';
 import type { GitHubCopilotAccount } from '../types/githubCopilot';
 
 const GHCP_FLOW_NOTICE_COLLAPSED_KEY = 'agtools.github_copilot.flow_notice_collapsed';
@@ -55,6 +56,7 @@ const GHCP_TOKEN_BATCH_EXAMPLE = `[
 
 export function GitHubCopilotAccountsPage() {
   const [activeTab, setActiveTab] = useState<GitHubCopilotTab>('overview');
+  const [filterTypes, setFilterTypes] = useState<string[]>([]);
   const untaggedKey = '__untagged__';
 
   const store = useGitHubCopilotAccountStore();
@@ -91,7 +93,7 @@ export function GitHubCopilotAccountsPage() {
 
   const {
     t, privacyModeEnabled, togglePrivacyMode, maskAccountText,
-    viewMode, setViewMode, searchQuery, setSearchQuery, filterType, setFilterType,
+    viewMode, setViewMode, searchQuery, setSearchQuery,
     sortBy, setSortBy, sortDirection, setSortDirection,
     selected, toggleSelect, toggleSelectAll,
     tagFilter, groupByTag, setGroupByTag, showTagFilter, setShowTagFilter,
@@ -118,6 +120,19 @@ export function GitHubCopilotAccountsPage() {
     currentAccountId,
     formatDate,
   } = page;
+
+  const toggleFilterTypeValue = useCallback((value: string) => {
+    setFilterTypes((prev) => {
+      if (prev.includes(value)) {
+        return prev.filter((item) => item !== value);
+      }
+      return [...prev, value];
+    });
+  }, []);
+
+  const clearFilterTypes = useCallback(() => {
+    setFilterTypes([]);
+  }, []);
 
   const accounts = store.accounts;
   const loading = store.loading;
@@ -192,6 +207,13 @@ export function GitHubCopilotAccountsPage() {
     return counts;
   }, [accounts, resolvePlanKey]);
 
+  const tierFilterOptions = useMemo<MultiSelectFilterOption[]>(() => [
+    { value: 'FREE', label: `FREE (${tierCounts.FREE})` },
+    { value: 'PRO', label: `PRO (${tierCounts.PRO})` },
+    { value: 'BUSINESS', label: `BUSINESS (${tierCounts.BUSINESS})` },
+    { value: 'ENTERPRISE', label: `ENTERPRISE (${tierCounts.ENTERPRISE})` },
+  ], [tierCounts]);
+
   const normalizeTag = (tag: string) => tag.trim().toLowerCase();
 
   const compareAccountsBySort = useCallback((a: GitHubCopilotAccount, b: GitHubCopilotAccount) => {
@@ -243,8 +265,9 @@ export function GitHubCopilotAccountsPage() {
       );
     }
 
-    if (filterType !== 'all') {
-      result = result.filter((account) => resolvePlanKey(account) === filterType);
+    if (filterTypes.length > 0) {
+      const selectedTypes = new Set(filterTypes);
+      result = result.filter((account) => selectedTypes.has(resolvePlanKey(account)));
     }
 
     if (tagFilter.length > 0) {
@@ -258,7 +281,7 @@ export function GitHubCopilotAccountsPage() {
     result.sort(compareAccountsBySort);
 
     return result;
-  }, [accounts, compareAccountsBySort, filterType, normalizeTag, resolvePlanKey, resolvePresentation, searchQuery, tagFilter]);
+  }, [accounts, compareAccountsBySort, filterTypes, normalizeTag, resolvePlanKey, resolvePresentation, searchQuery, tagFilter]);
 
   const groupedAccounts = useMemo(() => {
     if (!groupByTag) return [] as Array<[string, typeof filteredAccounts]>;
@@ -680,19 +703,17 @@ export function GitHubCopilotAccountsPage() {
             </button>
           </div>
 
-          <div className="filter-select">
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              aria-label={t('common.shared.filterLabel', '筛选')}
-            >
-              <option value="all">{t('common.shared.filter.all', { count: tierCounts.all })}</option>
-              <option value="FREE">{`FREE (${tierCounts.FREE})`}</option>
-              <option value="PRO">{`PRO (${tierCounts.PRO})`}</option>
-              <option value="BUSINESS">{`BUSINESS (${tierCounts.BUSINESS})`}</option>
-              <option value="ENTERPRISE">{`ENTERPRISE (${tierCounts.ENTERPRISE})`}</option>
-            </select>
-          </div>
+          <MultiSelectFilterDropdown
+            options={tierFilterOptions}
+            selectedValues={filterTypes}
+            allLabel={t('common.shared.filter.all', { count: tierCounts.all })}
+            filterLabel={t('common.shared.filterLabel', '筛选')}
+            clearLabel={t('accounts.clearFilter', '清空筛选')}
+            emptyLabel={t('common.none', '暂无')}
+            ariaLabel={t('common.shared.filterLabel', '筛选')}
+            onToggleValue={toggleFilterTypeValue}
+            onClear={clearFilterTypes}
+          />
 
           <div className="tag-filter" ref={tagFilterRef}>
             <button
