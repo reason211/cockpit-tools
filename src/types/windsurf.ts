@@ -1153,7 +1153,24 @@ export function getWindsurfBillingStrategy(account: WindsurfAccount): string | n
       ['windsurfUserStatus', 'userStatus', 'planStatus', 'billing_strategy'],
     ]);
 
-  return strategy?.trim() || null;
+  const normalizedStrategy = strategy?.trim();
+  if (!normalizedStrategy) {
+    return null;
+  }
+
+  const canonicalStrategy = normalizedStrategy
+    .replace(/^billing[_-]?strategy[_-]?/i, '')
+    .trim()
+    .toLowerCase();
+
+  if (canonicalStrategy === 'quota') {
+    return 'quota';
+  }
+  if (canonicalStrategy.includes('credit')) {
+    return 'credits';
+  }
+
+  return canonicalStrategy || normalizedStrategy;
 }
 
 export function getWindsurfOfficialUsageMode(account: WindsurfAccount): WindsurfOfficialUsageMode {

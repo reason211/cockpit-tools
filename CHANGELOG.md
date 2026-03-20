@@ -7,6 +7,13 @@ All notable changes to Cockpit Tools will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
+## [0.17.6] - 2026-03-20
+
+### Changed
+- **Windsurf usage-mode detection now follows the official billing-strategy enums end-to-end**: the account page now normalizes raw `BILLING_STRATEGY_*` values before deciding between quota and credits, preventing official quota accounts from being misclassified when Windsurf stores enum-style strategy strings.
+- **Windsurf quota panels now keep the official three-field summary visible**: quota-billed accounts now always render daily quota usage, weekly quota usage, and extra usage balance, defaulting the extra-balance row to `$0.00` when the local snapshot does not include an upstream balance value.
+
+---
 ## [0.17.5] - 2026-03-20
 
 ### Changed

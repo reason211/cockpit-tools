@@ -371,17 +371,15 @@ export function WindsurfAccountsPage() {
         });
       }
 
-      if (summary.overageBalanceMicros != null) {
-        const label = t('windsurf.usageSummary.extraUsageBalance', 'Extra usage balance');
-        const value = formatMicrosAsUsd(summary.overageBalanceMicros);
-        items.push({
-          key: 'extraUsage',
-          label,
-          value,
-          detail: '',
-          title: `${label}: ${value}`,
-        });
-      }
+      const label = t('windsurf.usageSummary.extraUsageBalance', 'Extra usage balance');
+      const value = formatMicrosAsUsd(summary.overageBalanceMicros ?? 0);
+      items.push({
+        key: 'extraUsage',
+        label,
+        value,
+        detail: '',
+        title: `${label}: ${value}`,
+      });
 
       return items;
     },

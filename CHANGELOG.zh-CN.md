@@ -7,6 +7,13 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
 ---
+## [0.17.6] - 2026-03-20
+
+### 变更
+- **Windsurf 用量模式判定现已按官方 billing strategy 枚举值全链路对齐**：账号页会先归一化原始 `BILLING_STRATEGY_*` 值，再决定走 quota 还是 credits 展示，避免官方 quota 账号因枚举式原值而被误判。
+- **Windsurf 的 quota 面板现保持官方三字段摘要完整可见**：按 quota 计费的账号现在始终展示每日额度用量、每周额度用量和额外用量余额；当本地快照缺少余额字段时，额外用量余额默认显示为 `$0.00`。
+
+---
 ## [0.17.5] - 2026-03-20
 
 ### 变更
