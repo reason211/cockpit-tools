@@ -24,7 +24,7 @@ async fn refresh_github_copilot_account_after_login(
 /// 列出所有 GitHub Copilot 账号
 #[tauri::command]
 pub fn list_github_copilot_accounts() -> Result<Vec<GitHubCopilotAccount>, String> {
-    Ok(github_copilot_account::list_accounts())
+    github_copilot_account::list_accounts_checked()
 }
 
 /// 删除 GitHub Copilot 账号

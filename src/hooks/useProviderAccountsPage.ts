@@ -25,6 +25,7 @@ import {
   persistPrivacyModeEnabled,
 } from '../utils/privacy';
 import { useExportJsonModal } from './useExportJsonModal';
+import { parseFileCorruptedError } from '../components/FileCorruptedModal';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -68,6 +69,7 @@ export interface ProviderDataService {
 export interface ProviderStoreActions<TAccount> {
   accounts: TAccount[];
   loading: boolean;
+  error?: string | null;
   fetchAccounts: () => Promise<void>;
   deleteAccounts: (ids: string[]) => Promise<void>;
   refreshToken: (id: string) => Promise<void>;
@@ -314,6 +316,7 @@ export function useProviderAccountsPage<TAccount extends ProviderAccountBase>(
 
   const {
     accounts,
+    error: storeError,
     fetchAccounts,
     deleteAccounts,
     refreshToken,
@@ -492,6 +495,26 @@ export function useProviderAccountsPage<TAccount extends ProviderAccountBase>(
   } | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState<{ text: string; tone?: 'error' } | null>(null);
+
+  useEffect(() => {
+    if (!storeError) return;
+
+    const corrupted = parseFileCorruptedError(storeError);
+    if (corrupted) {
+      setMessage({
+        text: t('error.fileCorrupted.description', '文件 {{fileName}} 已损坏，无法解析。', {
+          fileName: corrupted.file_name,
+        }),
+        tone: 'error',
+      });
+      return;
+    }
+
+    setMessage({
+      text: String(storeError).replace(/^Error:\s*/, ''),
+      tone: 'error',
+    });
+  }, [storeError, t]);
 
   const handleRefresh = useCallback(
     async (accountId: string) => {

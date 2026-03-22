@@ -140,11 +140,75 @@ fn load_account_index() -> ZedAccountIndex {
         Err(_) => return ZedAccountIndex::new(),
     };
     if !path.exists() {
-        return ZedAccountIndex::new();
+        return repair_account_index_from_details("索引文件不存在")
+            .unwrap_or_else(ZedAccountIndex::new);
     }
-    match fs::read_to_string(path) {
-        Ok(content) => serde_json::from_str(&content).unwrap_or_else(|_| ZedAccountIndex::new()),
+    match fs::read_to_string(&path) {
+        Ok(content) if content.trim().is_empty() => {
+            repair_account_index_from_details("索引文件为空").unwrap_or_else(ZedAccountIndex::new)
+        }
+        Ok(content) => match serde_json::from_str::<ZedAccountIndex>(&content) {
+            Ok(index) if !index.accounts.is_empty() => index,
+            Ok(_) => repair_account_index_from_details("索引账号列表为空")
+                .unwrap_or_else(ZedAccountIndex::new),
+            Err(err) => {
+                logger::log_warn(&format!(
+                    "[Zed Account] 账号索引解析失败，尝试按详情文件自动修复: path={}, error={}",
+                    path.display(),
+                    err
+                ));
+                repair_account_index_from_details("索引文件损坏")
+                    .unwrap_or_else(ZedAccountIndex::new)
+            }
+        },
         Err(_) => ZedAccountIndex::new(),
+    }
+}
+
+fn load_account_index_checked() -> Result<ZedAccountIndex, String> {
+    let path = get_accounts_index_path()?;
+    if !path.exists() {
+        if let Some(index) = repair_account_index_from_details("索引文件不存在") {
+            return Ok(index);
+        }
+        return Ok(ZedAccountIndex::new());
+    }
+
+    let content = match fs::read_to_string(&path) {
+        Ok(content) => content,
+        Err(err) => {
+            if let Some(index) = repair_account_index_from_details("索引文件读取失败") {
+                return Ok(index);
+            }
+            return Err(format!("读取账号索引失败: {}", err));
+        }
+    };
+
+    if content.trim().is_empty() {
+        if let Some(index) = repair_account_index_from_details("索引文件为空") {
+            return Ok(index);
+        }
+        return Ok(ZedAccountIndex::new());
+    }
+
+    match serde_json::from_str::<ZedAccountIndex>(&content) {
+        Ok(index) if !index.accounts.is_empty() => Ok(index),
+        Ok(index) => {
+            if let Some(repaired) = repair_account_index_from_details("索引账号列表为空") {
+                return Ok(repaired);
+            }
+            Ok(index)
+        }
+        Err(err) => {
+            if let Some(index) = repair_account_index_from_details("索引文件损坏") {
+                return Ok(index);
+            }
+            Err(crate::error::file_corrupted_error(
+                ACCOUNTS_INDEX_FILE,
+                &path.to_string_lossy(),
+                &err.to_string(),
+            ))
+        }
     }
 }
 
@@ -153,6 +217,64 @@ fn save_account_index(index: &ZedAccountIndex) -> Result<(), String> {
     let content =
         serde_json::to_string_pretty(index).map_err(|e| format!("序列化账号索引失败: {}", e))?;
     fs::write(path, content).map_err(|e| format!("写入账号索引失败: {}", e))
+}
+
+fn repair_account_index_from_details(reason: &str) -> Option<ZedAccountIndex> {
+    let index_path = get_accounts_index_path().ok()?;
+    let accounts_dir = get_accounts_dir().ok()?;
+    let mut accounts = crate::modules::account_index_repair::load_accounts_from_details(
+        &accounts_dir,
+        |account_id| load_stored_account(account_id),
+    )
+    .ok()?;
+
+    if accounts.is_empty() {
+        return None;
+    }
+
+    crate::modules::account_index_repair::sort_accounts_by_recency(
+        &mut accounts,
+        |account| account.public_account.last_used,
+        |account| account.public_account.created_at,
+        |account| account.public_account.id.as_str(),
+    );
+
+    let mut index = ZedAccountIndex::new();
+    index.accounts = accounts.iter().map(|account| account.summary()).collect();
+    index.current_account_id = accounts
+        .first()
+        .map(|account| account.public_account.id.clone());
+
+    let backup_path = crate::modules::account_index_repair::backup_existing_index(&index_path)
+        .unwrap_or_else(|err| {
+            logger::log_warn(&format!(
+                "[Zed Account] 自动修复前备份索引失败，继续尝试重建: path={}, error={}",
+                index_path.display(),
+                err
+            ));
+            None
+        });
+
+    if let Err(err) = save_account_index(&index) {
+        logger::log_warn(&format!(
+            "[Zed Account] 自动修复索引保存失败，将以内存结果继续运行: reason={}, recovered_accounts={}, error={}",
+            reason,
+            index.accounts.len(),
+            err
+        ));
+    }
+
+    logger::log_warn(&format!(
+        "[Zed Account] 检测到账号索引异常，已根据详情文件自动重建: reason={}, recovered_accounts={}, backup_path={}",
+        reason,
+        index.accounts.len(),
+        backup_path
+            .as_ref()
+            .map(|path| path.display().to_string())
+            .unwrap_or_else(|| "-".to_string())
+    ));
+
+    Some(index)
 }
 
 fn refresh_summary(index: &mut ZedAccountIndex, account: &ZedStoredAccount) {
@@ -209,6 +331,14 @@ pub fn list_accounts() -> Vec<ZedAccount> {
         .into_iter()
         .map(|account| account.to_public())
         .collect()
+}
+
+pub fn list_accounts_checked() -> Result<Vec<ZedAccount>, String> {
+    let index = load_account_index_checked()?;
+    Ok(list_stored_accounts_from_index(&index)
+        .into_iter()
+        .map(|account| account.to_public())
+        .collect())
 }
 
 fn load_all_stored_accounts() -> Vec<ZedStoredAccount> {
@@ -352,7 +482,9 @@ fn json_nested_str(value: &Value, path: &[&str]) -> Option<String> {
 
 fn json_nested_i64(value: &Value, path: &[&str]) -> Option<i64> {
     json_nested(value, path).and_then(|raw| match raw {
-        Value::Number(number) => number.as_i64().or_else(|| number.as_f64().map(|v| v.round() as i64)),
+        Value::Number(number) => number
+            .as_i64()
+            .or_else(|| number.as_f64().map(|v| v.round() as i64)),
         Value::String(text) => text.trim().parse::<i64>().ok(),
         _ => None,
     })
@@ -526,23 +658,36 @@ fn build_stored_account_from_bundle(
         json_nested_i64(&bundle.usage_raw, &["token_spend", "used"]),
     ]);
     let token_spend_limit_cents = pick_first_i64(&[
-        json_nested_i64(&bundle.usage_raw, &["current_usage", "token_spend", "limit"]),
+        json_nested_i64(
+            &bundle.usage_raw,
+            &["current_usage", "token_spend", "limit"],
+        ),
         json_nested_i64(&bundle.usage_raw, &["token_spend", "limit"]),
     ]);
     let token_spend_remaining_cents = pick_first_i64(&[
-        json_nested_i64(&bundle.usage_raw, &["current_usage", "token_spend", "remaining"]),
+        json_nested_i64(
+            &bundle.usage_raw,
+            &["current_usage", "token_spend", "remaining"],
+        ),
         json_nested_i64(&bundle.usage_raw, &["token_spend", "remaining"]),
     ]);
 
     let edit_predictions_limit_raw = pick_first_string(&[
-        json_nested(&bundle.usage_raw, &["current_usage", "edit_predictions", "limit"])
-            .and_then(value_to_string),
+        json_nested(
+            &bundle.usage_raw,
+            &["current_usage", "edit_predictions", "limit"],
+        )
+        .and_then(value_to_string),
         json_nested(&bundle.usage_raw, &["edit_predictions", "limit"]).and_then(value_to_string),
     ]);
     let edit_predictions_remaining_raw = pick_first_string(&[
-        json_nested(&bundle.usage_raw, &["current_usage", "edit_predictions", "remaining"])
+        json_nested(
+            &bundle.usage_raw,
+            &["current_usage", "edit_predictions", "remaining"],
+        )
+        .and_then(value_to_string),
+        json_nested(&bundle.usage_raw, &["edit_predictions", "remaining"])
             .and_then(value_to_string),
-        json_nested(&bundle.usage_raw, &["edit_predictions", "remaining"]).and_then(value_to_string),
     ]);
 
     let created_at = existing
@@ -579,7 +724,10 @@ fn build_stored_account_from_bundle(
                     &["subscription", "period", "start_at"],
                 ),
                 json_nested_timestamp(&bundle.subscription_raw, &["period", "start_at"]),
-                json_nested_timestamp(&bundle.user_raw, &["plan", "subscription_period", "started_at"]),
+                json_nested_timestamp(
+                    &bundle.user_raw,
+                    &["plan", "subscription_period", "started_at"],
+                ),
             ]),
             billing_period_end_at: pick_first_i64(&[
                 json_nested_timestamp(
@@ -587,11 +735,17 @@ fn build_stored_account_from_bundle(
                     &["subscription", "period", "end_at"],
                 ),
                 json_nested_timestamp(&bundle.subscription_raw, &["period", "end_at"]),
-                json_nested_timestamp(&bundle.user_raw, &["plan", "subscription_period", "ended_at"]),
+                json_nested_timestamp(
+                    &bundle.user_raw,
+                    &["plan", "subscription_period", "ended_at"],
+                ),
             ]),
             trial_started_at: pick_first_i64(&[
                 json_nested_timestamp(&bundle.preferences_raw, &["trial_started_at"]),
-                json_nested_timestamp(&bundle.subscription_raw, &["subscription", "trial_started_at"]),
+                json_nested_timestamp(
+                    &bundle.subscription_raw,
+                    &["subscription", "trial_started_at"],
+                ),
                 json_nested_timestamp(&bundle.subscription_raw, &["trial_started_at"]),
                 json_nested_timestamp(&bundle.user_raw, &["plan", "trial_started_at"]),
             ]),
@@ -603,13 +757,22 @@ fn build_stored_account_from_bundle(
             token_spend_limit_cents,
             token_spend_remaining_cents,
             edit_predictions_used: pick_first_i64(&[
-                json_nested_i64(&bundle.usage_raw, &["current_usage", "edit_predictions", "used"]),
+                json_nested_i64(
+                    &bundle.usage_raw,
+                    &["current_usage", "edit_predictions", "used"],
+                ),
                 json_nested_i64(&bundle.usage_raw, &["edit_predictions", "used"]),
-                json_nested_i64(&bundle.user_raw, &["plan", "usage", "edit_predictions", "used"]),
+                json_nested_i64(
+                    &bundle.user_raw,
+                    &["plan", "usage", "edit_predictions", "used"],
+                ),
             ]),
             edit_predictions_limit_raw: edit_predictions_limit_raw.or_else(|| {
-                json_nested(&bundle.user_raw, &["plan", "usage", "edit_predictions", "limit"])
-                    .and_then(value_to_string)
+                json_nested(
+                    &bundle.user_raw,
+                    &["plan", "usage", "edit_predictions", "limit"],
+                )
+                .and_then(value_to_string)
             }),
             edit_predictions_remaining_raw,
             usage_updated_at: pick_first_i64(&[
@@ -655,8 +818,8 @@ pub async fn upsert_account_from_credentials(
 }
 
 pub async fn refresh_account(account_id: &str) -> Result<ZedAccount, String> {
-    let stored = load_stored_account(account_id)
-        .ok_or_else(|| format!("Zed 账号不存在: {}", account_id))?;
+    let stored =
+        load_stored_account(account_id).ok_or_else(|| format!("Zed 账号不存在: {}", account_id))?;
     let bundle = fetch_remote_bundle(&stored.public_account.user_id, &stored.access_token).await?;
     logger::log_info(&format!(
         "[Zed] 刷新配额原始返回: account_id={}, payload={}",
@@ -689,9 +852,8 @@ pub async fn refresh_all_accounts() -> Result<Vec<ZedAccount>, String> {
 }
 
 pub async fn import_from_local() -> Result<ZedAccount, String> {
-    let credentials = read_credentials_from_keychain()?.ok_or_else(|| {
-        "未在本机 Zed 客户端登录态中找到可导入的账号信息".to_string()
-    })?;
+    let credentials = read_credentials_from_keychain()?
+        .ok_or_else(|| "未在本机 Zed 客户端登录态中找到可导入的账号信息".to_string())?;
     upsert_account_from_credentials(&credentials.user_id, &credentials.access_token).await
 }
 
@@ -702,18 +864,17 @@ pub fn import_from_json(json_content: &str) -> Result<Vec<ZedAccount>, String> {
     }
 
     let mut payload_current_id = None;
-    let accounts: Vec<ZedStoredAccount> = if let Ok(payload) =
-        serde_json::from_str::<ZedExportPayload>(trimmed)
-    {
-        payload_current_id = payload.current_account_id.clone();
-        payload.accounts
-    } else if let Ok(list) = serde_json::from_str::<Vec<ZedStoredAccount>>(trimmed) {
-        list
-    } else if let Ok(single) = serde_json::from_str::<ZedStoredAccount>(trimmed) {
-        vec![single]
-    } else {
-        return Err("导入内容格式无效，需为 Zed 账号导出 JSON".to_string());
-    };
+    let accounts: Vec<ZedStoredAccount> =
+        if let Ok(payload) = serde_json::from_str::<ZedExportPayload>(trimmed) {
+            payload_current_id = payload.current_account_id.clone();
+            payload.accounts
+        } else if let Ok(list) = serde_json::from_str::<Vec<ZedStoredAccount>>(trimmed) {
+            list
+        } else if let Ok(single) = serde_json::from_str::<ZedStoredAccount>(trimmed) {
+            vec![single]
+        } else {
+            return Err("导入内容格式无效，需为 Zed 账号导出 JSON".to_string());
+        };
 
     if accounts.is_empty() {
         return Ok(Vec::new());
@@ -766,15 +927,15 @@ pub fn export_accounts(account_ids: &[String]) -> Result<String, String> {
 }
 
 pub fn update_account_tags(account_id: &str, tags: Vec<String>) -> Result<ZedAccount, String> {
-    let mut stored = load_stored_account(account_id)
-        .ok_or_else(|| format!("Zed 账号不存在: {}", account_id))?;
+    let mut stored =
+        load_stored_account(account_id).ok_or_else(|| format!("Zed 账号不存在: {}", account_id))?;
     stored.public_account.tags = normalize_tags(tags);
     upsert_account_record(stored, false, false)
 }
 
 pub fn inject_account(account_id: &str) -> Result<ZedAccount, String> {
-    let stored = load_stored_account(account_id)
-        .ok_or_else(|| format!("Zed 账号不存在: {}", account_id))?;
+    let stored =
+        load_stored_account(account_id).ok_or_else(|| format!("Zed 账号不存在: {}", account_id))?;
     write_credentials_to_keychain(&stored.public_account.user_id, &stored.access_token)?;
     let public = upsert_account_record(stored, false, true)?;
     Ok(public)
@@ -840,7 +1001,9 @@ pub fn read_credentials_from_keychain() -> Result<Option<ZedKeychainCredentials>
     );
     let user_id = parse_account_from_security_output(&meta_text)
         .ok_or_else(|| "解析 Zed Keychain 账号失败".to_string())?;
-    let access_token = String::from_utf8_lossy(&password_output.stdout).trim().to_string();
+    let access_token = String::from_utf8_lossy(&password_output.stdout)
+        .trim()
+        .to_string();
     if access_token.is_empty() {
         return Err("Zed Keychain access_token 为空".to_string());
     }
@@ -859,8 +1022,7 @@ pub fn read_credentials_from_keychain() -> Result<Option<ZedKeychainCredentials>
 #[cfg(target_os = "macos")]
 pub fn clear_credentials_from_keychain() -> Result<(), String> {
     loop {
-        let output =
-            security_command_output(&["delete-internet-password", "-s", ZED_SERVER_URL])?;
+        let output = security_command_output(&["delete-internet-password", "-s", ZED_SERVER_URL])?;
         if output.status.success() {
             continue;
         }
@@ -932,7 +1094,10 @@ fn parse_numeric_text(raw: Option<&str>) -> Option<f64> {
     if value.is_empty() {
         return None;
     }
-    value.parse::<f64>().ok().filter(|parsed| parsed.is_finite())
+    value
+        .parse::<f64>()
+        .ok()
+        .filter(|parsed| parsed.is_finite())
 }
 
 fn compute_remaining_percent_i64(
@@ -1020,7 +1185,10 @@ fn clear_quota_alert_cooldown(account_id: &str, threshold: i32) {
     }
 }
 
-fn pick_quota_alert_recommendation(accounts: &[ZedAccount], current_id: &str) -> Option<ZedAccount> {
+fn pick_quota_alert_recommendation(
+    accounts: &[ZedAccount],
+    current_id: &str,
+) -> Option<ZedAccount> {
     let mut candidates: Vec<ZedAccount> = accounts
         .iter()
         .filter(|account| account.id != current_id)
@@ -1044,7 +1212,8 @@ fn pick_quota_alert_recommendation(accounts: &[ZedAccount], current_id: &str) ->
     candidates.into_iter().next()
 }
 
-pub fn run_quota_alert_if_needed() -> Result<Option<crate::modules::account::QuotaAlertPayload>, String> {
+pub fn run_quota_alert_if_needed(
+) -> Result<Option<crate::modules::account::QuotaAlertPayload>, String> {
     let config = crate::modules::config::get_user_config();
     if !config.zed_quota_alert_enabled {
         return Ok(None);
@@ -1089,9 +1258,7 @@ pub fn run_quota_alert_if_needed() -> Result<Option<crate::modules::account::Quo
         lowest_percentage,
         low_models: low_models.into_iter().map(|(name, _)| name).collect(),
         recommended_account_id: recommendation.as_ref().map(|account| account.id.clone()),
-        recommended_email: recommendation
-            .as_ref()
-            .map(display_account_label),
+        recommended_email: recommendation.as_ref().map(display_account_label),
         triggered_at: now,
     };
 

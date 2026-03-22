@@ -114,8 +114,8 @@ fn decode_url_safe_base64(value: &str) -> Result<Vec<u8>, String> {
 }
 
 fn build_key_pair() -> Result<(String, String), String> {
-    let private_key =
-        RsaPrivateKey::new(&mut OsRng, 2048).map_err(|e| format!("生成 Zed RSA 私钥失败: {}", e))?;
+    let private_key = RsaPrivateKey::new(&mut OsRng, 2048)
+        .map_err(|e| format!("生成 Zed RSA 私钥失败: {}", e))?;
     let public_key = RsaPublicKey::from(&private_key);
 
     let private_der = private_key
@@ -131,7 +131,10 @@ fn build_key_pair() -> Result<(String, String), String> {
     ))
 }
 
-fn decrypt_access_token(private_key_der_b64: &str, encrypted_token: &str) -> Result<String, String> {
+fn decrypt_access_token(
+    private_key_der_b64: &str,
+    encrypted_token: &str,
+) -> Result<String, String> {
     let private_key_der = decode_url_safe_base64(private_key_der_b64)?;
     let private_key = RsaPrivateKey::from_pkcs1_der(&private_key_der)
         .map_err(|e| format!("解析 Zed RSA 私钥失败: {}", e))?;
@@ -178,7 +181,8 @@ fn parse_query_from_request(request: &str, port: u16) -> Result<CallbackQuery, S
     } else {
         format!("http://{}:{}{}", CALLBACK_HOST, port, target)
     };
-    let parsed = url::Url::parse(&url).map_err(|e| format!("解析 Zed OAuth 回调 URL 失败: {}", e))?;
+    let parsed =
+        url::Url::parse(&url).map_err(|e| format!("解析 Zed OAuth 回调 URL 失败: {}", e))?;
     let query = parsed.query().unwrap_or_default();
     serde_urlencoded::from_str::<CallbackQuery>(query)
         .map_err(|e| format!("解析 Zed OAuth 回调参数失败: {}", e))
@@ -198,7 +202,8 @@ fn parse_callback_url(callback_url: &str, port: u16) -> Result<Url, String> {
         format!("http://{}:{}/{}", CALLBACK_HOST, port, trimmed)
     };
 
-    let parsed = Url::parse(&normalized).map_err(|e| format!("解析 Zed OAuth 回调 URL 失败: {}", e))?;
+    let parsed =
+        Url::parse(&normalized).map_err(|e| format!("解析 Zed OAuth 回调 URL 失败: {}", e))?;
     let parsed_port = parsed
         .port_or_known_default()
         .ok_or_else(|| "回调地址缺少端口".to_string())?;
@@ -415,7 +420,8 @@ pub fn peek_pending_login() -> Option<ZedOAuthStartResponse> {
 
 pub async fn complete_login(login_id: &str) -> Result<ZedAccount, String> {
     loop {
-        let state = active_pending_state().or_else(|| load_pending_state_from_disk().ok().flatten());
+        let state =
+            active_pending_state().or_else(|| load_pending_state_from_disk().ok().flatten());
         let Some(state) = state else {
             return Err("没有待处理的 Zed 登录请求".to_string());
         };
@@ -462,7 +468,10 @@ pub fn cancel_login(login_id: Option<&str>) -> Result<(), String> {
     }
 
     replace_pending_state(None)?;
-    logger::log_info(&format!("[Zed OAuth] 登录已取消: login_id={}", state.login_id));
+    logger::log_info(&format!(
+        "[Zed OAuth] 登录已取消: login_id={}",
+        state.login_id
+    ));
     Ok(())
 }
 

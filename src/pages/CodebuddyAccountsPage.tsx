@@ -65,6 +65,7 @@ export function CodebuddyAccountsPage() {
     store: {
       accounts: store.accounts,
       loading: store.loading,
+      error: store.error,
       fetchAccounts: store.fetchAccounts,
       deleteAccounts: store.deleteAccounts,
       refreshToken: store.refreshToken,

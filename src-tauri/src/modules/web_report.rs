@@ -1279,10 +1279,18 @@ fn push_qoder_bucket_row(
             let Some(bucket) = get_nested_value(root, path) else {
                 continue;
             };
-            used = used.or(pick_first_number(bucket, &[&["used"], &["usage"], &["consumed"]]));
-            total = total.or(pick_first_number(bucket, &[&["total"], &["quota"], &["limit"]]));
-            remaining =
-                remaining.or(pick_first_number(bucket, &[&["remaining"], &["available"], &["left"]]));
+            used = used.or(pick_first_number(
+                bucket,
+                &[&["used"], &["usage"], &["consumed"]],
+            ));
+            total = total.or(pick_first_number(
+                bucket,
+                &[&["total"], &["quota"], &["limit"]],
+            ));
+            remaining = remaining.or(pick_first_number(
+                bucket,
+                &[&["remaining"], &["available"], &["left"]],
+            ));
             percentage = percentage.or(pick_first_number(
                 bucket,
                 &[&["percentage"], &["usagePercent"], &["usage_percentage"]],
@@ -1346,12 +1354,7 @@ fn pick_qoder_reset_value(roots: &[&Value]) -> String {
     for root in roots {
         let value = pick_first_reset_value(
             root,
-            &[
-                &["expiresAt"],
-                &["expires_at"],
-                &["resetAt"],
-                &["reset_at"],
-            ],
+            &[&["expiresAt"], &["expires_at"], &["resetAt"], &["reset_at"]],
             "-",
         );
         if value != "-" {
@@ -1642,9 +1645,10 @@ fn append_zed_rows(rows: &mut Vec<ReportRow>) {
         let reset = format_unix_timestamp(account.billing_period_end_at);
         let mut pushed = false;
 
-        if let (Some(used_cents), Some(limit_cents)) =
-            (account.token_spend_used_cents, account.token_spend_limit_cents)
-        {
+        if let (Some(used_cents), Some(limit_cents)) = (
+            account.token_spend_used_cents,
+            account.token_spend_limit_cents,
+        ) {
             if limit_cents > 0 {
                 let used = used_cents.max(0) as f64 / 100.0;
                 let total = limit_cents as f64 / 100.0;
@@ -1659,7 +1663,12 @@ fn append_zed_rows(rows: &mut Vec<ReportRow>) {
                     "Zed",
                     &account_name,
                     "Token spend",
-                    &format!("${:.2}/${:.2} ({})", used, total, percent_text(used_percent)),
+                    &format!(
+                        "${:.2}/${:.2} ({})",
+                        used,
+                        total,
+                        percent_text(used_percent)
+                    ),
                     &format!("${:.2}", remaining),
                     &reset,
                     "normal",
@@ -1735,7 +1744,10 @@ fn append_zed_rows(rows: &mut Vec<ReportRow>) {
                 "-",
                 &reset,
                 "normal",
-                account.subscription_status.as_deref().unwrap_or("Usage data unavailable"),
+                account
+                    .subscription_status
+                    .as_deref()
+                    .unwrap_or("Usage data unavailable"),
             ));
         }
     }
@@ -1750,15 +1762,19 @@ fn append_trae_rows(rows: &mut Vec<ReportRow>) {
         let mut pushed = 0usize;
 
         if let Some(pack) = pick_preferred_trae_pack(account.trae_usage_raw.as_ref()) {
-            let basic_used = pick_first_number(pack, &[&["usage", "basic_usage_amount"]]).unwrap_or(0.0);
-            let basic_total =
-                pick_first_number(pack, &[&["entitlement_base_info", "quota", "basic_usage_limit"]]);
+            let basic_used =
+                pick_first_number(pack, &[&["usage", "basic_usage_amount"]]).unwrap_or(0.0);
+            let basic_total = pick_first_number(
+                pack,
+                &[&["entitlement_base_info", "quota", "basic_usage_limit"]],
+            );
             if let Some(total) = basic_total {
                 if total > 0.0 {
                     let used = basic_used.max(0.0);
                     let remaining = (total - used).max(0.0);
                     let used_percent = clamp_percent((used / total) * 100.0);
-                    let reset = pick_trae_pack_reset(pack).unwrap_or_else(|| reset_fallback.clone());
+                    let reset =
+                        pick_trae_pack_reset(pack).unwrap_or_else(|| reset_fallback.clone());
                     rows.push(make_row(
                         "Trae",
                         &account_name,
@@ -1778,15 +1794,19 @@ fn append_trae_rows(rows: &mut Vec<ReportRow>) {
                 }
             }
 
-            let bonus_used = pick_first_number(pack, &[&["usage", "bonus_usage_amount"]]).unwrap_or(0.0);
-            let bonus_total =
-                pick_first_number(pack, &[&["entitlement_base_info", "quota", "bonus_usage_limit"]]);
+            let bonus_used =
+                pick_first_number(pack, &[&["usage", "bonus_usage_amount"]]).unwrap_or(0.0);
+            let bonus_total = pick_first_number(
+                pack,
+                &[&["entitlement_base_info", "quota", "bonus_usage_limit"]],
+            );
             if let Some(total) = bonus_total {
                 if total > 0.0 {
                     let used = bonus_used.max(0.0);
                     let remaining = (total - used).max(0.0);
                     let used_percent = clamp_percent((used / total) * 100.0);
-                    let reset = pick_trae_pack_reset(pack).unwrap_or_else(|| reset_fallback.clone());
+                    let reset =
+                        pick_trae_pack_reset(pack).unwrap_or_else(|| reset_fallback.clone());
                     rows.push(make_row(
                         "Trae",
                         &account_name,

@@ -46,8 +46,8 @@ fn load_runtime_state() -> ZedRuntimeState {
 
 fn save_runtime_state(state: &ZedRuntimeState) -> Result<(), String> {
     let path = runtime_path()?;
-    let content =
-        serde_json::to_string_pretty(state).map_err(|e| format!("序列化 Zed 运行时状态失败: {}", e))?;
+    let content = serde_json::to_string_pretty(state)
+        .map_err(|e| format!("序列化 Zed 运行时状态失败: {}", e))?;
     fs::write(path, content).map_err(|e| format!("保存 Zed 运行时状态失败: {}", e))
 }
 
@@ -92,7 +92,10 @@ pub fn get_runtime_status() -> ZedRuntimeStatus {
 fn build_launch_command(launch_path: &std::path::Path) -> Command {
     let mut command = Command::new(launch_path);
     process::apply_managed_proxy_env_to_command(&mut command);
-    command.stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null());
+    command
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
 
     #[cfg(target_os = "windows")]
     {

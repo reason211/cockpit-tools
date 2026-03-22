@@ -6,7 +6,7 @@ use crate::modules::{logger, qoder_account, qoder_oauth};
 
 #[tauri::command]
 pub fn list_qoder_accounts() -> Result<Vec<QoderAccount>, String> {
-    Ok(qoder_account::list_accounts())
+    qoder_account::list_accounts_checked()
 }
 
 #[tauri::command]

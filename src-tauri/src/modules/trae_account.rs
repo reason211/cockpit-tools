@@ -187,12 +187,76 @@ fn load_account_index() -> TraeAccountIndex {
     };
 
     if !path.exists() {
-        return TraeAccountIndex::new();
+        return repair_account_index_from_details("索引文件不存在")
+            .unwrap_or_else(TraeAccountIndex::new);
     }
 
-    match fs::read_to_string(path) {
-        Ok(content) => serde_json::from_str(&content).unwrap_or_else(|_| TraeAccountIndex::new()),
+    match fs::read_to_string(&path) {
+        Ok(content) if content.trim().is_empty() => {
+            repair_account_index_from_details("索引文件为空").unwrap_or_else(TraeAccountIndex::new)
+        }
+        Ok(content) => match serde_json::from_str::<TraeAccountIndex>(&content) {
+            Ok(index) if !index.accounts.is_empty() => index,
+            Ok(_) => repair_account_index_from_details("索引账号列表为空")
+                .unwrap_or_else(TraeAccountIndex::new),
+            Err(err) => {
+                logger::log_warn(&format!(
+                    "[Trae Account] 账号索引解析失败，尝试按详情文件自动修复: path={}, error={}",
+                    path.display(),
+                    err
+                ));
+                repair_account_index_from_details("索引文件损坏")
+                    .unwrap_or_else(TraeAccountIndex::new)
+            }
+        },
         Err(_) => TraeAccountIndex::new(),
+    }
+}
+
+fn load_account_index_checked() -> Result<TraeAccountIndex, String> {
+    let path = get_accounts_index_path()?;
+    if !path.exists() {
+        if let Some(index) = repair_account_index_from_details("索引文件不存在") {
+            return Ok(index);
+        }
+        return Ok(TraeAccountIndex::new());
+    }
+
+    let content = match fs::read_to_string(&path) {
+        Ok(content) => content,
+        Err(err) => {
+            if let Some(index) = repair_account_index_from_details("索引文件读取失败") {
+                return Ok(index);
+            }
+            return Err(format!("读取账号索引失败: {}", err));
+        }
+    };
+
+    if content.trim().is_empty() {
+        if let Some(index) = repair_account_index_from_details("索引文件为空") {
+            return Ok(index);
+        }
+        return Ok(TraeAccountIndex::new());
+    }
+
+    match serde_json::from_str::<TraeAccountIndex>(&content) {
+        Ok(index) if !index.accounts.is_empty() => Ok(index),
+        Ok(index) => {
+            if let Some(repaired) = repair_account_index_from_details("索引账号列表为空") {
+                return Ok(repaired);
+            }
+            Ok(index)
+        }
+        Err(err) => {
+            if let Some(index) = repair_account_index_from_details("索引文件损坏") {
+                return Ok(index);
+            }
+            Err(crate::error::file_corrupted_error(
+                ACCOUNTS_INDEX_FILE,
+                &path.to_string_lossy(),
+                &err.to_string(),
+            ))
+        }
     }
 }
 
@@ -201,6 +265,61 @@ fn save_account_index(index: &TraeAccountIndex) -> Result<(), String> {
     let content = serde_json::to_string_pretty(index)
         .map_err(|e| format!("序列化 Trae 账号索引失败: {}", e))?;
     fs::write(path, content).map_err(|e| format!("写入 Trae 账号索引失败: {}", e))
+}
+
+fn repair_account_index_from_details(reason: &str) -> Option<TraeAccountIndex> {
+    let index_path = get_accounts_index_path().ok()?;
+    let accounts_dir = get_accounts_dir().ok()?;
+    let mut accounts = crate::modules::account_index_repair::load_accounts_from_details(
+        &accounts_dir,
+        |account_id| load_account(account_id),
+    )
+    .ok()?;
+
+    if accounts.is_empty() {
+        return None;
+    }
+
+    crate::modules::account_index_repair::sort_accounts_by_recency(
+        &mut accounts,
+        |account| account.last_used,
+        |account| account.created_at,
+        |account| account.id.as_str(),
+    );
+
+    let mut index = TraeAccountIndex::new();
+    index.accounts = accounts.iter().map(|account| account.summary()).collect();
+
+    let backup_path = crate::modules::account_index_repair::backup_existing_index(&index_path)
+        .unwrap_or_else(|err| {
+            logger::log_warn(&format!(
+                "[Trae Account] 自动修复前备份索引失败，继续尝试重建: path={}, error={}",
+                index_path.display(),
+                err
+            ));
+            None
+        });
+
+    if let Err(err) = save_account_index(&index) {
+        logger::log_warn(&format!(
+            "[Trae Account] 自动修复索引保存失败，将以内存结果继续运行: reason={}, recovered_accounts={}, error={}",
+            reason,
+            index.accounts.len(),
+            err
+        ));
+    }
+
+    logger::log_warn(&format!(
+        "[Trae Account] 检测到账号索引异常，已根据详情文件自动重建: reason={}, recovered_accounts={}, backup_path={}",
+        reason,
+        index.accounts.len(),
+        backup_path
+            .as_ref()
+            .map(|path| path.display().to_string())
+            .unwrap_or_else(|| "-".to_string())
+    ));
+
+    Some(index)
 }
 
 fn refresh_summary(index: &mut TraeAccountIndex, account: &TraeAccount) {
@@ -679,6 +798,15 @@ pub fn list_accounts() -> Vec<TraeAccount> {
         .iter()
         .filter_map(|item| load_account(item.id.as_str()))
         .collect()
+}
+
+pub fn list_accounts_checked() -> Result<Vec<TraeAccount>, String> {
+    let index = load_account_index_checked()?;
+    Ok(index
+        .accounts
+        .iter()
+        .filter_map(|item| load_account(item.id.as_str()))
+        .collect())
 }
 
 pub fn upsert_account(payload: TraeImportPayload) -> Result<TraeAccount, String> {

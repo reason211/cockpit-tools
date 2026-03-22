@@ -6,7 +6,7 @@ use crate::modules::{logger, trae_account, trae_oauth};
 
 #[tauri::command]
 pub fn list_trae_accounts() -> Result<Vec<TraeAccount>, String> {
-    Ok(trae_account::list_accounts())
+    trae_account::list_accounts_checked()
 }
 
 #[tauri::command]

@@ -367,7 +367,10 @@ fn normalize_ordered_entries(
     result
 }
 
-fn normalize_config(config: TrayLayoutConfig, allow_legacy_tray_migration: bool) -> TrayLayoutConfig {
+fn normalize_config(
+    config: TrayLayoutConfig,
+    allow_legacy_tray_migration: bool,
+) -> TrayLayoutConfig {
     let ordered_platform_ids = normalize_order(&config.ordered_platform_ids);
 
     let raw_order_new_platforms: Vec<&str> = [
@@ -433,13 +436,16 @@ pub fn save_tray_layout(
     ordered_entry_ids: Option<Vec<String>>,
     platform_groups: Option<Vec<TrayLayoutGroup>>,
 ) -> Result<TrayLayoutConfig, String> {
-    let normalized = normalize_config(TrayLayoutConfig {
-        sort_mode,
-        ordered_platform_ids,
-        tray_platform_ids,
-        ordered_entry_ids: ordered_entry_ids.unwrap_or_default(),
-        platform_groups: platform_groups.unwrap_or_else(default_platform_groups),
-    }, false);
+    let normalized = normalize_config(
+        TrayLayoutConfig {
+            sort_mode,
+            ordered_platform_ids,
+            tray_platform_ids,
+            ordered_entry_ids: ordered_entry_ids.unwrap_or_default(),
+            platform_groups: platform_groups.unwrap_or_else(default_platform_groups),
+        },
+        false,
+    );
 
     let path = get_tray_layout_path()?;
     let content = serde_json::to_string_pretty(&normalized)

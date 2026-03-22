@@ -20,7 +20,7 @@ async fn refresh_kiro_account_after_login(account: KiroAccount) -> KiroAccount {
 
 #[tauri::command]
 pub fn list_kiro_accounts() -> Result<Vec<KiroAccount>, String> {
-    Ok(kiro_account::list_accounts())
+    kiro_account::list_accounts_checked()
 }
 
 #[tauri::command]

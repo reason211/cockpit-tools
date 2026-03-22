@@ -20,7 +20,7 @@ async fn refresh_windsurf_account_after_login(account: WindsurfAccount) -> Winds
 
 #[tauri::command]
 pub fn list_windsurf_accounts() -> Result<Vec<WindsurfAccount>, String> {
-    Ok(windsurf_account::list_accounts())
+    windsurf_account::list_accounts_checked()
 }
 
 #[tauri::command]

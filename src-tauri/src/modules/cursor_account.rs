@@ -173,6 +173,51 @@ fn load_account_index() -> CursorAccountIndex {
     }
 }
 
+fn load_account_index_checked() -> Result<CursorAccountIndex, String> {
+    let path = get_accounts_index_path()?;
+    if !path.exists() {
+        return Ok(CursorAccountIndex::new());
+    }
+
+    let content = match fs::read_to_string(path.as_path()) {
+        Ok(content) => content,
+        Err(err) => {
+            if !collect_account_ids_from_directory().is_empty() {
+                logger::log_warn(&format!(
+                    "[Cursor Account] 读取账号索引失败，将按账号目录补扫恢复: path={}, error={}",
+                    path.display(),
+                    err
+                ));
+                return Ok(CursorAccountIndex::new());
+            }
+            return Err(format!("读取账号索引失败: {}", err));
+        }
+    };
+
+    if content.trim().is_empty() {
+        return Ok(CursorAccountIndex::new());
+    }
+
+    match serde_json::from_str::<CursorAccountIndex>(&content) {
+        Ok(index) => Ok(index),
+        Err(err) => {
+            if !collect_account_ids_from_directory().is_empty() {
+                logger::log_warn(&format!(
+                    "[Cursor Account] 账号索引解析失败，将按账号目录补扫恢复: path={}, error={}",
+                    path.display(),
+                    err
+                ));
+                return Ok(CursorAccountIndex::new());
+            }
+            Err(crate::error::file_corrupted_error(
+                ACCOUNTS_INDEX_FILE,
+                &path.to_string_lossy(),
+                &err.to_string(),
+            ))
+        }
+    }
+}
+
 fn save_account_index(index: &CursorAccountIndex) -> Result<(), String> {
     let path = get_accounts_index_path()?;
     let content =
@@ -649,6 +694,18 @@ pub fn list_accounts() -> Vec<CursorAccount> {
         logger::log_warn(&format!("[Cursor Account] 保存账号索引失败: {}", err));
     }
     accounts
+}
+
+pub fn list_accounts_checked() -> Result<Vec<CursorAccount>, String> {
+    let _lock = CURSOR_ACCOUNT_INDEX_LOCK
+        .lock()
+        .map_err(|_| "获取 Cursor 账号锁失败".to_string())?;
+    let mut index = load_account_index_checked()?;
+    let accounts = normalize_account_index(&mut index);
+    if let Err(err) = save_account_index(&index) {
+        logger::log_warn(&format!("[Cursor Account] 保存账号索引失败: {}", err));
+    }
+    Ok(accounts)
 }
 
 fn apply_payload(

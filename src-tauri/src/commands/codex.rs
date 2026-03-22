@@ -11,7 +11,7 @@ static CODEX_POST_REFRESH_CHECK_IN_PROGRESS: AtomicBool = AtomicBool::new(false)
 /// 列出所有 Codex 账号
 #[tauri::command]
 pub fn list_codex_accounts() -> Result<Vec<CodexAccount>, String> {
-    Ok(codex_account::list_accounts())
+    codex_account::list_accounts_checked()
 }
 
 /// 获取当前激活的 Codex 账号

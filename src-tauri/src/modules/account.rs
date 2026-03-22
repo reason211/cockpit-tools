@@ -215,12 +215,79 @@ pub fn get_accounts_dir() -> Result<PathBuf, String> {
     Ok(accounts_dir)
 }
 
+fn repair_account_index_from_details(reason: &str) -> Result<Option<AccountIndex>, String> {
+    let index_path = get_data_dir()?.join(ACCOUNTS_INDEX);
+    let accounts_dir = get_accounts_dir()?;
+    let mut accounts = crate::modules::account_index_repair::load_accounts_from_details(
+        &accounts_dir,
+        |account_id| load_account(account_id).ok(),
+    )?;
+
+    if accounts.is_empty() {
+        return Ok(None);
+    }
+
+    crate::modules::account_index_repair::sort_accounts_by_recency(
+        &mut accounts,
+        |account| account.last_used,
+        |account| account.created_at,
+        |account| account.id.as_str(),
+    );
+
+    let mut index = AccountIndex::new();
+    index.accounts = accounts
+        .iter()
+        .map(|account| AccountSummary {
+            id: account.id.clone(),
+            email: account.email.clone(),
+            name: account.name.clone(),
+            created_at: account.created_at,
+            last_used: account.last_used,
+        })
+        .collect();
+    index.current_account_id = accounts.first().map(|account| account.id.clone());
+
+    let backup_path = crate::modules::account_index_repair::backup_existing_index(&index_path)
+        .unwrap_or_else(|err| {
+            modules::logger::log_warn(&format!(
+                "自动修复账号索引前备份失败，继续尝试重建: path={}, error={}",
+                index_path.display(),
+                err
+            ));
+            None
+        });
+
+    if let Err(err) = save_account_index(&index) {
+        modules::logger::log_warn(&format!(
+            "自动修复账号索引保存失败，将以内存结果继续运行: reason={}, recovered_accounts={}, error={}",
+            reason,
+            index.accounts.len(),
+            err
+        ));
+    }
+
+    modules::logger::log_warn(&format!(
+        "检测到账号索引异常，已根据详情文件自动重建: reason={}, recovered_accounts={}, backup_path={}",
+        reason,
+        index.accounts.len(),
+        backup_path
+            .as_ref()
+            .map(|path| path.display().to_string())
+            .unwrap_or_else(|| "-".to_string())
+    ));
+
+    Ok(Some(index))
+}
+
 /// 加载账号索引
 pub fn load_account_index() -> Result<AccountIndex, String> {
     let data_dir = get_data_dir()?;
     let index_path = data_dir.join(ACCOUNTS_INDEX);
 
     if !index_path.exists() {
+        if let Some(index) = repair_account_index_from_details("索引文件不存在")? {
+            return Ok(index);
+        }
         return Ok(AccountIndex::new());
     }
 
@@ -228,16 +295,33 @@ pub fn load_account_index() -> Result<AccountIndex, String> {
         fs::read_to_string(&index_path).map_err(|e| format!("读取账号索引失败: {}", e))?;
 
     if content.trim().is_empty() {
+        if let Some(index) = repair_account_index_from_details("索引文件为空")? {
+            return Ok(index);
+        }
         return Ok(AccountIndex::new());
     }
 
-    serde_json::from_str(&content).map_err(|e| {
-        crate::error::file_corrupted_error(
-            ACCOUNTS_INDEX,
-            &index_path.to_string_lossy(),
-            &e.to_string(),
-        )
-    })
+    match serde_json::from_str::<AccountIndex>(&content) {
+        Ok(index) => {
+            if index.accounts.is_empty() {
+                if let Some(repaired) = repair_account_index_from_details("索引账号列表为空")?
+                {
+                    return Ok(repaired);
+                }
+            }
+            Ok(index)
+        }
+        Err(e) => {
+            if let Some(index) = repair_account_index_from_details("索引文件损坏")? {
+                return Ok(index);
+            }
+            Err(crate::error::file_corrupted_error(
+                ACCOUNTS_INDEX,
+                &index_path.to_string_lossy(),
+                &e.to_string(),
+            ))
+        }
+    }
 }
 
 /// 保存账号索引
@@ -322,7 +406,11 @@ pub fn update_account_tags(account_id: &str, tags: Vec<String>) -> Result<Accoun
 pub fn update_account_notes(account_id: &str, notes: String) -> Result<Account, String> {
     let mut account = load_account(account_id)?;
     let trimmed = notes.trim().to_string();
-    account.notes = if trimmed.is_empty() { None } else { Some(trimmed) };
+    account.notes = if trimmed.is_empty() {
+        None
+    } else {
+        Some(trimmed)
+    };
     save_account(&account)?;
     Ok(account)
 }

@@ -7,6 +7,15 @@ All notable changes to Cockpit Tools will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
+## [0.18.3] - 2026-03-22
+
+### Added
+- **Provider account indexes now auto-repair from local detail files when the index is missing, empty, or corrupted**: Codex, Cursor, GitHub Copilot, Gemini, Kiro, Qoder, Trae, Windsurf, CodeBuddy, CodeBuddy CN, WorkBuddy, and Zed now back up the broken index, rescan per-account detail JSON files, rebuild the account list in recency order, and write the recovered index back to disk before the page continues loading.
+
+### Changed
+- **Account pages now show unrecoverable local file corruption more directly**: shared provider account pages now reuse the corrupted-file parser so users see the damaged file name instead of only a generic error when automatic repair cannot recover the index.
+
+---
 ## [0.18.2] - 2026-03-22
 
 ### Changed

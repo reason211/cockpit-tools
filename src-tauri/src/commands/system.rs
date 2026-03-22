@@ -727,8 +727,7 @@ pub fn save_general_config(
         codex_quota_alert_enabled: codex_quota_alert_enabled
             .unwrap_or(current.codex_quota_alert_enabled),
         codex_quota_alert_threshold: next_codex_quota_alert_threshold,
-        zed_quota_alert_enabled: zed_quota_alert_enabled
-            .unwrap_or(current.zed_quota_alert_enabled),
+        zed_quota_alert_enabled: zed_quota_alert_enabled.unwrap_or(current.zed_quota_alert_enabled),
         zed_quota_alert_threshold: zed_quota_alert_threshold
             .unwrap_or(current.zed_quota_alert_threshold),
         codex_quota_alert_primary_threshold: codex_quota_alert_primary_threshold
@@ -855,9 +854,10 @@ pub fn detect_app_path(app: String, force: Option<bool>) -> Result<Option<String
         )),
         "cursor" => Ok(modules::cursor_instance::detect_and_save_cursor_launch_path(force)),
         "antigravity" | "codex" | "zed" | "vscode" | "codebuddy" | "codebuddy_cn" | "qoder"
-        | "trae" | "opencode" | "workbuddy" => {
-            Ok(modules::process::detect_and_save_app_path(app.as_str(), force))
-        }
+        | "trae" | "opencode" | "workbuddy" => Ok(modules::process::detect_and_save_app_path(
+            app.as_str(),
+            force,
+        )),
         _ => Err("未知应用类型".to_string()),
     }
 }

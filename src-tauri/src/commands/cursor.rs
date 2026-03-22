@@ -6,7 +6,7 @@ use crate::modules::{cursor_account, cursor_oauth, logger};
 
 #[tauri::command]
 pub fn list_cursor_accounts() -> Result<Vec<CursorAccount>, String> {
-    Ok(cursor_account::list_accounts())
+    cursor_account::list_accounts_checked()
 }
 
 #[tauri::command]

@@ -585,12 +585,124 @@ pub fn extract_user_info(
 pub fn load_account_index() -> CodexAccountIndex {
     let path = get_accounts_storage_path();
     if !path.exists() {
-        return CodexAccountIndex::new();
+        return repair_account_index_from_details("索引文件不存在")
+            .unwrap_or_else(CodexAccountIndex::new);
     }
 
     match fs::read_to_string(&path) {
-        Ok(content) => serde_json::from_str(&content).unwrap_or_else(|_| CodexAccountIndex::new()),
+        Ok(content) if content.trim().is_empty() => {
+            repair_account_index_from_details("索引文件为空").unwrap_or_else(CodexAccountIndex::new)
+        }
+        Ok(content) => match serde_json::from_str::<CodexAccountIndex>(&content) {
+            Ok(index) if !index.accounts.is_empty() => index,
+            Ok(_) => repair_account_index_from_details("索引账号列表为空")
+                .unwrap_or_else(CodexAccountIndex::new),
+            Err(err) => {
+                logger::log_warn(&format!(
+                    "[Codex Account] 账号索引解析失败，尝试按详情文件自动修复: path={}, error={}",
+                    path.display(),
+                    err
+                ));
+                repair_account_index_from_details("索引文件损坏")
+                    .unwrap_or_else(CodexAccountIndex::new)
+            }
+        },
         Err(_) => CodexAccountIndex::new(),
+    }
+}
+
+fn load_account_index_checked() -> Result<CodexAccountIndex, String> {
+    let path = get_accounts_storage_path();
+    if !path.exists() {
+        logger::log_warn(&format!(
+            "[Codex Account][Repair] 检测到账号索引文件不存在，准备尝试自动修复: path={}",
+            path.display()
+        ));
+        if let Some(index) = repair_account_index_from_details("索引文件不存在") {
+            logger::log_info(&format!(
+                "[Codex Account][Repair] 索引文件不存在，已自动修复完成: recovered_accounts={}",
+                index.accounts.len()
+            ));
+            return Ok(index);
+        }
+        logger::log_warn(
+            "[Codex Account][Repair] 索引文件不存在，但未找到可恢复详情文件，返回空索引",
+        );
+        return Ok(CodexAccountIndex::new());
+    }
+
+    let content = match fs::read_to_string(&path) {
+        Ok(content) => content,
+        Err(err) => {
+            logger::log_warn(&format!(
+                "[Codex Account][Repair] 读取账号索引失败，准备尝试自动修复: path={}, error={}",
+                path.display(),
+                err
+            ));
+            if let Some(index) = repair_account_index_from_details("索引文件读取失败") {
+                logger::log_info(&format!(
+                    "[Codex Account][Repair] 索引读取失败，已自动修复完成: recovered_accounts={}",
+                    index.accounts.len()
+                ));
+                return Ok(index);
+            }
+            return Err(format!("读取账号索引失败: {}", err));
+        }
+    };
+
+    if content.trim().is_empty() {
+        logger::log_warn(&format!(
+            "[Codex Account][Repair] 检测到账号索引文件为空，准备尝试自动修复: path={}",
+            path.display()
+        ));
+        if let Some(index) = repair_account_index_from_details("索引文件为空") {
+            logger::log_info(&format!(
+                "[Codex Account][Repair] 空索引文件已自动修复完成: recovered_accounts={}",
+                index.accounts.len()
+            ));
+            return Ok(index);
+        }
+        logger::log_warn(
+            "[Codex Account][Repair] 索引文件为空，但未找到可恢复详情文件，返回空索引",
+        );
+        return Ok(CodexAccountIndex::new());
+    }
+
+    match serde_json::from_str::<CodexAccountIndex>(&content) {
+        Ok(index) if !index.accounts.is_empty() => Ok(index),
+        Ok(index) => {
+            logger::log_warn(&format!(
+                "[Codex Account][Repair] 账号索引可解析但列表为空，准备尝试自动修复: path={}",
+                path.display()
+            ));
+            if let Some(repaired) = repair_account_index_from_details("索引账号列表为空") {
+                logger::log_info(&format!(
+                    "[Codex Account][Repair] 空账号列表已自动修复完成: recovered_accounts={}",
+                    repaired.accounts.len()
+                ));
+                return Ok(repaired);
+            }
+            Ok(index)
+        }
+        Err(err) => {
+            logger::log_warn(&format!(
+                "[Codex Account][Repair] 账号索引解析失败，准备尝试自动修复: path={}, error={}",
+                path.display(),
+                err
+            ));
+            if let Some(index) = repair_account_index_from_details("索引文件损坏") {
+                logger::log_info(&format!(
+                    "[Codex Account][Repair] 损坏索引文件已自动修复完成: recovered_accounts={}",
+                    index.accounts.len()
+                ));
+                return Ok(index);
+            }
+            Err(crate::error::file_corrupted_error(
+                "codex_accounts.json",
+                &path.to_string_lossy(),
+                &err.to_string(),
+            ))
+        }
     }
 }
 
@@ -600,6 +712,104 @@ pub fn save_account_index(index: &CodexAccountIndex) -> Result<(), String> {
     let content = serde_json::to_string_pretty(index).map_err(|e| format!("序列化失败: {}", e))?;
     fs::write(&path, content).map_err(|e| format!("写入文件失败: {}", e))?;
     Ok(())
+}
+
+fn repair_account_index_from_details(reason: &str) -> Option<CodexAccountIndex> {
+    let index_path = get_accounts_storage_path();
+    let accounts_dir = get_accounts_dir();
+    logger::log_warn(&format!(
+        "[Codex Account][Repair] 检测到索引异常，开始按详情文件重建: reason={}, index_path={}, accounts_dir={}",
+        reason,
+        index_path.display(),
+        accounts_dir.display()
+    ));
+
+    let mut accounts = match crate::modules::account_index_repair::load_accounts_from_details(
+        &accounts_dir,
+        |account_id| load_account(account_id),
+    ) {
+        Ok(accounts) => accounts,
+        Err(err) => {
+            logger::log_warn(&format!(
+                "[Codex Account][Repair] 扫描账号详情文件失败，无法自动修复: reason={}, accounts_dir={}, error={}",
+                reason,
+                accounts_dir.display(),
+                err
+            ));
+            return None;
+        }
+    };
+
+    if accounts.is_empty() {
+        logger::log_warn(&format!(
+            "[Codex Account][Repair] 账号详情目录中未发现可恢复账号，放弃自动修复: reason={}, accounts_dir={}",
+            reason,
+            accounts_dir.display()
+        ));
+        return None;
+    }
+
+    logger::log_info(&format!(
+        "[Codex Account][Repair] 已扫描到 {} 个账号详情，准备重建索引",
+        accounts.len()
+    ));
+
+    crate::modules::account_index_repair::sort_accounts_by_recency(
+        &mut accounts,
+        |account| account.last_used,
+        |account| account.created_at,
+        |account| account.id.as_str(),
+    );
+
+    let mut index = CodexAccountIndex::new();
+    index.accounts = accounts
+        .iter()
+        .map(|account| CodexAccountSummary {
+            id: account.id.clone(),
+            email: account.email.clone(),
+            plan_type: account.plan_type.clone(),
+            created_at: account.created_at,
+            last_used: account.last_used,
+        })
+        .collect();
+    index.current_account_id = accounts.first().map(|account| account.id.clone());
+
+    logger::log_info(&format!(
+        "[Codex Account][Repair] 索引重建完成，准备写回本地文件: recovered_accounts={}, current_account_id={}",
+        index.accounts.len(),
+        index.current_account_id.as_deref().unwrap_or("-")
+    ));
+
+    let backup_path = crate::modules::account_index_repair::backup_existing_index(&index_path)
+        .unwrap_or_else(|err| {
+            logger::log_warn(&format!(
+                "[Codex Account] 自动修复前备份索引失败，继续尝试重建: path={}, error={}",
+                index_path.display(),
+                err
+            ));
+            None
+        });
+
+    if let Err(err) = save_account_index(&index) {
+        logger::log_warn(&format!(
+            "[Codex Account] 自动修复索引保存失败，将以内存结果继续运行: reason={}, recovered_accounts={}, error={}",
+            reason,
+            index.accounts.len(),
+            err
+        ));
+    }
+
+    logger::log_info(&format!(
+        "[Codex Account][Repair] 已根据详情文件自动重建账号索引: reason={}, recovered_accounts={}, backup_path={}",
+        reason,
+        index.accounts.len(),
+        backup_path
+            .as_ref()
+            .map(|path| path.display().to_string())
+            .unwrap_or_else(|| "-".to_string())
+    ));
+
+    Some(index)
 }
 
 /// 读取单个账号详情
@@ -641,6 +851,15 @@ pub fn list_accounts() -> Vec<CodexAccount> {
         .iter()
         .filter_map(|summary| load_account(&summary.id))
         .collect()
+}
+
+pub fn list_accounts_checked() -> Result<Vec<CodexAccount>, String> {
+    let index = load_account_index_checked()?;
+    Ok(index
+        .accounts
+        .iter()
+        .filter_map(|summary| load_account(&summary.id))
+        .collect())
 }
 
 /// 刷新账号资料（团队名/结构）
@@ -1481,7 +1700,8 @@ fn extract_codex_tokens_from_value(
 #[cfg(test)]
 mod tests {
     use super::{
-        extract_codex_tokens_from_value, read_api_base_url_from_config_toml,
+        extract_codex_tokens_from_value, get_accounts_dir, get_accounts_storage_path,
+        list_accounts_checked, load_account_index, read_api_base_url_from_config_toml,
         write_api_base_url_to_config_toml,
     };
     use std::fs;
@@ -1550,6 +1770,38 @@ mod tests {
         );
 
         fs::remove_dir_all(&base_dir).expect("cleanup temp dir");
+    }
+
+    #[test]
+    #[ignore = "manual local Codex repair smoke test"]
+    fn local_codex_index_repair_smoke() {
+        crate::modules::logger::init_logger();
+
+        let index_path = get_accounts_storage_path();
+        let accounts_dir = get_accounts_dir();
+        eprintln!(
+            "[LocalCodexRepairTest] 检测到本地 Codex 索引路径: {}",
+            index_path.display()
+        );
+        eprintln!(
+            "[LocalCodexRepairTest] 检测到本地 Codex 详情目录: {}",
+            accounts_dir.display()
+        );
+
+        let accounts = list_accounts_checked().expect("local Codex repair should succeed");
+        let index = load_account_index();
+        eprintln!(
+            "[LocalCodexRepairTest] 修复/读取完成: accounts={}, current_account_id={}",
+            accounts.len(),
+            index.current_account_id.as_deref().unwrap_or("-")
+        );
+
+        if let Ok(log_file) = crate::modules::logger::get_latest_app_log_file() {
+            eprintln!(
+                "[LocalCodexRepairTest] 应用日志文件: {}",
+                log_file.display()
+            );
+        }
     }
 }
 

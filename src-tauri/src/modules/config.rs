@@ -854,10 +854,7 @@ pub fn load_user_config() -> Result<UserConfig, String> {
             );
         }
         if !obj.contains_key("zed_quota_alert_enabled") {
-            obj.insert(
-                "zed_quota_alert_enabled".to_string(),
-                json!(legacy_enabled),
-            );
+            obj.insert("zed_quota_alert_enabled".to_string(), json!(legacy_enabled));
         }
         if !obj.contains_key("zed_quota_alert_threshold") {
             obj.insert(

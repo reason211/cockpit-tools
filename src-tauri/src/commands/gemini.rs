@@ -6,7 +6,7 @@ use crate::modules::{gemini_account, gemini_oauth, logger};
 
 #[tauri::command]
 pub fn list_gemini_accounts() -> Result<Vec<GeminiAccount>, String> {
-    Ok(gemini_account::list_accounts())
+    gemini_account::list_accounts_checked()
 }
 
 #[tauri::command]

@@ -64,7 +64,7 @@ async fn refresh_codebuddy_cn_account_after_login(account: CodebuddyAccount) -> 
 
 #[tauri::command]
 pub fn list_codebuddy_cn_accounts() -> Result<Vec<CodebuddyAccount>, String> {
-    Ok(codebuddy_cn_account::list_accounts())
+    codebuddy_cn_account::list_accounts_checked()
 }
 
 #[tauri::command]

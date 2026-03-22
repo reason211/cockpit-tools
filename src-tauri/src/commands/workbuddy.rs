@@ -64,7 +64,7 @@ async fn refresh_workbuddy_account_after_login(account: WorkbuddyAccount) -> Wor
 
 #[tauri::command]
 pub fn list_workbuddy_accounts() -> Result<Vec<WorkbuddyAccount>, String> {
-    Ok(workbuddy_account::list_accounts())
+    workbuddy_account::list_accounts_checked()
 }
 
 #[tauri::command]

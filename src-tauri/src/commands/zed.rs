@@ -6,7 +6,7 @@ use crate::modules::{logger, zed_account, zed_instance, zed_oauth};
 
 #[tauri::command]
 pub fn list_zed_accounts() -> Result<Vec<ZedAccount>, String> {
-    Ok(zed_account::list_accounts())
+    zed_account::list_accounts_checked()
 }
 
 #[tauri::command]
@@ -24,7 +24,10 @@ pub fn delete_zed_accounts(app: AppHandle, account_ids: Vec<String>) -> Result<(
 }
 
 #[tauri::command]
-pub fn import_zed_from_json(app: AppHandle, json_content: String) -> Result<Vec<ZedAccount>, String> {
+pub fn import_zed_from_json(
+    app: AppHandle,
+    json_content: String,
+) -> Result<Vec<ZedAccount>, String> {
     let accounts = zed_account::import_from_json(&json_content)?;
     let _ = crate::modules::tray::update_tray_menu(&app);
     Ok(accounts)
@@ -69,7 +72,10 @@ pub async fn refresh_all_zed_tokens(app: AppHandle) -> Result<i32, String> {
     let refreshed = zed_account::refresh_all_accounts().await?;
     if !refreshed.is_empty() {
         if let Err(err) = zed_account::run_quota_alert_if_needed() {
-            logger::log_warn(&format!("[QuotaAlert][Zed] 全量刷新后预警检查失败: {}", err));
+            logger::log_warn(&format!(
+                "[QuotaAlert][Zed] 全量刷新后预警检查失败: {}",
+                err
+            ));
         }
     }
     let _ = crate::modules::tray::update_tray_menu(&app);
@@ -82,7 +88,10 @@ pub async fn refresh_all_zed_tokens(app: AppHandle) -> Result<i32, String> {
 }
 
 #[tauri::command]
-pub fn update_zed_account_tags(account_id: String, tags: Vec<String>) -> Result<ZedAccount, String> {
+pub fn update_zed_account_tags(
+    account_id: String,
+    tags: Vec<String>,
+) -> Result<ZedAccount, String> {
     zed_account::update_account_tags(&account_id, tags)
 }
 
@@ -137,10 +146,7 @@ pub fn zed_oauth_login_cancel(login_id: Option<String>) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn zed_oauth_submit_callback_url(
-    login_id: String,
-    callback_url: String,
-) -> Result<(), String> {
+pub fn zed_oauth_submit_callback_url(login_id: String, callback_url: String) -> Result<(), String> {
     zed_oauth::submit_callback_url(login_id.as_str(), callback_url.as_str())
 }
 

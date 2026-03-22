@@ -51,6 +51,7 @@ import {
   persistPrivacyModeEnabled,
 } from '../utils/privacy';
 import { useExportJsonModal } from '../hooks/useExportJsonModal';
+import { parseFileCorruptedError } from '../components/FileCorruptedModal';
 
 const QODER_CURRENT_ACCOUNT_ID_KEY = 'agtools.qoder.current_account_id';
 const QODER_FLOW_NOTICE_COLLAPSED_KEY = 'agtools.qoder.flow_notice_collapsed';
@@ -254,6 +255,26 @@ export function QoderAccountsPage() {
   const [privacyModeEnabled, setPrivacyModeEnabled] = useState<boolean>(() =>
     isPrivacyModeEnabledByDefault(),
   );
+
+  useEffect(() => {
+    if (!store.error) return;
+
+    const corrupted = parseFileCorruptedError(store.error);
+    if (corrupted) {
+      setMessage({
+        text: t('error.fileCorrupted.description', '文件 {{fileName}} 已损坏，无法解析。', {
+          fileName: corrupted.file_name,
+        }),
+        tone: 'error',
+      });
+      return;
+    }
+
+    setMessage({
+      text: String(store.error).replace(/^Error:\s*/, ''),
+      tone: 'error',
+    });
+  }, [store.error, t]);
 
   const toggleFilterTypeValue = useCallback((value: string) => {
     setFilterTypes((prev) => {
