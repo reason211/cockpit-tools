@@ -2129,6 +2129,10 @@
   width: min(760px, calc(100vw - 32px));
 }
 
+.codex-wakeup-preset-overlay {
+  z-index: 10020;
+}
+
 .codex-wakeup-results-modal {
   width: min(800px, calc(100vw - 32px));
   border: 1px solid rgba(214, 224, 239, 0.9);
@@ -2298,6 +2302,11 @@
   background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
   z-index: 30;
+}
+
+.codex-wakeup-single-select-panel-portal {
+  max-height: min(320px, calc(100vh - 24px));
+  overflow-y: auto;
 }
 
 .codex-wakeup-single-select-option {
