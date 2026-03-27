@@ -2649,6 +2649,30 @@
       "unsupported": {
         "descPlatform": "CodeBuddy CN 多开实例仅支持 macOS、Windows 和 Linux。"
       }
+    },
+    "checkin": {
+      "title": "每日签到",
+      "modalTitle": "每日签到",
+      "status": "签到状态",
+      "checkedIn": "已签到",
+      "notCheckedIn": "未签到",
+      "button": "签到",
+      "button.loading": "签到中...",
+      "done": "已完成",
+      "success": "签到成功！连续签到 {{days}} 天",
+      "failure": "签到失败：{{message}}",
+      "failure.network": "网络异常，请稍后重试",
+      "lastCheckin": "最后签到：{{time}}",
+      "streak": "连续签到 {{days}} 天",
+      "reward": "奖励：{{reward}}",
+      "refreshStatus": "刷新状态",
+      "checkAll": "一键签到",
+      "noAccounts": "暂无账号",
+      "querying": "查询中...",
+      "streakDays": "{{days}} 天",
+      "streakRewardCountdown": "再签 {{days}} 天获大礼包",
+      "streakRewardToday": "今日可获得大礼包!",
+      "recentDates": "近期签到："
     }
   },
   "workbuddy": {

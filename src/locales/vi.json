@@ -2534,6 +2534,20 @@
       "unsupported": {
         "descPlatform": "Phiên bản đa phiên bản CodeBuddy CN chỉ được hỗ trợ trên macOS, Windows và Linux."
       }
+    },
+    "checkin": {
+      "title": "Daily Check-in",
+      "status": "Check-in Status",
+      "checkedIn": "Checked In",
+      "notCheckedIn": "Not Checked In",
+      "button": "Check In",
+      "button.loading": "Checking in...",
+      "success": "Check-in successful! {{days}} day streak",
+      "failure": "Check-in failed: {{message}}",
+      "failure.network": "Network error, please try again later",
+      "lastCheckin": "Last check-in: {{time}}",
+      "streak": "{{days}}-day streak",
+      "reward": "Reward: {{reward}}"
     }
   },
   "workbuddy": {

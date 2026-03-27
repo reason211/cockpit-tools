@@ -49,6 +49,15 @@ pub struct CodebuddyAccount {
     pub status: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status_reason: Option<String>,
+
+    // 签到相关字段
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub last_checkin_time: Option<i64>,
+    #[serde(default)]
+    pub checkin_streak: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub checkin_rewards: Option<serde_json::Value>,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quota_query_last_error: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -131,6 +140,11 @@ pub struct CodebuddyOAuthCompletePayload {
 
     pub status: Option<String>,
     pub status_reason: Option<String>,
+
+    // 签到相关字段
+    pub last_checkin_time: Option<i64>,
+    pub checkin_streak: i32,
+    pub checkin_rewards: Option<serde_json::Value>,
 }
 
 impl CodebuddyAccount {

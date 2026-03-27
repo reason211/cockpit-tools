@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::sync::{Arc, Mutex};
 
@@ -291,6 +292,9 @@ pub async fn complete_login(login_id: &str) -> Result<CodebuddyOAuthCompletePayl
                                     usage_raw: None,
                                     status: Some("normal".to_string()),
                                     status_reason: None,
+                                    last_checkin_time: None,
+                                    checkin_streak: 0,
+                                    checkin_rewards: None,
                                 });
                             }
                         }
@@ -855,6 +859,9 @@ async fn refresh_payload_for_account_inner(
             usage_raw: user_resource.or_else(|| account.usage_raw.clone()),
             status: account.status.clone(),
             status_reason: account.status_reason.clone(),
+            last_checkin_time: account.last_checkin_time,
+            checkin_streak: account.checkin_streak,
+            checkin_rewards: account.checkin_rewards.clone(),
         },
         quota_refresh_error,
     ))
@@ -1025,5 +1032,201 @@ pub async fn build_payload_from_token(
         usage_raw: user_resource,
         status: Some("normal".to_string()),
         status_reason: None,
+        last_checkin_time: None,
+        checkin_streak: 0,
+        checkin_rewards: None,
+    })
+}
+
+// 签到相关类型定义
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct CheckinStatusResponse {
+    pub today_checked_in: bool,
+    pub active: bool,
+    pub streak_days: i64,
+    pub daily_credit: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub today_credit: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub next_streak_day: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_streak_day: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub checkin_dates: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct CheckinResponse {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reward: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub next_checkin_in: Option<i64>,
+}
+
+// 签到 API 函数
+pub async fn get_checkin_status(
+    access_token: &str,
+    uid: Option<&str>,
+    enterprise_id: Option<&str>,
+    domain: Option<&str>,
+) -> Result<CheckinStatusResponse, String> {
+    let client = build_client()?;
+    let url = format!("{}/v2/billing/meter/checkin-status", CODEBUDDY_API_ENDPOINT);
+
+    let mut req = client
+        .post(&url)
+        .header("Authorization", format!("Bearer {}", access_token))
+        .header("Content-Type", "application/json");
+
+    if let Some(u) = uid {
+        req = req.header("X-User-Id", u);
+    }
+    if let Some(eid) = enterprise_id {
+        req = req.header("X-Enterprise-Id", eid);
+        req = req.header("X-Tenant-Id", eid);
+    }
+    if let Some(d) = domain {
+        req = req.header("X-Domain", d);
+    }
+
+    let resp = req
+        .send()
+        .await
+        .map_err(|e| format!("请求 checkin-status 失败: {}", e))?;
+
+    let status_code = resp.status();
+    let body: Value = resp
+        .json()
+        .await
+        .map_err(|e| format!("解析 checkin-status 响应失败: {}", e))?;
+
+    if !status_code.is_success() {
+        let message = body
+            .get("message")
+            .or_else(|| body.get("msg"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("unknown error");
+        return Err(format!(
+            "请求 checkin-status 失败 (http={}): {}",
+            status_code.as_u16(),
+            message
+        ));
+    }
+
+    let code = body.get("code").and_then(|v| v.as_i64()).unwrap_or(-1);
+    if code != 0 && code != 200 {
+        let message = body
+            .get("message")
+            .or_else(|| body.get("msg"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("unknown error");
+        return Err(format!(
+            "请求 checkin-status 失败 (code={}): {}",
+            code, message
+        ));
+    }
+
+    let data = body.get("data").ok_or_else(|| "checkin-status 响应缺少 data 字段".to_string())?;
+
+    let status: CheckinStatusResponse = serde_json::from_value(data.clone())
+        .map_err(|e| format!("解析 checkin-status data 失败: {}", e))?;
+
+    Ok(status)
+}
+
+pub async fn perform_checkin(
+    access_token: &str,
+    uid: Option<&str>,
+    enterprise_id: Option<&str>,
+    domain: Option<&str>,
+) -> Result<CheckinResponse, String> {
+    let client = build_client()?;
+    let url = format!("{}/v2/billing/meter/daily-checkin", CODEBUDDY_API_ENDPOINT);
+
+    let mut req = client
+        .post(&url)
+        .header("Authorization", format!("Bearer {}", access_token))
+        .header("Content-Type", "application/json")
+        .json(&json!({}));
+
+    if let Some(u) = uid {
+        req = req.header("X-User-Id", u);
+    }
+    if let Some(eid) = enterprise_id {
+        req = req.header("X-Enterprise-Id", eid);
+        req = req.header("X-Tenant-Id", eid);
+    }
+    if let Some(d) = domain {
+        req = req.header("X-Domain", d);
+    }
+
+    let resp = req
+        .send()
+        .await
+        .map_err(|e| format!("请求 daily-checkin 失败: {}", e))?;
+
+    let status_code = resp.status();
+    let body: Value = resp
+        .json()
+        .await
+        .map_err(|e| format!("解析 daily-checkin 响应失败: {}", e))?;
+
+    if !status_code.is_success() {
+        let message = body
+            .get("message")
+            .or_else(|| body.get("msg"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("unknown error");
+        return Err(format!(
+            "请求 daily-checkin 失败 (http={}): {}",
+            status_code.as_u16(),
+            message
+        ));
+    }
+
+    let code = body.get("code").and_then(|v| v.as_i64()).unwrap_or(-1);
+    let api_msg = body
+        .get("message")
+        .or_else(|| body.get("msg"))
+        .and_then(|v| v.as_str())
+        .unwrap_or("unknown error")
+        .to_string();
+
+    // code != 0 时，API 返回业务错误（如已签到），包装为 success=false 返回给前端展示
+    if code != 0 && code != 200 {
+        return Ok(CheckinResponse {
+            success: false,
+            message: Some(api_msg),
+            reward: None,
+            next_checkin_in: None,
+        });
+    }
+
+    let data = body.get("data").ok_or_else(|| "daily-checkin 响应缺少 data 字段".to_string())?;
+
+    let success = data
+        .get("success")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(true); // code==0 时默认成功
+
+    let message = data.get("message").and_then(|v| v.as_str()).map(|s| s.to_string());
+
+    let reward = data.get("reward").cloned();
+
+    let next_checkin_in = data
+        .get("nextCheckinIn")
+        .or_else(|| data.get("next_checkin_in"))
+        .and_then(|v| v.as_i64());
+
+    Ok(CheckinResponse {
+        success,
+        message,
+        reward,
+        next_checkin_in,
     })
 }

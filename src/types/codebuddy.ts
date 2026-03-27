@@ -31,6 +31,11 @@ export interface CodebuddyAccount {
 
   created_at: number;
   last_used: number;
+
+  // 签到相关字段（Wave 2 新增）
+  last_checkin_time?: number | null;
+  checkin_streak?: number;
+  checkin_rewards?: Record<string, any> | null;
 }
 
 export type CodebuddyPlanBadge = 'FREE' | 'PRO' | 'TRIAL' | 'ENTERPRISE' | 'UNKNOWN';

@@ -224,8 +224,285 @@
   line-height: 1.45;
 }
 
+/* ===== 签到弹窗 ===== */
+.checkin-modal {
+  max-width: 600px;
+  width: 92vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.checkin-modal .modal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkin-modal .modal-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 16px;
+}
+
+.checkin-modal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.checkin-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.checkin-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.checkin-stat.checked {
+  color: var(--color-success, #22c55e);
+}
+
+.checkin-stat.unchecked {
+  color: var(--color-warning, #f59e0b);
+}
+
+.checkin-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkin-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+}
+
+.checkin-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 32px 0;
+  font-size: 14px;
+}
+
+.checkin-account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkin-account-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 8px);
+  background: var(--bg-secondary);
+  transition: border-color 0.2s;
+  flex-wrap: wrap;
+}
+
+.checkin-account-row:hover {
+  border-color: var(--border-hover, var(--primary));
+}
+
+.checkin-account-row.checked {
+  opacity: 0.7;
+}
+
+.checkin-account-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 120px;
+}
+
+.checkin-account-name {
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.checkin-streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--color-warning, #f59e0b);
+  font-weight: 500;
+}
+
+.checkin-credit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--color-success, #22c55e);
+  font-weight: 500;
+}
+
+.checkin-streak-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.checkin-streak-reward.streak-today {
+  color: var(--primary);
+  font-weight: 600;
+  animation: checkin-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes checkin-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.checkin-dates {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding-top: 4px;
+}
+
+.checkin-date-tag {
+  padding: 1px 6px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.checkin-account-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+.checkin-status-yes {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-success, #22c55e);
+}
+
+.checkin-status-no {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-warning, #f59e0b);
+}
+
+.checkin-status-unknown {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.checkin-last-time {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.checkin-reward-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--primary);
+  background: var(--primary-light, rgba(59, 130, 246, 0.1));
+  padding: 2px 8px;
+  border-radius: 12px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checkin-account-action {
+  flex-shrink: 0;
+}
+
+.checkin-account-error {
+  width: 100%;
+  font-size: 11px;
+  color: var(--color-error, #ef4444);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 4px;
+}
+
+.checkin-account-info-msg {
+  width: 100%;
+  font-size: 12px;
+  color: var(--color-warning, #f59e0b);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 4px;
+  background: rgba(245, 158, 11, 0.08);
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+.checkin-account-success {
+  width: 100%;
+  font-size: 11px;
+  color: var(--color-success, #22c55e);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 4px;
+}
+
+.btn-ghost {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.btn-ghost:disabled {
+  opacity: 0.5;
+}
+
 @media (max-width: 720px) {
   .codebuddy-accounts-page .codebuddy-quota-grid {
     grid-template-columns: 1fr;
+  }
+
+  .checkin-modal-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .checkin-account-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

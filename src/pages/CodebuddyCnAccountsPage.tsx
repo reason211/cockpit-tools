@@ -2,7 +2,7 @@ import { useMemo, useCallback, Fragment, useState } from 'react';
 import {
   Plus, RefreshCw, Download, Upload, Trash2, X, Globe, KeyRound, Database,
   Copy, Check, RotateCw, LayoutGrid, List, Search,
-  Tag, Play, Eye, EyeOff, CircleAlert, ChevronDown, ArrowRightLeft,
+  Tag, Play, Eye, EyeOff, CircleAlert, ChevronDown, ArrowRightLeft, CalendarCheck,
 } from 'lucide-react';
 import { useCodebuddyCnAccountStore } from '../stores/useCodebuddyCnAccountStore';
 import * as codebuddyCnService from '../services/codebuddyCnService';
@@ -23,6 +23,7 @@ import { useProviderAccountsPage } from '../hooks/useProviderAccountsPage';
 import { PlatformOverviewTabsHeader, PlatformOverviewTab } from '../components/platform/PlatformOverviewTabsHeader';
 import { CodebuddyCnInstancesContent } from './CodebuddyCnInstancesPage';
 import { DosageNotifyUsageStatus } from '../components/platform/DosageNotifyUsageStatus';
+import { CodeBuddyCNCheckinModal } from '../components/codebuddy/CodeBuddyCNCheckinModal';
 import { MultiSelectFilterDropdown, type MultiSelectFilterOption } from '../components/MultiSelectFilterDropdown';
 
 const CB_FLOW_NOTICE_COLLAPSED_KEY = 'agtools.codebuddycn.flow_notice_collapsed';
@@ -141,6 +142,7 @@ export function CodebuddyCnAccountsPage() {
 
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [showCheckinModal, setShowCheckinModal] = useState(false);
 
   const handleSyncToWorkbuddy = useCallback(async () => {
     setSyncing(true);
@@ -602,6 +604,9 @@ export function CodebuddyCnAccountsPage() {
           <button className="btn btn-secondary icon-only" onClick={handleSyncToWorkbuddy} disabled={syncing || accounts.length === 0} title={t('codebuddyCn.syncToWorkbuddy', '同步到 WorkBuddy')}>
             {syncing ? <RefreshCw size={14} className="loading-spinner" /> : <ArrowRightLeft size={14} />}
           </button>
+          <button className="btn btn-secondary icon-only" onClick={() => setShowCheckinModal(true)} disabled={accounts.length === 0} title={t('codebuddyCn.checkin.modalTitle', '每日签到')}>
+            <CalendarCheck size={14} />
+          </button>
           <button className="btn btn-secondary icon-only" onClick={handleRefreshAll} disabled={refreshingAll || accounts.length === 0} title={t('common.shared.refreshAll', '刷新全部')}>
             <RefreshCw size={14} className={refreshingAll ? 'loading-spinner' : ''} />
           </button>
@@ -908,6 +913,14 @@ export function CodebuddyCnAccountsPage() {
         onClose={() => setShowTagModal(null)}
         onSave={handleSaveTags}
       />
+
+      {showCheckinModal && (
+        <CodeBuddyCNCheckinModal
+          accounts={filteredAccounts}
+          onClose={() => setShowCheckinModal(false)}
+          onCheckinComplete={() => { store.fetchAccounts(); }}
+        />
+      )}
         </>
       )}
     </div>

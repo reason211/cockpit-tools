@@ -397,6 +397,22 @@ fn merge_duplicate_account(primary: &mut CodebuddyAccount, dup: &CodebuddyAccoun
         &mut primary.quota_query_last_error_at,
         &dup.quota_query_last_error_at,
     );
+    // 签到字段合并：保留最新的签到时间，累加连续签到天数（如果两者都已签到）
+    if let (Some(primary_time), Some(dup_time)) = (primary.last_checkin_time, dup.last_checkin_time) {
+        if dup_time > primary_time {
+            primary.last_checkin_time = Some(dup_time);
+        }
+    } else if primary.last_checkin_time.is_none() {
+        primary.last_checkin_time = dup.last_checkin_time;
+    }
+    // 连续签到天数取最大值（合并时保守处理）
+    if dup.checkin_streak > primary.checkin_streak {
+        primary.checkin_streak = dup.checkin_streak;
+    }
+    if primary.checkin_rewards.is_none() {
+        primary.checkin_rewards = dup.checkin_rewards.clone();
+    }
+
     primary.tags = merge_string_list(primary.tags.clone(), dup.tags.clone());
     primary.created_at = primary.created_at.min(dup.created_at);
     primary.last_used = primary.last_used.max(dup.last_used);
@@ -567,6 +583,16 @@ fn apply_payload(account: &mut CodebuddyAccount, payload: CodebuddyOAuthComplete
     }
     account.status = payload.status;
     account.status_reason = payload.status_reason;
+
+    // 更新签到信息（如果提供）
+    if payload.last_checkin_time.is_some() {
+        account.last_checkin_time = payload.last_checkin_time;
+    }
+    account.checkin_streak = payload.checkin_streak;
+    if payload.checkin_rewards.is_some() {
+        account.checkin_rewards = payload.checkin_rewards.clone();
+    }
+
     account.last_used = now_ts();
 }
 
@@ -632,6 +658,12 @@ pub fn upsert_account(payload: CodebuddyOAuthCompletePayload) -> Result<Codebudd
         usage_raw: payload.usage_raw.clone(),
         status: payload.status.clone(),
         status_reason: payload.status_reason.clone(),
+
+        // 签到字段默认值
+        last_checkin_time: None,
+        checkin_streak: 0,
+        checkin_rewards: None,
+
         quota_query_last_error: None,
         quota_query_last_error_at: None,
         usage_updated_at: None,
@@ -879,6 +911,12 @@ fn upsert_account_record_from_payload(
         usage_raw: payload.usage_raw,
         status: payload.status,
         status_reason: payload.status_reason,
+
+        // 签到字段默认值
+        last_checkin_time: None,
+        checkin_streak: 0,
+        checkin_rewards: None,
+
         quota_query_last_error: None,
         quota_query_last_error_at: None,
         usage_updated_at: None,
@@ -966,6 +1004,9 @@ fn payload_from_import_value(raw: Value) -> Result<CodebuddyOAuthCompletePayload
         usage_raw: obj.get("usage_raw").cloned(),
         status: Some("normal".to_string()),
         status_reason: None,
+        last_checkin_time: None,
+        checkin_streak: 0,
+        checkin_rewards: None,
     })
 }
 
@@ -1207,6 +1248,9 @@ fn build_local_import_payload(
         usage_raw: None,
         status: Some("normal".to_string()),
         status_reason: None,
+        last_checkin_time: None,
+        checkin_streak: 0,
+        checkin_rewards: None,
     }
 }
 
@@ -1282,6 +1326,34 @@ pub(crate) fn resolve_current_account_id(accounts: &[CodebuddyAccount]) -> Optio
             )
         })
         .map(|account| account.id.clone())
+}
+
+/// 更新账号的签到信息
+pub fn update_checkin_info(
+    account_id: &str,
+    last_checkin_time: Option<i64>,
+    streak: i32,
+    rewards: Option<serde_json::Value>,
+) -> Result<CodebuddyAccount, String> {
+    let mut account = load_account(account_id).ok_or_else(|| "账号不存在".to_string())?;
+
+    // 更新签到字段
+    if let Some(time) = last_checkin_time {
+        account.last_checkin_time = Some(time);
+    }
+    account.checkin_streak = streak;
+    account.checkin_rewards = rewards;
+
+    account.last_used = now_ts();
+    let updated = account.clone();
+    upsert_account_record(account)?;
+
+    logger::log_info(&format!(
+        "[CodeBuddy CN Checkin] 签到信息已更新: account_id={}, streak={}",
+        updated.id, streak
+    ));
+
+    Ok(updated)
 }
 
 pub fn run_quota_alert_if_needed() -> Result<(), String> {

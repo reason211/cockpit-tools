@@ -284,6 +284,9 @@ pub async fn complete_login(login_id: &str) -> Result<CodebuddyOAuthCompletePayl
                                     usage_raw: None,
                                     status: Some("normal".to_string()),
                                     status_reason: None,
+                                    last_checkin_time: None,
+                                    checkin_streak: 0,
+                                    checkin_rewards: None,
                                 });
                             }
                         }
@@ -835,6 +838,9 @@ async fn refresh_payload_for_account_inner(
             usage_raw: user_resource.or_else(|| account.usage_raw.clone()),
             status: account.status.clone(),
             status_reason: account.status_reason.clone(),
+            last_checkin_time: account.last_checkin_time,
+            checkin_streak: account.checkin_streak,
+            checkin_rewards: account.checkin_rewards.clone(),
         },
         quota_refresh_error,
     ))
@@ -944,5 +950,8 @@ pub async fn build_payload_from_token(
         usage_raw: None,
         status: Some("normal".to_string()),
         status_reason: None,
+        last_checkin_time: None,
+        checkin_streak: 0,
+        checkin_rewards: None,
     })
 }

@@ -632,6 +632,9 @@ pub fn upsert_account(payload: CodebuddyOAuthCompletePayload) -> Result<Codebudd
         usage_raw: payload.usage_raw.clone(),
         status: payload.status.clone(),
         status_reason: payload.status_reason.clone(),
+        last_checkin_time: None,
+        checkin_streak: 0,
+        checkin_rewards: None,
         quota_query_last_error: None,
         quota_query_last_error_at: None,
         usage_updated_at: None,
@@ -879,6 +882,9 @@ fn upsert_account_record_from_payload(
         usage_raw: payload.usage_raw,
         status: payload.status,
         status_reason: payload.status_reason,
+        last_checkin_time: None,
+        checkin_streak: 0,
+        checkin_rewards: None,
         quota_query_last_error: None,
         quota_query_last_error_at: None,
         usage_updated_at: None,
@@ -966,6 +972,9 @@ fn payload_from_import_value(raw: Value) -> Result<CodebuddyOAuthCompletePayload
         usage_raw: obj.get("usage_raw").cloned(),
         status: Some("normal".to_string()),
         status_reason: None,
+        last_checkin_time: None,
+        checkin_streak: 0,
+        checkin_rewards: None,
     })
 }
 
@@ -1207,6 +1216,9 @@ fn build_local_import_payload(
         usage_raw: None,
         status: Some("normal".to_string()),
         status_reason: None,
+        last_checkin_time: None,
+        checkin_streak: 0,
+        checkin_rewards: None,
     }
 }
 

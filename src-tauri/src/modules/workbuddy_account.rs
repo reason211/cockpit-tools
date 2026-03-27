@@ -1371,6 +1371,9 @@ pub fn sync_accounts_to_codebuddy_cn() -> Result<usize, String> {
             usage_raw: wb_account.usage_raw.clone(),
             status: wb_account.status.clone(),
             status_reason: wb_account.status_reason.clone(),
+            last_checkin_time: None,
+            checkin_streak: 0,
+            checkin_rewards: None,
         };
 
         // 使用 CodeBuddy CN 的 upsert 函数保存账号

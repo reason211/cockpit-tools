@@ -2580,6 +2580,20 @@
       "unsupported": {
         "descPlatform": "تعدد مثيلات CodeBuddy CN مدعوم فقط على macOS وWindows وLinux."
       }
+    },
+    "checkin": {
+      "title": "الت签到 اليومي",
+      "status": "حالة التسجيل",
+      "checkedIn": "تم التسجيل",
+      "notCheckedIn": "لم يتم التسجيل",
+      "button": "تسجيل",
+      "button.loading": "جاري التسجيل...",
+      "success": "تم التسجيل بنجاح! {{days}} يوم متتالي",
+      "failure": "فشل التسجيل: {{message}}",
+      "failure.network": "خطأ في الشبكة، يرجى المحاولة لاحقًا",
+      "lastCheckin": "آخر تسجيل: {{time}}",
+      "streak": "{{days}} يوم متتالي",
+      "reward": "المكافأة: {{reward}}"
     }
   },
   "workbuddy": {
