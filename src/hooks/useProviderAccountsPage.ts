@@ -209,6 +209,52 @@ const readBundleMessage = (value: unknown): string | null => {
   return trimmed ? trimmed : null;
 };
 
+const parseLineDelimitedJsonObjects = (
+  rawContent: string,
+  invalidJsonMessage: string,
+): unknown[] | null => {
+  const lines = rawContent
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  if (lines.length <= 1) return null;
+
+  return lines.map((line) => {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(line) as unknown;
+    } catch {
+      throw new Error(invalidJsonMessage);
+    }
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new Error(invalidJsonMessage);
+    }
+    return parsed;
+  });
+};
+
+const isCodexDirectImportItem = (value: unknown): boolean => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const payload = value as Record<string, unknown>;
+  const tokens = payload.tokens;
+  if (
+    typeof payload.id_token === 'string' &&
+    payload.id_token.trim() &&
+    typeof payload.access_token === 'string' &&
+    payload.access_token.trim()
+  ) {
+    return true;
+  }
+  return Boolean(
+    tokens &&
+      typeof tokens === 'object' &&
+      !Array.isArray(tokens) &&
+      typeof (tokens as Record<string, unknown>).id_token === 'string' &&
+      typeof (tokens as Record<string, unknown>).access_token === 'string',
+  );
+};
+
 const resolveExternalImportBundleItems = (
   rawContent: string,
   platformId: string,
@@ -218,6 +264,10 @@ const resolveExternalImportBundleItems = (
   try {
     parsed = JSON.parse(rawContent) as unknown;
   } catch {
+    const lineDelimitedItems = parseLineDelimitedJsonObjects(rawContent, messages.invalidJson);
+    if (lineDelimitedItems && lineDelimitedItems.length > 0) {
+      return lineDelimitedItems;
+    }
     throw new Error(messages.invalidJson);
   }
 
@@ -238,6 +288,17 @@ const resolveExternalImportBundleItems = (
       ? (parsed as { data?: unknown }).data
       : parsed;
 
+  if (typeof root === 'string') {
+    return resolveExternalImportBundleItems(root, platformId, messages);
+  }
+
+  if (Array.isArray(root)) {
+    if (root.length === 0) {
+      throw new Error(messages.noItems);
+    }
+    return root;
+  }
+
   if (!root || typeof root !== 'object') {
     throw new Error(messages.empty);
   }
@@ -248,11 +309,19 @@ const resolveExternalImportBundleItems = (
   }
 
   const items = (root as { items?: unknown }).items;
+  if (Array.isArray(items) && items.length > 0) {
+    return items;
+  }
+
+  if (platformId === 'codex' && isCodexDirectImportItem(root)) {
+    return [root];
+  }
+
   if (!Array.isArray(items) || items.length === 0) {
     throw new Error(messages.noItems);
   }
 
-  return items;
+  throw new Error(messages.noItems);
 };
 
 const buildInitialExternalImportProgress = (): ExternalImportProgressState => ({

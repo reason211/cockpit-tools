@@ -14,6 +14,7 @@
 
 ### 变更
 - **Codex 账号导入后端现统一刷新 OAuth 额度信息**：从本地、JSON 或文件导入后会跳过 API Key 账号并刷新 OAuth 账号配额，再用刷新后的记录更新账号列表与托盘状态。
+- **Codex 导入包现支持更多便携 JSON 形态**：远端导入包与粘贴 JSON 导入可读取根数组、字符串包裹载荷、直接 Codex Token 对象，以及每行一个账号对象的 JSON Lines。
 - **Codex 便携导出格式现归一 Cockpit Tools JSON**：Cockpit Tools 导出会输出可移植的 Token/API Key JSON，CPA 文档会保留 Token 刷新时间与过期时间元数据。
 - **Codex PRO 档位识别现与 CPA 20x 语义对齐**：未显式标记 `prolite` 的 `pro` 账号默认展示为 PRO Max/20x，并在本地 API 服务路由排序中按 20x 档位处理。
 - **Codex 会话可见性修复备份现按实例保留最近一次**：执行新一轮修复前会清理旧的会话可见性修复备份目录，避免备份长期堆积。

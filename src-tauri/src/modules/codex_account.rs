@@ -1214,7 +1214,12 @@ pub fn extract_user_info(
 
     let email = payload
         .email
-        .or_else(|| payload.profile_data.as_ref().and_then(|data| data.email.clone()))
+        .or_else(|| {
+            payload
+                .profile_data
+                .as_ref()
+                .and_then(|data| data.email.clone())
+        })
         .ok_or("id_token 中缺少 email")?;
     let user_id = payload
         .auth_data
@@ -3045,6 +3050,84 @@ fn import_account_struct(account: CodexAccount) -> Result<CodexAccount, String> 
     Ok(imported)
 }
 
+fn import_account_from_json_value(
+    value: serde_json::Value,
+) -> Result<Option<CodexAccount>, String> {
+    if is_auth_mode_apikey(
+        value
+            .get("auth_mode")
+            .and_then(|value| value.as_str())
+            .or_else(|| value.get("authMode").and_then(|value| value.as_str())),
+    ) {
+        if let Some(api_key) = value
+            .get("OPENAI_API_KEY")
+            .and_then(|value| value.as_str())
+            .and_then(normalize_api_key)
+        {
+            return Ok(Some(upsert_api_key_account(
+                api_key,
+                extract_api_base_url_from_json_value(&value),
+                None,
+                value
+                    .get("api_provider_id")
+                    .and_then(|value| value.as_str())
+                    .map(|value| value.to_string()),
+                value
+                    .get("api_provider_name")
+                    .and_then(|value| value.as_str())
+                    .map(|value| value.to_string()),
+            )?));
+        }
+    }
+
+    if let Some((tokens, account_id_hint)) = extract_codex_tokens_from_value(&value) {
+        return Ok(Some(upsert_account_with_hints(
+            tokens,
+            account_id_hint,
+            None,
+        )?));
+    }
+
+    if let Ok(account) = serde_json::from_value::<CodexAccount>(value) {
+        return Ok(Some(import_account_struct(account)?));
+    }
+
+    Ok(None)
+}
+
+fn parse_line_delimited_json_values(
+    json_content: &str,
+) -> Result<Option<Vec<serde_json::Value>>, String> {
+    let lines: Vec<(usize, &str)> = json_content
+        .lines()
+        .enumerate()
+        .filter_map(|(index, line)| {
+            let trimmed = line.trim();
+            if trimmed.is_empty() {
+                None
+            } else {
+                Some((index + 1, trimmed))
+            }
+        })
+        .collect();
+
+    if lines.len() <= 1 {
+        return Ok(None);
+    }
+
+    let mut values = Vec::with_capacity(lines.len());
+    for (line_number, line) in lines {
+        let parsed = serde_json::from_str::<serde_json::Value>(line)
+            .map_err(|e| format!("第 {} 行不是有效 JSON: {}", line_number, e))?;
+        if !parsed.is_object() {
+            return Err(format!("第 {} 行不是 JSON 对象", line_number));
+        }
+        values.push(parsed);
+    }
+
+    Ok(Some(values))
+}
+
 /// 从 JSON 字符串导入账号
 pub fn import_from_json(json_content: &str) -> Result<Vec<CodexAccount>, String> {
     ensure_storage_writable_for_import()?;
@@ -3095,80 +3178,16 @@ pub fn import_from_json(json_content: &str) -> Result<Vec<CodexAccount>, String>
     if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(json_content) {
         match parsed {
             serde_json::Value::Object(_) => {
-                if is_auth_mode_apikey(
-                    parsed
-                        .get("auth_mode")
-                        .and_then(|value| value.as_str())
-                        .or_else(|| parsed.get("authMode").and_then(|value| value.as_str())),
-                ) {
-                    if let Some(api_key) = parsed
-                        .get("OPENAI_API_KEY")
-                        .and_then(|value| value.as_str())
-                        .and_then(normalize_api_key)
-                    {
-                        return Ok(vec![upsert_api_key_account(
-                            api_key,
-                            extract_api_base_url_from_json_value(&parsed),
-                            None,
-                            parsed
-                                .get("api_provider_id")
-                                .and_then(|value| value.as_str())
-                                .map(|value| value.to_string()),
-                            parsed
-                                .get("api_provider_name")
-                                .and_then(|value| value.as_str())
-                                .map(|value| value.to_string()),
-                        )?]);
-                    }
-                }
-
-                if let Some((tokens, account_id_hint)) = extract_codex_tokens_from_value(&parsed) {
-                    let account = upsert_account_with_hints(tokens, account_id_hint, None)?;
+                if let Some(account) = import_account_from_json_value(parsed)? {
                     return Ok(vec![account]);
-                }
-
-                if let Ok(account) = serde_json::from_value::<CodexAccount>(parsed) {
-                    let imported = import_account_struct(account)?;
-                    return Ok(vec![imported]);
                 }
             }
             serde_json::Value::Array(items) => {
                 let mut result = Vec::new();
 
                 for item in items {
-                    if let Some((tokens, account_id_hint)) = extract_codex_tokens_from_value(&item)
-                    {
-                        result.push(upsert_account_with_hints(tokens, account_id_hint, None)?);
-                        continue;
-                    }
-
-                    if is_auth_mode_apikey(
-                        item.get("auth_mode")
-                            .and_then(|value| value.as_str())
-                            .or_else(|| item.get("authMode").and_then(|value| value.as_str())),
-                    ) {
-                        if let Some(api_key) = item
-                            .get("OPENAI_API_KEY")
-                            .and_then(|value| value.as_str())
-                            .and_then(normalize_api_key)
-                        {
-                            result.push(upsert_api_key_account(
-                                api_key,
-                                extract_api_base_url_from_json_value(&item),
-                                None,
-                                item.get("api_provider_id")
-                                    .and_then(|value| value.as_str())
-                                    .map(|value| value.to_string()),
-                                item.get("api_provider_name")
-                                    .and_then(|value| value.as_str())
-                                    .map(|value| value.to_string()),
-                            )?);
-                            continue;
-                        }
-                    }
-
-                    if let Ok(account) = serde_json::from_value::<CodexAccount>(item) {
-                        result.push(import_account_struct(account)?);
+                    if let Some(account) = import_account_from_json_value(item)? {
+                        result.push(account);
                     }
                 }
 
@@ -3180,14 +3199,19 @@ pub fn import_from_json(json_content: &str) -> Result<Vec<CodexAccount>, String>
         }
     }
 
-    // 尝试解析为账号数组
-    if let Ok(accounts) = serde_json::from_str::<Vec<CodexAccount>>(json_content) {
+    if let Some(items) = parse_line_delimited_json_values(json_content)? {
         let mut result = Vec::new();
-        for acc in accounts {
-            let imported = import_account_struct(acc)?;
-            result.push(imported);
+
+        for (index, item) in items.into_iter().enumerate() {
+            match import_account_from_json_value(item)? {
+                Some(account) => result.push(account),
+                None => return Err(format!("第 {} 行未找到有效的 Codex Token", index + 1)),
+            }
         }
-        return Ok(result);
+
+        if !result.is_empty() {
+            return Ok(result);
+        }
     }
 
     Err("无法解析 JSON 内容".to_string())
@@ -3327,9 +3351,9 @@ mod tests {
         extract_codex_tokens_from_value, extract_user_info, format_refresh_error_for_user,
         get_accounts_dir, get_accounts_storage_path, get_current_account, list_accounts_checked,
         load_account, load_account_index, parse_auth_file_last_refresh,
-        read_api_provider_from_config_toml, read_quick_config_from_config_toml,
-        resolve_api_provider_config, save_account, save_account_index,
-        should_accept_authority_snapshot, sync_account_from_auth_dir,
+        parse_line_delimited_json_values, read_api_provider_from_config_toml,
+        read_quick_config_from_config_toml, resolve_api_provider_config, save_account,
+        save_account_index, should_accept_authority_snapshot, sync_account_from_auth_dir,
         sync_managed_projection_from_auth_dir, validate_api_key_credentials,
         write_api_provider_to_config_toml, write_managed_projection_to_dir,
         write_quick_config_to_config_toml, ApiProviderConfig, CodexAccountIndex,
@@ -3343,6 +3367,28 @@ mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
     static TEST_ENV_LOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
+
+    #[test]
+    fn parse_line_delimited_json_values_accepts_one_object_per_line() {
+        let raw = r#"{"id_token":"id-1","access_token":"access-1"}
+{"id_token":"id-2","access_token":"access-2"}"#;
+
+        let values = parse_line_delimited_json_values(raw)
+            .expect("json lines should parse")
+            .expect("multiple non-empty lines should return values");
+
+        assert_eq!(values.len(), 2);
+        assert_eq!(
+            values[0].get("id_token").and_then(|value| value.as_str()),
+            Some("id-1")
+        );
+        assert_eq!(
+            values[1]
+                .get("access_token")
+                .and_then(|value| value.as_str()),
+            Some("access-2")
+        );
+    }
 
     fn make_temp_dir(prefix: &str) -> std::path::PathBuf {
         let unique = SystemTime::now()
