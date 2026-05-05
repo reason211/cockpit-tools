@@ -4,7 +4,7 @@
   "topRightAd": {
     "id": "top-right-ad-2026-04-shop",
     "priority": 100,
-    "text": "此地址提供Codex Plus兑换码（无质保存货 到账40多天），有需要可以支持一下，感谢。",
+    "text": "此地址提供Codex Plus兑换码（无质保存货 到账40天左右），有需要可以支持一下，感谢。",
     "badge": "推广",
     "ctaLabel": "选购",
     "ctaUrl": "https://xiangzili.xyz",
@@ -16,7 +16,7 @@
     "expiresAt": null,
     "locales": {
       "zh-CN": {
-        "text": "此地址提供Gemini Pro成品号与Codex Pro兑换码，有需要可以支持一下，感谢。",
+        "text": "此地址提供Codex Plus兑换码（无质保存货 到账40天左右），有需要可以支持一下，感谢。",  
         "badge": "推广",
         "ctaLabel": "选购"
       }
