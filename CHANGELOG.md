@@ -7,6 +7,12 @@ All notable changes to Cockpit Tools will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
+## [0.23.1] - 2026-05-12
+
+### Changed
+- **Republished from the mainline state to replace the withdrawn v0.23.0 build**: this release keeps the stable v0.22.22 code path and excludes the experimental PR integration that was accidentally published as v0.23.0.
+
+---
 ## [0.22.22] - 2026-05-12
 
 ### Added
