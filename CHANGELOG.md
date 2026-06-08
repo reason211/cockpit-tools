@@ -15,9 +15,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Codex config.toml cleanup no longer removes user-managed provider settings**: Cockpit now only removes its own provider-gateway model catalog and model override, preserving external `model_catalog_json`, custom providers, and other user configuration.
 - **Windows provider-gateway sidecars no longer open visible console windows**: background sidecars launched for Codex provider gateways keep the Windows hidden-console startup behavior.
 
-### Changed
-- **APIKEY.FUN provider configuration now stays on Responses direct mode**: sponsored APIKEY.FUN templates and existing saved APIKEY.FUN providers use Responses instead of the Chat Completions gateway path.
-
 ---
 ## [0.25.2] - 2026-06-06
 

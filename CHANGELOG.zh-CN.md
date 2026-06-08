@@ -15,9 +15,6 @@
 - **Codex config.toml 清理不再误删用户管理的供应商配置**：Cockpit 现在只移除自身写入的 provider gateway 模型目录和模型覆盖，保留外部 `model_catalog_json`、自定义 provider 以及其他用户配置。
 - **Windows provider gateway 后台 sidecar 不再弹出可见控制台窗口**：Codex 供应商网关启动的后台 sidecar 会继续使用隐藏控制台窗口的启动方式。
 
-### 变更
-- **APIKEY.FUN 供应商配置保持 Responses 直连模式**：APIKEY.FUN 赞助模板和已保存的 APIKEY.FUN 供应商会使用 Responses 协议，不再走 Chat Completions 网关路径。
-
 ---
 ## [0.25.2] - 2026-06-06
 
