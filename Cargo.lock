@@ -861,6 +861,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "cockpit-zed-adapter"
+version = "0.1.0"
+dependencies = [
+ "cockpit-core",
+ "serde",
+ "serde_json",
+ "tiny_http",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
 name = "colorchoice"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"

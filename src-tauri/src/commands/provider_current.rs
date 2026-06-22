@@ -1,4 +1,7 @@
+use std::time::Duration;
 use tauri::AppHandle;
+
+const ZED_FAST_LOCAL_READ_TIMEOUT: Duration = Duration::from_secs(20);
 
 fn resolve_provider_current_account_id(platform: &str) -> Result<Option<String>, String> {
     match platform {
@@ -53,7 +56,11 @@ fn resolve_provider_current_account_id(platform: &str) -> Result<Option<String>,
             let accounts = crate::modules::github_copilot_account::list_accounts();
             Ok(crate::modules::github_copilot_account::resolve_current_account_id(&accounts))
         }
-        "zed" => Ok(crate::modules::zed_account::resolve_current_account_id()),
+        "zed" => crate::modules::platform_adapter::call_zed_with_timeout(
+            "accounts.current",
+            serde_json::json!({}),
+            ZED_FAST_LOCAL_READ_TIMEOUT,
+        ),
         other => Err(format!("不支持的平台: {}", other)),
     }
 }
@@ -64,6 +71,8 @@ pub async fn get_provider_current_account_id(
     platform: String,
 ) -> Result<Option<String>, String> {
     let current_account_id = resolve_provider_current_account_id(platform.trim())?;
-    let _ = crate::modules::tray::update_tray_menu(&app);
+    tauri::async_runtime::spawn_blocking(move || {
+        let _ = crate::modules::tray::update_tray_menu(&app);
+    });
     Ok(current_account_id)
 }

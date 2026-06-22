@@ -12,6 +12,12 @@ const USAGE_URL: &str = "https://chatgpt.com/backend-api/wham/usage";
 const RESET_CREDITS_URL: &str = "https://chatgpt.com/backend-api/wham/rate-limit-reset-credits";
 const RESET_CREDITS_CONSUME_URL: &str =
     "https://chatgpt.com/backend-api/wham/rate-limit-reset-credits/consume";
+const REFERRAL_INVITE_ELIGIBILITY_URL: &str =
+    "https://chatgpt.com/backend-api/referrals/invite/eligibility";
+const REFERRAL_ELIGIBILITY_RULES_URL: &str =
+    "https://chatgpt.com/backend-api/wham/referrals/eligibility_rules";
+const REFERRAL_INVITE_URL: &str = "https://chatgpt.com/backend-api/wham/referrals/invite";
+pub const CODEX_REFERRAL_PERSISTENT_INVITE_KEY: &str = "codex_referral_persistent_invite";
 const SUBSCRIPTION_ACCOUNTS_CHECK_URL: &str =
     "https://chatgpt.com/backend-api/accounts/check/v4-2023-04-27";
 const SUBSCRIPTIONS_URL: &str = "https://chatgpt.com/backend-api/subscriptions";
@@ -86,6 +92,54 @@ fn append_http_error_diagnostics(message: &mut String, headers: &HeaderMap, body
         get_header_value(headers, "cf-ray"),
         normalize_http_error_body_for_display(body)
     ));
+}
+
+fn extract_referral_error_detail(body: &str) -> Option<String> {
+    let value: serde_json::Value = serde_json::from_str(body).ok()?;
+    let detail = value.get("detail")?;
+    if let Some(message) = detail.as_str().map(str::trim).filter(|item| !item.is_empty()) {
+        return Some(message.to_string());
+    }
+
+    let message = detail
+        .get("message")
+        .and_then(|item| item.as_str())
+        .map(str::trim)
+        .filter(|item| !item.is_empty());
+    let failed_emails = detail
+        .get("failed_emails")
+        .and_then(|item| item.as_array())
+        .map(|items| {
+            items
+                .iter()
+                .filter_map(|item| item.as_str())
+                .map(str::trim)
+                .filter(|item| !item.is_empty())
+                .map(ToString::to_string)
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+
+    match (message, failed_emails.is_empty()) {
+        (Some(message), false) => Some(format!("{}: {}", message, failed_emails.join(", "))),
+        (Some(message), true) => Some(message.to_string()),
+        (None, false) => Some(failed_emails.join(", ")),
+        (None, true) => None,
+    }
+}
+
+fn build_referral_http_error(action: &str, status: StatusCode, body: &str) -> String {
+    if let Some(detail) = extract_referral_error_detail(body) {
+        return format!("{}失败（HTTP {}）：{}", action, status.as_u16(), detail);
+    }
+
+    let detail_code = extract_detail_code_from_body(body);
+    let mut error_message = format!("{}接口返回错误 {}", action, status);
+    if let Some(code) = detail_code {
+        error_message.push_str(&format!(" [error_code:{}]", code));
+    }
+    error_message.push_str(&format!(" [body_len:{}]", body.len()));
+    error_message
 }
 
 fn extract_error_code_from_message(message: &str) -> Option<String> {
@@ -168,6 +222,60 @@ pub struct CodexResetCreditsSnapshot {
     available_count: Option<i64>,
     credits: Vec<CodexResetCredit>,
     next_expires_at: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CodexReferralInviteEligibility {
+    #[serde(default)]
+    pub should_show: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remaining_referrals: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ineligible_reason_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grant_action: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grant_amount: Option<i64>,
+    #[serde(default)]
+    pub referral_key: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub raw_data: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CodexReferralTimeFrameRule {
+    #[serde(rename = "type")]
+    pub rule_type: String,
+    #[serde(default)]
+    pub invites_sent: i64,
+    #[serde(default)]
+    pub invites_total: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CodexReferralEligibilityRules {
+    #[serde(default)]
+    pub requires_explicit_confirmation: Option<bool>,
+    #[serde(default)]
+    pub rules: Vec<String>,
+    #[serde(default)]
+    pub time_frame_rules: Vec<CodexReferralTimeFrameRule>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub raw_data: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CodexReferralInvite {
+    pub email: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub raw_data: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CodexReferralInviteResponse {
+    pub invites: Vec<CodexReferralInvite>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub raw_data: Option<serde_json::Value>,
 }
 
 fn normalize_remaining_percentage(window: &WindowInfo) -> i32 {
@@ -1277,6 +1385,336 @@ pub async fn fetch_account_reset_credits(
             normalize_subscription_retry_state(&mut account);
             codex_account::save_account(&account)?;
             fetch_reset_credits(&account).await
+        }
+        Err(error) => Err(error),
+    }
+}
+
+fn codex_api_account_id(account: &CodexAccount) -> Option<String> {
+    account.account_id.clone().or_else(|| {
+        codex_account::extract_chatgpt_account_id_from_access_token(&account.tokens.access_token)
+    })
+}
+
+fn normalize_referral_key(referral_key: Option<String>) -> String {
+    referral_key
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| CODEX_REFERRAL_PERSISTENT_INVITE_KEY.to_string())
+}
+
+async fn prepare_codex_referral_account(
+    account_id: &str,
+    expired_reason: &str,
+) -> Result<CodexAccount, String> {
+    let mut account = codex_account::prepare_account_for_injection(account_id).await?;
+    if account.is_api_key_auth() {
+        return Err("API Key 账号不支持 Codex 邀请".to_string());
+    }
+
+    if crate::modules::codex_oauth::is_token_expired(&account.tokens.access_token) {
+        refresh_account_tokens(&mut account, expired_reason).await?;
+        sync_subscription_expiry_from_current_id_token(&mut account);
+        normalize_subscription_retry_state(&mut account);
+        codex_account::save_account(&account)?;
+    }
+
+    Ok(account)
+}
+
+fn parse_referral_invite_eligibility(
+    payload: serde_json::Value,
+    referral_key: String,
+) -> CodexReferralInviteEligibility {
+    CodexReferralInviteEligibility {
+        should_show: payload
+            .get("should_show")
+            .and_then(|item| item.as_bool())
+            .unwrap_or(false),
+        remaining_referrals: payload
+            .get("remaining_referrals")
+            .and_then(|item| item.as_i64()),
+        ineligible_reason_code: payload
+            .get("ineligible_reason_code")
+            .and_then(|item| item.as_str())
+            .map(ToString::to_string),
+        grant_action: payload
+            .get("grant_action")
+            .and_then(|item| item.as_str())
+            .map(ToString::to_string),
+        grant_amount: payload.get("grant_amount").and_then(|item| item.as_i64()),
+        referral_key,
+        raw_data: Some(payload),
+    }
+}
+
+fn parse_referral_eligibility_rules(payload: serde_json::Value) -> CodexReferralEligibilityRules {
+    let rules = payload
+        .get("rules")
+        .and_then(|item| item.as_array())
+        .map(|items| {
+            items
+                .iter()
+                .filter_map(|item| item.as_str())
+                .map(str::trim)
+                .filter(|item| !item.is_empty())
+                .map(ToString::to_string)
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    let time_frame_rules = payload
+        .get("time_frame_rules")
+        .and_then(|item| item.as_array())
+        .map(|items| {
+            items
+                .iter()
+                .filter_map(|item| {
+                    Some(CodexReferralTimeFrameRule {
+                        rule_type: item.get("type")?.as_str()?.to_string(),
+                        invites_sent: item
+                            .get("invites_sent")
+                            .and_then(|value| value.as_i64())
+                            .unwrap_or(0),
+                        invites_total: item
+                            .get("invites_total")
+                            .and_then(|value| value.as_i64())
+                            .unwrap_or(0),
+                    })
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+
+    CodexReferralEligibilityRules {
+        requires_explicit_confirmation: payload
+            .get("requires_explicit_confirmation")
+            .and_then(|item| item.as_bool()),
+        rules,
+        time_frame_rules,
+        raw_data: Some(payload),
+    }
+}
+
+fn parse_referral_invite_response(payload: serde_json::Value) -> CodexReferralInviteResponse {
+    let invites = payload
+        .get("invites")
+        .and_then(|item| item.as_array())
+        .map(|items| {
+            items
+                .iter()
+                .filter_map(|item| {
+                    let email = item
+                        .get("email")
+                        .and_then(|value| value.as_str())
+                        .or_else(|| item.as_str())?
+                        .trim();
+                    if email.is_empty() {
+                        return None;
+                    }
+                    Some(CodexReferralInvite {
+                        email: email.to_string(),
+                        raw_data: Some(item.clone()),
+                    })
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+
+    CodexReferralInviteResponse {
+        invites,
+        raw_data: Some(payload),
+    }
+}
+
+async fn fetch_referral_invite_eligibility_once(
+    account: &CodexAccount,
+    referral_key: &str,
+) -> Result<CodexReferralInviteEligibility, String> {
+    let headers = build_codex_api_headers(account, codex_api_account_id(account).as_deref())?;
+    let response = reqwest::Client::new()
+        .get(REFERRAL_INVITE_ELIGIBILITY_URL)
+        .headers(headers)
+        .query(&[("referral_key", referral_key)])
+        .send()
+        .await
+        .map_err(|e| format!("请求 Codex 邀请资格失败: {}", e))?;
+    let status = response.status();
+    let headers = response.headers().clone();
+    let body = response
+        .text()
+        .await
+        .map_err(|e| format!("读取 Codex 邀请资格响应失败: {}", e))?;
+
+    logger::log_info(&format!(
+        "Codex 邀请资格响应: url={}, status={}, request-id={}, x-request-id={}, cf-ray={}, body_len={}",
+        REFERRAL_INVITE_ELIGIBILITY_URL,
+        status,
+        get_header_value(&headers, "request-id"),
+        get_header_value(&headers, "x-request-id"),
+        get_header_value(&headers, "cf-ray"),
+        body.len()
+    ));
+
+    if !status.is_success() {
+        return Err(build_referral_http_error("查询 Codex 邀请资格", status, &body));
+    }
+
+    let payload: serde_json::Value =
+        serde_json::from_str(&body).map_err(|e| format!("Codex 邀请资格 JSON 解析失败: {}", e))?;
+    Ok(parse_referral_invite_eligibility(
+        payload,
+        referral_key.to_string(),
+    ))
+}
+
+pub async fn fetch_referral_invite_eligibility(
+    account_id: &str,
+    referral_key: Option<String>,
+) -> Result<CodexReferralInviteEligibility, String> {
+    let referral_key = normalize_referral_key(referral_key);
+    let mut account =
+        prepare_codex_referral_account(account_id, "查询 Codex 邀请资格前 Token 已过期").await?;
+
+    match fetch_referral_invite_eligibility_once(&account, &referral_key).await {
+        Ok(result) => Ok(result),
+        Err(error) if is_unauthorized_error(&error) => {
+            refresh_account_tokens(&mut account, "Codex 邀请资格接口返回 401").await?;
+            sync_subscription_expiry_from_current_id_token(&mut account);
+            normalize_subscription_retry_state(&mut account);
+            codex_account::save_account(&account)?;
+            fetch_referral_invite_eligibility_once(&account, &referral_key).await
+        }
+        Err(error) => Err(error),
+    }
+}
+
+async fn fetch_referral_eligibility_rules_once(
+    account: &CodexAccount,
+    referral_key: &str,
+) -> Result<CodexReferralEligibilityRules, String> {
+    let headers = build_codex_api_headers(account, codex_api_account_id(account).as_deref())?;
+    let response = reqwest::Client::new()
+        .get(REFERRAL_ELIGIBILITY_RULES_URL)
+        .headers(headers)
+        .query(&[("referral_key", referral_key)])
+        .send()
+        .await
+        .map_err(|e| format!("请求 Codex 邀请规则失败: {}", e))?;
+    let status = response.status();
+    let headers = response.headers().clone();
+    let body = response
+        .text()
+        .await
+        .map_err(|e| format!("读取 Codex 邀请规则响应失败: {}", e))?;
+
+    logger::log_info(&format!(
+        "Codex 邀请规则响应: url={}, status={}, request-id={}, x-request-id={}, cf-ray={}, body_len={}",
+        REFERRAL_ELIGIBILITY_RULES_URL,
+        status,
+        get_header_value(&headers, "request-id"),
+        get_header_value(&headers, "x-request-id"),
+        get_header_value(&headers, "cf-ray"),
+        body.len()
+    ));
+
+    if !status.is_success() {
+        return Err(build_referral_http_error("查询 Codex 邀请规则", status, &body));
+    }
+
+    let payload: serde_json::Value =
+        serde_json::from_str(&body).map_err(|e| format!("Codex 邀请规则 JSON 解析失败: {}", e))?;
+    Ok(parse_referral_eligibility_rules(payload))
+}
+
+pub async fn fetch_referral_eligibility_rules(
+    account_id: &str,
+    referral_key: Option<String>,
+) -> Result<CodexReferralEligibilityRules, String> {
+    let referral_key = normalize_referral_key(referral_key);
+    let mut account =
+        prepare_codex_referral_account(account_id, "查询 Codex 邀请规则前 Token 已过期").await?;
+
+    match fetch_referral_eligibility_rules_once(&account, &referral_key).await {
+        Ok(result) => Ok(result),
+        Err(error) if is_unauthorized_error(&error) => {
+            refresh_account_tokens(&mut account, "Codex 邀请规则接口返回 401").await?;
+            sync_subscription_expiry_from_current_id_token(&mut account);
+            normalize_subscription_retry_state(&mut account);
+            codex_account::save_account(&account)?;
+            fetch_referral_eligibility_rules_once(&account, &referral_key).await
+        }
+        Err(error) => Err(error),
+    }
+}
+
+async fn send_referral_invites_once(
+    account: &CodexAccount,
+    referral_key: &str,
+    emails: &[String],
+) -> Result<CodexReferralInviteResponse, String> {
+    let headers = build_codex_api_headers(account, codex_api_account_id(account).as_deref())?;
+    let response = reqwest::Client::new()
+        .post(REFERRAL_INVITE_URL)
+        .headers(headers)
+        .json(&json!({ "referral_key": referral_key, "emails": emails }))
+        .send()
+        .await
+        .map_err(|e| format!("发送 Codex 邀请失败: {}", e))?;
+    let status = response.status();
+    let headers = response.headers().clone();
+    let body = response
+        .text()
+        .await
+        .map_err(|e| format!("读取 Codex 邀请响应失败: {}", e))?;
+
+    logger::log_info(&format!(
+        "Codex 邀请发送响应: url={}, status={}, request-id={}, x-request-id={}, cf-ray={}, body_len={}",
+        REFERRAL_INVITE_URL,
+        status,
+        get_header_value(&headers, "request-id"),
+        get_header_value(&headers, "x-request-id"),
+        get_header_value(&headers, "cf-ray"),
+        body.len()
+    ));
+
+    if !status.is_success() {
+        return Err(build_referral_http_error("发送 Codex 邀请", status, &body));
+    }
+
+    let payload: serde_json::Value =
+        serde_json::from_str(&body).map_err(|e| format!("Codex 邀请响应 JSON 解析失败: {}", e))?;
+    Ok(parse_referral_invite_response(payload))
+}
+
+pub async fn send_referral_invites(
+    account_id: &str,
+    referral_key: Option<String>,
+    emails: Vec<String>,
+) -> Result<CodexReferralInviteResponse, String> {
+    let referral_key = normalize_referral_key(referral_key);
+    let emails = emails
+        .into_iter()
+        .map(|email| email.trim().to_string())
+        .filter(|email| !email.is_empty())
+        .collect::<Vec<_>>();
+    if emails.is_empty() {
+        return Err("请至少填写一个邀请邮箱".to_string());
+    }
+    if emails.len() > 5 {
+        return Err("一次最多发送 5 个 Codex 邀请邮箱".to_string());
+    }
+
+    let mut account =
+        prepare_codex_referral_account(account_id, "发送 Codex 邀请前 Token 已过期").await?;
+
+    match send_referral_invites_once(&account, &referral_key, &emails).await {
+        Ok(result) => Ok(result),
+        Err(error) if is_unauthorized_error(&error) => {
+            refresh_account_tokens(&mut account, "Codex 邀请接口返回 401").await?;
+            sync_subscription_expiry_from_current_id_token(&mut account);
+            normalize_subscription_retry_state(&mut account);
+            codex_account::save_account(&account)?;
+            send_referral_invites_once(&account, &referral_key, &emails).await
         }
         Err(error) => Err(error),
     }

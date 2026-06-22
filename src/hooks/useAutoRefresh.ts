@@ -14,6 +14,7 @@ import { useWorkbuddyAccountStore } from '../stores/useWorkbuddyAccountStore';
 import { useQoderAccountStore } from '../stores/useQoderAccountStore';
 import { useTraeAccountStore } from '../stores/useTraeAccountStore';
 import { useZedAccountStore } from '../stores/useZedAccountStore';
+import { usePlatformPackageStore } from '../stores/usePlatformPackageStore';
 import { getGitHubCopilotAccountDisplayEmail } from '../types/githubCopilot';
 import { getWindsurfAccountDisplayEmail } from '../types/windsurf';
 import { getKiroAccountDisplayEmail } from '../types/kiro';
@@ -606,8 +607,8 @@ export function useAutoRefresh() {
                 await runProviderCurrentRefresh(fetchCurrentTraeAccountId, refreshTraeToken);
               },
             },
-            {
-              key: 'zed',
+            ...(usePlatformPackageStore.getState().canOpenPlatform('zed') ? [{
+              key: 'zed' as const,
               label: 'Zed',
               intervalMinutes: config.zed_auto_refresh_minutes,
               currentMinutes: resolveCurrentMinutes('zed', currentAccountEmails.zed, currentRefreshMinutesMap),
@@ -619,7 +620,7 @@ export function useAutoRefresh() {
               runCurrentRefresh: async () => {
                 await runProviderCurrentRefresh(fetchCurrentZedAccountId, refreshZedToken);
               },
-            },
+            }] : []),
           ];
 
           const tasks: AutoRefreshSchedulerTask[] = [];
@@ -756,6 +757,7 @@ export function useAutoRefresh() {
     };
 
     window.addEventListener('config-updated', handleConfigUpdate);
+    window.addEventListener('agtools:platform-package-changed', handleConfigUpdate);
 
     return () => {
       destroyedRef.current = true;
@@ -765,6 +767,7 @@ export function useAutoRefresh() {
       }
       stopScheduler();
       window.removeEventListener('config-updated', handleConfigUpdate);
+      window.removeEventListener('agtools:platform-package-changed', handleConfigUpdate);
     };
   }, [setupAutoRefresh, stopScheduler]);
 }

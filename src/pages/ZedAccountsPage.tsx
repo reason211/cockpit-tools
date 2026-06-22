@@ -1634,7 +1634,7 @@ export function ZedAccountsPage() {
                 {t('common.cancel')}
               </button>
               <button className="btn btn-danger" onClick={confirmDelete} disabled={deleting}>
-                {t('common.confirm')}
+                {deleting ? t('common.processing', '处理中...') : t('common.confirm')}
               </button>
             </div>
           </div>

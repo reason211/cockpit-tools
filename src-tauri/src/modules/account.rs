@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::PathBuf;
@@ -31,6 +31,7 @@ const PROFILE_ENV: &str = "COCKPIT_TOOLS_PROFILE";
 
 const ACCOUNTS_INDEX: &str = "accounts.json";
 const ACCOUNTS_DIR: &str = "accounts";
+const ACCOUNT_STORE_PLATFORM: &str = "antigravity";
 
 #[derive(Clone)]
 struct ListAccountsCacheEntry {
@@ -67,6 +68,15 @@ fn write_list_accounts_cache(accounts: &[Account]) {
             accounts: accounts.to_vec(),
         });
     }
+}
+
+fn ensure_account_store_migrated() -> Result<(), String> {
+    let data_dir = get_data_dir()?;
+    crate::modules::account_store::ensure_platform_migrated_from_json(
+        ACCOUNT_STORE_PLATFORM,
+        &data_dir.join(ACCOUNTS_INDEX),
+        &get_accounts_dir()?,
+    )
 }
 /// 获取数据目录路径
 pub fn is_dev_profile() -> bool {
@@ -180,54 +190,38 @@ fn repair_account_index_from_details(reason: &str) -> Result<Option<AccountIndex
 
 /// 加载账号索引
 pub fn load_account_index() -> Result<AccountIndex, String> {
-    let data_dir = get_data_dir()?;
-    let index_path = data_dir.join(ACCOUNTS_INDEX);
-
-    if !index_path.exists() {
-        if let Some(index) = repair_account_index_from_details("索引文件不存在")? {
-            return Ok(index);
-        }
-        return Ok(AccountIndex::new());
-    }
-
-    let content =
-        fs::read_to_string(&index_path).map_err(|e| format!("读取账号索引失败: {}", e))?;
-
-    if content.trim().is_empty() {
-        if let Some(index) = repair_account_index_from_details("索引文件为空")? {
-            return Ok(index);
-        }
-        return Ok(AccountIndex::new());
-    }
-
-    match crate::modules::atomic_write::parse_json_with_auto_restore::<AccountIndex>(
-        &index_path,
-        &content,
-    ) {
-        Ok(index) => {
-            if index.accounts.is_empty() {
-                if let Some(repaired) = repair_account_index_from_details("索引账号列表为空")?
-                {
-                    return Ok(repaired);
-                }
-            }
-            Ok(index)
-        }
-        Err(e) => {
-            if let Some(index) = repair_account_index_from_details("索引文件损坏")? {
-                return Ok(index);
-            }
-            Err(crate::error::file_corrupted_error(
-                ACCOUNTS_INDEX,
-                &index_path.to_string_lossy(),
-                &e.to_string(),
-            ))
-        }
-    }
+    ensure_account_store_migrated()?;
+    let accounts = crate::modules::account_store::list_accounts::<Account>(ACCOUNT_STORE_PLATFORM)?;
+    let current_account_id =
+        crate::modules::account_store::get_current_account_id(ACCOUNT_STORE_PLATFORM)?
+            .filter(|current_id| accounts.iter().any(|account| account.id == *current_id));
+    let mut index = AccountIndex::new();
+    index.accounts = accounts
+        .iter()
+        .map(|account| AccountSummary {
+            id: account.id.clone(),
+            email: account.email.clone(),
+            name: account.name.clone(),
+            created_at: account.created_at,
+            last_used: account.last_used,
+        })
+        .collect();
+    index.current_account_id = current_account_id;
+    Ok(index)
 }
 
 /// 保存账号索引
 pub fn save_account_index(index: &AccountIndex) -> Result<(), String> {
+    crate::modules::account_store::set_current_account_id(
+        ACCOUNT_STORE_PLATFORM,
+        index.current_account_id.as_deref(),
+    )?;
+    let ordered_ids = index
+        .accounts
+        .iter()
+        .map(|summary| summary.id.clone())
+        .collect::<Vec<_>>();
+    crate::modules::account_store::save_account_order(ACCOUNT_STORE_PLATFORM, &ordered_ids)?;
     let data_dir = get_data_dir()?;
     let index_path = data_dir.join(ACCOUNTS_INDEX);
 
@@ -242,6 +236,13 @@ pub fn save_account_index(index: &AccountIndex) -> Result<(), String> {
 
 /// 加载账号数据
 pub fn load_account(account_id: &str) -> Result<Account, String> {
+    ensure_account_store_migrated()?;
+    if let Some(account) =
+        crate::modules::account_store::load_account::<Account>(ACCOUNT_STORE_PLATFORM, account_id)?
+    {
+        return Ok(account);
+    }
+
     let accounts_dir = get_accounts_dir()?;
     let account_path = accounts_dir.join(format!("{}.json", account_id));
 
@@ -258,6 +259,12 @@ pub fn load_account(account_id: &str) -> Result<Account, String> {
 
 /// 保存账号数据
 pub fn save_account(account: &Account) -> Result<(), String> {
+    ensure_account_store_migrated()?;
+    crate::modules::account_store::save_account(
+        ACCOUNT_STORE_PLATFORM,
+        account.id.as_str(),
+        account,
+    )?;
     let accounts_dir = get_accounts_dir()?;
     let account_path = accounts_dir.join(format!("{}.json", account.id));
 
@@ -517,6 +524,7 @@ pub fn delete_account(account_id: &str) -> Result<(), String> {
     }
 
     save_account_index(&index)?;
+    crate::modules::account_store::delete_account(ACCOUNT_STORE_PLATFORM, account_id)?;
 
     let accounts_dir = get_accounts_dir()?;
     let account_path = accounts_dir.join(format!("{}.json", account_id));
@@ -548,6 +556,7 @@ pub fn delete_accounts(account_ids: &[String]) -> Result<(), String> {
         if account_path.exists() {
             let _ = fs::remove_file(&account_path);
         }
+        let _ = crate::modules::account_store::delete_account(ACCOUNT_STORE_PLATFORM, account_id);
     }
 
     save_account_index(&index)
@@ -689,7 +698,7 @@ pub enum QuotaRefreshTrigger {
     Auto,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QuotaAlertPayload {
     pub platform: String,
     pub current_account_id: String,

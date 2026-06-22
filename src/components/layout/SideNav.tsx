@@ -24,6 +24,12 @@ import { getPlatformLabel, renderPlatformIcon } from '../../utils/platformMeta';
 import { useAntigravityRuntimeTarget } from '../../hooks/useAntigravityRuntimeTarget';
 import { setAntigravityRuntimeTargetFromPlatform } from '../../utils/antigravityRuntimeTarget';
 import { useRemoteConfigStore } from '../../stores/useRemoteConfigStore';
+import {
+  canShowPlatformEntryFromPackages,
+  isPlatformPackageInstallRequiredFromPackages,
+  usePlatformPackageStore,
+} from '../../stores/usePlatformPackageStore';
+import { usePlatformPackageInstallPrompt } from '../../hooks/usePlatformPackageInstallPrompt';
 
 interface SideNavProps {
   page: Page;
@@ -35,7 +41,6 @@ interface SideNavProps {
   updateActionState: 'hidden' | 'available' | 'downloading' | 'installing' | 'ready';
   updateProgress: number;
   onUpdateActionClick: () => void;
-  versionJumpAvailable: boolean;
   updateRemindersEnabled: boolean;
   sponsorEntryVisible: boolean;
   onOpenLogViewer: () => void;
@@ -132,7 +137,6 @@ export function SideNav({
   updateActionState,
   updateProgress,
   onUpdateActionClick,
-  versionJumpAvailable,
   updateRemindersEnabled,
   sponsorEntryVisible,
   onOpenLogViewer,
@@ -178,6 +182,25 @@ export function SideNav({
     apiRelayEntryOrder,
   } = usePlatformLayoutStore();
   const remoteHiddenPlatformIds = useRemoteConfigStore((state) => state.hiddenPlatformIds);
+  const platformPackages = usePlatformPackageStore((state) => state.packages);
+  const platformPackagesInitialized = usePlatformPackageStore((state) => state.initialized);
+  const canShowPackagePlatform = useCallback(
+    (platformId: PlatformId) => canShowPlatformEntryFromPackages(
+      platformPackages,
+      platformPackagesInitialized,
+      platformId,
+    ),
+    [platformPackages, platformPackagesInitialized],
+  );
+  const isPackageInstallRequired = useCallback(
+    (platformId: PlatformId) => isPlatformPackageInstallRequiredFromPackages(
+      platformPackages,
+      platformPackagesInitialized,
+      platformId,
+    ),
+    [platformPackages, platformPackagesInitialized],
+  );
+  const { ensurePlatformInstalledAndOpen } = usePlatformPackageInstallPrompt();
 
   const antigravityRuntimeTarget = useAntigravityRuntimeTarget();
   const currentPlatformId = page === 'overview'
@@ -199,10 +222,12 @@ export function SideNav({
     () => new Set(remoteHiddenPlatformIds),
     [remoteHiddenPlatformIds],
   );
-  const isPlatformAvailable = useCallback(
+  const isPlatformEntryVisible = useCallback(
     (platformId: PlatformId) =>
-      isMenuVisiblePlatform(platformId) && !remoteHiddenPlatformSet.has(platformId),
-    [remoteHiddenPlatformSet],
+      isMenuVisiblePlatform(platformId)
+      && !remoteHiddenPlatformSet.has(platformId)
+      && canShowPackagePlatform(platformId),
+    [canShowPackagePlatform, remoteHiddenPlatformSet],
   );
   const apiRelayEntryVisible = sponsorEntryVisible && apiRelaySidebarVisible;
 
@@ -211,7 +236,7 @@ export function SideNav({
       .map<SideNavEntry | null>((entryId) => {
         const platformId = parsePlatformEntryId(entryId);
         if (platformId) {
-          if (!isPlatformAvailable(platformId)) {
+          if (!isPlatformEntryVisible(platformId)) {
             return null;
           }
           return {
@@ -234,7 +259,7 @@ export function SideNav({
           return null;
         }
 
-        const visiblePlatformIds = group.platformIds.filter(isPlatformAvailable);
+        const visiblePlatformIds = group.platformIds.filter(isPlatformEntryVisible);
         if (visiblePlatformIds.length === 0) {
           return null;
         }
@@ -285,7 +310,7 @@ export function SideNav({
     orderedEntryIds,
     platformGroups,
     hiddenSet,
-    isPlatformAvailable,
+    isPlatformEntryVisible,
     antigravityRuntimeTarget,
     t,
   ]);
@@ -307,9 +332,16 @@ export function SideNav({
   );
 
   const navigateToPlatform = useCallback((platformId: PlatformId) => {
-    setAntigravityRuntimeTargetFromPlatform(platformId);
-    setPage(PLATFORM_PAGE_MAP[platformId]);
-  }, [setPage]);
+    const openPlatform = () => {
+      setAntigravityRuntimeTargetFromPlatform(platformId);
+      setPage(PLATFORM_PAGE_MAP[platformId]);
+    };
+    const handled = ensurePlatformInstalledAndOpen(platformId, openPlatform);
+    if (!handled) {
+      setPage('dashboard');
+      return;
+    }
+  }, [ensurePlatformInstalledAndOpen, setPage]);
 
   const navigateToEntry = useCallback((entry: SideNavEntry) => {
     if (entry.kind === 'api-relay') {
@@ -376,15 +408,13 @@ export function SideNav({
   const isMoreActive = !!currentEntryId && !sidebarMenuEntryIdSet.has(currentEntryId);
   const shouldLockActiveOnMore = showMore;
 
-  const shouldShowUpdateActionEntry = updateActionState !== 'hidden'
+  const shouldShowUpdateEntry = updateActionState !== 'hidden'
     && (
       updateRemindersEnabled
       || updateActionState === 'downloading'
       || updateActionState === 'installing'
       || updateActionState === 'ready'
     );
-  const isVersionJumpEntry = !shouldShowUpdateActionEntry && versionJumpAvailable;
-  const shouldShowUpdateEntry = shouldShowUpdateActionEntry || isVersionJumpEntry;
 
   const recalculateClassicAdaptiveScale = useCallback(() => {
     if (!isClassicLayout || typeof window === 'undefined') {
@@ -733,27 +763,11 @@ export function SideNav({
   }, [showMore, isClassicLayout]);
 
   const clampedUpdateProgress = Math.max(0, Math.min(100, Math.round(updateProgress)));
-  const updateVisualState = isVersionJumpEntry
-    ? 'updated'
-    : updateActionState === 'ready'
-      ? 'restart'
-      : updateActionState === 'downloading' || updateActionState === 'installing'
-        ? 'progress'
-        : 'update';
-  const updateEntryTitle = updateActionState === 'downloading'
-    ? t('update_notification.downloading', '下载中...')
-    : updateActionState === 'installing'
-      ? t('nav.quickUpdate.installing', '安装中')
-      : updateActionState === 'ready'
-        ? t('nav.quickUpdate.restart', '重启')
-        : isVersionJumpEntry
-          ? t('update_notification.versionJumpTitle', '更新成功！')
-          : t('nav.quickUpdate.update', '更新');
-  const updateEntryText = isVersionJumpEntry
-    ? t('nav.quickUpdate.update', '更新')
-    : updateActionState === 'ready'
-      ? t('nav.quickUpdate.restart', '重启')
-      : t('nav.quickUpdate.update', '更新');
+  const updateVisualState = updateActionState === 'ready'
+    ? 'restart'
+    : updateActionState === 'downloading' || updateActionState === 'installing'
+      ? 'progress'
+      : 'update';
 
   const morePopoverContent = showMore ? (
     <div
@@ -778,20 +792,30 @@ export function SideNav({
             : isClassicLayout
               ? currentEntryId === entry.id
               : !!currentPlatformId && entry.platformIds.includes(currentPlatformId);
+          const entryInstallRequired = !!entry.targetPlatformId
+            && isPackageInstallRequired(entry.targetPlatformId);
           const showGroupParent =
             !entry.group || !sidebarMenuEntryIdSet.has(entry.id);
           return (
             <div className="side-nav-more-group" key={entry.id}>
               {(isClassicLayout || showGroupParent) && (
                 <button
-                  className={`side-nav-more-item ${active ? 'active' : ''}`}
+                  className={`side-nav-more-item ${active ? 'active' : ''} ${entryInstallRequired ? 'is-package-install-required' : ''}`}
                   onClick={() => {
                     navigateToEntry(entry);
                     setShowMore(false);
                   }}
+                  title={entryInstallRequired
+                    ? `${entry.label} · ${t('platformLayout.packageInstallRequired', '未安装')}`
+                    : entry.label}
                 >
                   <span className="side-nav-more-item-icon">{renderEntryIcon(entry, 16)}</span>
                   <span className="side-nav-more-item-label">{entry.label}</span>
+                  {entryInstallRequired && (
+                    <span className="side-nav-more-item-badge">
+                      {t('platformLayout.packageInstallRequired', '未安装')}
+                    </span>
+                  )}
                   {entry.hidden && (
                     <span className="side-nav-more-item-badge">
                       {t('platformLayout.hiddenBadge', '已隐藏')}
@@ -809,16 +833,20 @@ export function SideNav({
                       platformId,
                       getPlatformLabel(platformId, t),
                     );
+                    const childInstallRequired = isPackageInstallRequired(platformId);
                     return (
                       <button
                         key={`${entry.id}:${platformId}`}
                         className={`${
                           showGroupParent ? 'side-nav-more-sub-item' : 'side-nav-more-item'
-                        } ${currentPlatformId === platformId ? 'active' : ''}`}
+                        } ${currentPlatformId === platformId ? 'active' : ''} ${childInstallRequired ? 'is-package-install-required' : ''}`}
                         onClick={() => {
                           navigateToPlatform(platformId);
                           setShowMore(false);
                         }}
+                        title={childInstallRequired
+                          ? `${label} · ${t('platformLayout.packageInstallRequired', '未安装')}`
+                          : label}
                       >
                         <span className={showGroupParent ? 'side-nav-more-sub-item-icon' : 'side-nav-more-item-icon'}>
                           {icon.iconKind === 'custom' && icon.iconCustomDataUrl ? (
@@ -835,6 +863,11 @@ export function SideNav({
                         <span className={showGroupParent ? 'side-nav-more-sub-item-label' : 'side-nav-more-item-label'}>
                           {label}
                         </span>
+                        {childInstallRequired && !showGroupParent && (
+                          <span className="side-nav-more-item-badge">
+                            {t('platformLayout.packageInstallRequired', '未安装')}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -870,7 +903,15 @@ export function SideNav({
             type="button"
             className={`side-nav-update-btn is-${updateVisualState}`}
             onClick={onUpdateActionClick}
-            title={updateEntryTitle}
+            title={
+              updateActionState === 'downloading'
+                ? t('update_notification.downloading', '下载中...')
+                : updateActionState === 'installing'
+                  ? t('nav.quickUpdate.installing', '安装中')
+                  : updateActionState === 'ready'
+                    ? t('nav.quickUpdate.restart', '重启')
+                    : t('nav.quickUpdate.update', '更新')
+            }
             disabled={updateActionState === 'installing'}
           >
             {updateActionState === 'downloading' ? (
@@ -888,7 +929,9 @@ export function SideNav({
               <span className="side-nav-update-text">{t('nav.quickUpdate.installing', '安装中')}</span>
             ) : (
               <span className="side-nav-update-text">
-                {updateEntryText}
+                {updateActionState === 'ready'
+                  ? t('nav.quickUpdate.restart', '重启')
+                  : t('nav.quickUpdate.update', '更新')}
               </span>
             )}
           </button>
@@ -957,18 +1000,37 @@ export function SideNav({
 
         {sidebarMenuEntries.map((entry) => {
           const active = currentEntryId === entry.id && !shouldLockActiveOnMore;
+          const entryInstallRequired = !!entry.targetPlatformId
+            && isPackageInstallRequired(entry.targetPlatformId);
           return (
             <button
               key={entry.id}
-              className={`nav-item ${active ? 'active' : ''}`}
+              className={`nav-item ${active ? 'active' : ''} ${entryInstallRequired ? 'is-package-install-required' : ''}`}
               onClick={() => navigateToEntry(entry)}
-              title={entry.label}
+              title={entryInstallRequired
+                ? `${entry.label} · ${t('platformLayout.packageInstallRequired', '未安装')}`
+                : entry.label}
             >
               {renderEntryIcon(entry, isClassicLayout ? classicMainIconSize : 20)}
               {showClassicLabels ? (
-                <span className="nav-item-text">{entry.label}</span>
-              ) : !isClassicLayout ? (
-                <span className="tooltip">{entry.label}</span>
+                <span className="nav-item-text">
+                  <span className="nav-item-label-text">{entry.label}</span>
+                  {entryInstallRequired && (
+                    <span className="nav-item-status-text">
+                      {t('platformLayout.packageInstallRequired', '未安装')}
+                    </span>
+                  )}
+                </span>
+              ) : null}
+              {entryInstallRequired && !showClassicLabels && (
+                <span className="nav-item-status-dot" aria-hidden="true" />
+              )}
+              {!isClassicLayout ? (
+                <span className="tooltip">
+                  {entryInstallRequired
+                    ? `${entry.label} · ${t('platformLayout.packageInstallRequired', '未安装')}`
+                    : entry.label}
+                </span>
               ) : null}
             </button>
           );

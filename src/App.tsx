@@ -24,6 +24,7 @@ import { Page } from './types/navigation';
 import { useAutoRefresh } from './hooks/useAutoRefresh';
 import { useEasterEggTrigger } from './hooks/useEasterEggTrigger';
 import { useGlobalModal } from './hooks/useGlobalModal';
+import { usePlatformPackageInstallPrompt } from './hooks/usePlatformPackageInstallPrompt';
 import { changeLanguage, getCurrentLanguage, normalizeLanguage, syncLanguage } from './i18n';
 import { useAccountStore } from './stores/useAccountStore';
 import { useCodexAccountStore } from './stores/useCodexAccountStore';
@@ -41,9 +42,11 @@ import { useWorkbuddyAccountStore } from './stores/useWorkbuddyAccountStore';
 import { useZedAccountStore } from './stores/useZedAccountStore';
 import { useSideNavLayoutStore } from './stores/useSideNavLayoutStore';
 import { usePlatformLayoutStore } from './stores/usePlatformLayoutStore';
+import { usePlatformPackageStore } from './stores/usePlatformPackageStore';
 import { useTopRightAdStore } from './stores/useTopRightAdStore';
 import { useSponsorStore } from './stores/useSponsorStore';
 import { useRemoteConfigStore } from './stores/useRemoteConfigStore';
+import type { PlatformId } from './types/platform';
 import type { UpdateCheckResult, UpdateInfo } from './components/UpdateNotification';
 import type { Update as UpdaterUpdate } from '@tauri-apps/plugin-updater';
 import { parseUpdaterReleaseNotes, resolveUpdaterDownloadUrl } from './utils/updaterReleaseNotes';
@@ -229,6 +232,15 @@ const WAKEUP_FORCE_DISABLE_MIGRATION_KEY = 'agtools.wakeup.migration.force_disab
 const TOP_RIGHT_AD_REFRESH_INTERVAL_MS = 10 * 60 * 1000;
 const REMOTE_CONFIG_FALLBACK_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const EXTERNAL_IMPORT_DEDUPE_WINDOW_MS = 30 * 1000;
+
+function getRuntimeManagedPlatformForPage(page: Page): PlatformId | null {
+  return page === 'zed' ? 'zed' : null;
+}
+
+function canOpenRuntimeManagedPage(page: Page): boolean {
+  const platformId = getRuntimeManagedPlatformForPage(page);
+  return platformId ? usePlatformPackageStore.getState().canOpenPlatform(platformId) : true;
+}
 
 type WakeupHistoryRecord = {
   id: string;
@@ -543,13 +555,13 @@ function MainApp() {
   const [appPathActionError, setAppPathActionError] = useState('');
   const [appPathCodexLaunchOnSwitch, setAppPathCodexLaunchOnSwitch] = useState(true);
   const [appPathCodexLaunchSetting, setAppPathCodexLaunchSetting] = useState(false);
+  const appPathMissingSessionRef = useRef(0);
   const [versionJumpInfo, setVersionJumpInfo] = useState<{
     previous_version: string;
     current_version: string;
     release_notes: string;
     release_notes_zh: string;
   } | null>(null);
-  const [showVersionJumpNotification, setShowVersionJumpNotification] = useState(false);
   const [updateRuntimeInfo, setUpdateRuntimeInfo] = useState<UpdateRuntimeInfo | null>(null);
   const [updateRuntimeInfoLoaded, setUpdateRuntimeInfoLoaded] = useState(false);
   const [updateNotificationInfo, setUpdateNotificationInfo] = useState<UpdateInfo | null>(null);
@@ -580,6 +592,10 @@ function MainApp() {
   const fetchSponsorModuleState = useSponsorStore((state) => state.fetchState);
   const sponsorModuleInitialized = useSponsorStore((state) => state.initialized);
   const fetchRemoteConfigState = useRemoteConfigStore((state) => state.fetchState);
+  const platformPackages = usePlatformPackageStore((state) => state.packages);
+  const platformPackagesInitialized = usePlatformPackageStore((state) => state.initialized);
+  const refreshPlatformPackages = usePlatformPackageStore((state) => state.refresh);
+  const { ensurePlatformInstalledAndOpen } = usePlatformPackageInstallPrompt();
   const sponsorEntryVisible = Boolean(sponsorModuleState.sponsorModule);
   const [topRightAdVisible, setTopRightAdVisible] = useState(true);
   const trayRefreshInFlightRef = useRef(false);
@@ -590,6 +606,36 @@ function MainApp() {
   const openBreakout = useCallback(() => {
     setHasBreakoutSession(true);
     setShowBreakout(true);
+  }, []);
+  const setPageWithRuntimeGate = useCallback((nextPage: Page) => {
+    const platformId = getRuntimeManagedPlatformForPage(nextPage);
+    if (!platformId) {
+      setPage(nextPage);
+      return;
+    }
+    const handled = ensurePlatformInstalledAndOpen(platformId, () => setPage(nextPage));
+    if (!handled) {
+      setPage('dashboard');
+    }
+  }, [ensurePlatformInstalledAndOpen]);
+  const isAppPathMissingSessionActive = useCallback((session: number) => (
+    appPathMissingSessionRef.current === session
+  ), []);
+  const openAppPathMissingModal = useCallback((detail: AppPathMissingDetail) => {
+    appPathMissingSessionRef.current += 1;
+    setAppPathActionError('');
+    setAppPathSetting(false);
+    setAppPathDetecting(false);
+    setAppPathCodexLaunchSetting(false);
+    setAppPathMissing(detail);
+  }, []);
+  const dismissAppPathMissingModal = useCallback(() => {
+    appPathMissingSessionRef.current += 1;
+    setAppPathMissing(null);
+    setAppPathActionError('');
+    setAppPathSetting(false);
+    setAppPathDetecting(false);
+    setAppPathCodexLaunchSetting(false);
   }, []);
   const ensureExternalImportVersionCompatible = useCallback(
     async (payload: ExternalProviderImportPayload): Promise<boolean> => {
@@ -676,12 +722,12 @@ function MainApp() {
       minAppVersion: normalized.minAppVersion ?? null,
       source: normalized.source ?? null,
     });
-    setPage(normalized.page);
+    setPageWithRuntimeGate(normalized.page);
     window.setTimeout(() => {
       console.info('[ExternalImport][App] 分发前端外部导入事件');
       dispatchExternalProviderImportEvent(normalized);
     }, 0);
-  }, [ensureExternalImportVersionCompatible]);
+  }, [ensureExternalImportVersionCompatible, setPageWithRuntimeGate]);
   const handleBreakoutMinimize = useCallback(() => {
     setShowBreakout(false);
   }, []);
@@ -719,6 +765,33 @@ function MainApp() {
   useEffect(() => {
     initWakeupNotificationListener();
   }, []);
+
+  useEffect(() => {
+    void refreshPlatformPackages().catch((error) => {
+      console.error('Failed to refresh platform packages:', error);
+    });
+  }, [refreshPlatformPackages]);
+
+  useEffect(() => {
+    const handlePackageChanged = () => {
+      void refreshPlatformPackages().catch((error) => {
+        console.error('Failed to refresh platform packages after change:', error);
+      });
+    };
+    window.addEventListener('agtools:platform-package-changed', handlePackageChanged);
+    return () => {
+      window.removeEventListener('agtools:platform-package-changed', handlePackageChanged);
+    };
+  }, [refreshPlatformPackages]);
+
+  useEffect(() => {
+    if (!platformPackagesInitialized) {
+      return;
+    }
+    if (!canOpenRuntimeManagedPage(page)) {
+      setPage('dashboard');
+    }
+  }, [page, platformPackages, platformPackagesInitialized]);
 
   useEffect(() => {
     let disposed = false;
@@ -1596,14 +1669,6 @@ function MainApp() {
       );
 
     if (!shouldOpenUpdateDetails) {
-      if (versionJumpInfo) {
-        (
-          window as Window & {
-            __agtoolsVersionJumpModalRequestedAt?: number;
-          }
-        ).__agtoolsVersionJumpModalRequestedAt = performance.now();
-        setShowVersionJumpNotification(true);
-      }
       return;
     }
 
@@ -1612,7 +1677,7 @@ function MainApp() {
     }
 
     openUpdateNotificationDetails();
-  }, [openUpdateNotificationDetails, updateAction.state, updateRemindersEnabled, versionJumpInfo]);
+  }, [openUpdateNotificationDetails, updateAction.state, updateRemindersEnabled]);
 
   const handleSkipUpdateVersion = useCallback(async () => {
     const targetVersion = updateNotificationInfo?.latest_version;
@@ -1690,13 +1755,13 @@ function MainApp() {
     const targetPage = getQuotaAlertTargetPage(platform);
     const targetType = getQuotaAlertQuickSettingsType(platform);
     closeModal();
-    setPage(targetPage);
+    setPageWithRuntimeGate(targetPage);
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
         window.dispatchEvent(new CustomEvent('quick-settings:open', { detail: { type: targetType } }));
       });
     });
-  }, [closeModal]);
+  }, [closeModal, setPageWithRuntimeGate]);
 
   useEffect(() => {
     let cleanup: (() => void) | null = null;
@@ -2275,11 +2340,15 @@ function MainApp() {
         );
         if (jumpInfo) {
           console.log('[App] Version jump detected:', jumpInfo.previous_version, '->', jumpInfo.current_version);
+          (
+            window as Window & {
+              __agtoolsVersionJumpModalRequestedAt?: number;
+            }
+          ).__agtoolsVersionJumpModalRequestedAt = performance.now();
           setVersionJumpInfo(jumpInfo);
-          setShowVersionJumpNotification(false);
           requestAnimationFrame(() => {
             console.log(
-              `[StartupPerf][VersionJump] first frame after collapsed version jump entry in ${(performance.now() - versionJumpStartedAt).toFixed(2)}ms`,
+              `[StartupPerf][VersionJump] first frame after setVersionJumpInfo in ${(performance.now() - versionJumpStartedAt).toFixed(2)}ms`,
             );
           });
         }
@@ -2436,7 +2505,7 @@ function MainApp() {
                       setPage('workbuddy');
                     } else if (platform === 'zed') {
                       await useZedAccountStore.getState().switchAccount(targetAccountId);
-                      setPage('zed');
+                      setPageWithRuntimeGate('zed');
                     } else {
                       await useAccountStore.getState().switchAccount(targetAccountId);
                       setPage('overview');
@@ -2477,7 +2546,7 @@ function MainApp() {
         unlisten();
       }
     };
-  }, [closeModal, openQuickSettingsForPlatform, showModal, t]);
+  }, [closeModal, openQuickSettingsForPlatform, setPageWithRuntimeGate, showModal, t]);
 
   useEffect(() => {
     let unlisten: UnlistenFn | undefined;
@@ -2672,9 +2741,12 @@ function MainApp() {
       try {
         await Promise.all(
           refreshTasks.map(({ command, errorMessage }) =>
-            invoke(command).catch((error) => {
-              console.error(errorMessage, error);
-            }),
+            command === 'refresh_all_zed_tokens'
+              && !usePlatformPackageStore.getState().canOpenPlatform('zed')
+              ? Promise.resolve()
+              : invoke(command).catch((error) => {
+                  console.error(errorMessage, error);
+                }),
           ),
         );
       } finally {
@@ -2710,7 +2782,7 @@ function MainApp() {
       ) {
         return;
       }
-      setAppPathMissing(detail);
+      openAppPathMissingModal(detail);
     };
 
     listen('app:path_missing', (event) => {
@@ -2729,7 +2801,7 @@ function MainApp() {
       }
       window.removeEventListener('app-path-missing', handleWindowEvent as EventListener);
     };
-  }, []);
+  }, [openAppPathMissingModal]);
 
   useEffect(() => {
     let active = true;
@@ -2793,14 +2865,15 @@ function MainApp() {
   }, [appPathMissing]);
 
   const handlePickMissingAppPath = async () => {
-    if (appPathSetting) return;
+    if (!appPathMissing || appPathSetting) return;
+    const session = appPathMissingSessionRef.current;
     try {
       const selected = await open({
         multiple: false,
         directory: false,
       });
       const path = Array.isArray(selected) ? selected[0] : selected;
-      if (path) {
+      if (path && isAppPathMissingSessionActive(session)) {
         setAppPathActionError('');
         setAppPathDraft(path);
       }
@@ -2810,14 +2883,15 @@ function MainApp() {
   };
 
   const handlePickMissingClaudeScanRoot = async () => {
-    if (appPathSetting || appPathDetecting) return;
+    if (!appPathMissing || appPathSetting || appPathDetecting) return;
+    const session = appPathMissingSessionRef.current;
     try {
       const selected = await open({
         multiple: false,
         directory: true,
       });
       const path = Array.isArray(selected) ? selected[0] : selected;
-      if (path) {
+      if (path && isAppPathMissingSessionActive(session)) {
         setAppPathActionError('');
         setAppPathScanRootsDraft(path);
       }
@@ -2834,11 +2908,13 @@ function MainApp() {
 
   const handleSaveMissingAppPath = async () => {
     if (!appPathMissing || appPathSetting || appPathDetecting) return;
+    const missing = appPathMissing;
+    const session = appPathMissingSessionRef.current;
     const path = appPathDraft.trim();
     if (!path) return;
     if (
-      appPathMissing.app === 'claude' &&
-      appPathMissing.retry?.kind === 'instance' &&
+      missing.app === 'claude' &&
+      missing.retry?.kind === 'instance' &&
       isClaudeWindowsAppLaunchTarget(path)
     ) {
       setAppPathActionError(
@@ -2852,34 +2928,41 @@ function MainApp() {
     setAppPathSetting(true);
     setAppPathActionError('');
     try {
-      const app = appPathMissing.app;
-      const retry = appPathMissing.retry;
+      const app = missing.app;
+      const retry = missing.retry;
       const antigravityInstanceStartCommand =
         app === 'antigravity' && retry?.runtimeTarget === 'antigravity'
           ? 'antigravity_legacy_start_instance'
           : 'start_instance';
       await invoke('set_app_path', { app, path });
+      if (!isAppPathMissingSessionActive(session)) return;
       if (app === 'claude') {
         await invoke('set_claude_app_scan_roots', {
           scanRoots: appPathScanRootsDraft.trim(),
         });
+        if (!isAppPathMissingSessionActive(session)) return;
       }
       if (retry?.kind === 'switchAccount' && retry.accountId && app === 'zed') {
         await useZedAccountStore.getState().switchAccount(retry.accountId);
-        setPage('zed');
+        if (!isAppPathMissingSessionActive(session)) return;
+        setPageWithRuntimeGate('zed');
       } else if (retry?.kind === 'switchAccount' && retry.accountId && app === 'claude') {
         await useClaudeAccountStore.getState().switchAccount(retry.accountId);
+        if (!isAppPathMissingSessionActive(session)) return;
         await useClaudeAccountStore.getState().fetchCurrentAccountId();
+        if (!isAppPathMissingSessionActive(session)) return;
         setPage('claude');
       } else if (retry?.kind === 'switchAccount' && retry.accountId) {
         await invoke('switch_account', {
           accountId: retry.accountId,
           runtimeTarget: retry.runtimeTarget,
         });
+        if (!isAppPathMissingSessionActive(session)) return;
         await Promise.allSettled([
           useAccountStore.getState().fetchAccounts(),
           useAccountStore.getState().fetchCurrentAccount(),
         ]);
+        if (!isAppPathMissingSessionActive(session)) return;
       } else if (retry?.kind === 'instance' && retry.instanceId) {
         if (app === 'codex') {
           await invoke('codex_start_instance', { instanceId: retry.instanceId });
@@ -2906,6 +2989,7 @@ function MainApp() {
         } else {
           await invoke(antigravityInstanceStartCommand, { instanceId: retry.instanceId });
         }
+        if (!isAppPathMissingSessionActive(session)) return;
       } else {
         if (app === 'codex') {
           await invoke('codex_start_instance', { instanceId: '__default__' });
@@ -2932,10 +3016,11 @@ function MainApp() {
         } else {
           await invoke(antigravityInstanceStartCommand, { instanceId: '__default__' });
         }
+        if (!isAppPathMissingSessionActive(session)) return;
       }
-      setAppPathMissing(null);
-      setAppPathSetting(false);
+      dismissAppPathMissingModal();
     } catch (error) {
+      if (!isAppPathMissingSessionActive(session)) return;
       console.error('设置应用路径失败:', error);
       setAppPathActionError(String(error));
       setAppPathSetting(false);
@@ -2944,7 +3029,9 @@ function MainApp() {
 
   const handleResetMissingAppPath = async () => {
     if (!appPathMissing || appPathSetting || appPathDetecting) return;
-    if (appPathMissing.app === 'claude') {
+    const missing = appPathMissing;
+    const session = appPathMissingSessionRef.current;
+    if (missing.app === 'claude') {
       setAppPathDetecting(true);
       setAppPathActionError('');
       try {
@@ -2954,8 +3041,9 @@ function MainApp() {
             scanRoots: appPathScanRootsDraft.trim() || null,
           },
         );
+        if (!isAppPathMissingSessionActive(session)) return;
         setClaudeLaunchCandidates(candidates);
-        if (appPathMissing.retry?.kind === 'instance') {
+        if (missing.retry?.kind === 'instance') {
           const exeCandidate = candidates.find((candidate) => candidate.supports_multi_instance);
           if (exeCandidate) {
             setAppPathDraft(exeCandidate.target);
@@ -2974,50 +3062,64 @@ function MainApp() {
           );
         }
       } catch (error) {
+        if (!isAppPathMissingSessionActive(session)) return;
         console.error('扫描 Claude Desktop 启动目标失败:', error);
         setAppPathActionError(String(error));
       } finally {
-        setAppPathDetecting(false);
+        if (isAppPathMissingSessionActive(session)) {
+          setAppPathDetecting(false);
+        }
       }
       return;
     }
     setAppPathDetecting(true);
+    setAppPathActionError('');
     try {
       const detectApp =
-        appPathMissing.app === 'antigravity' && appPathMissing.retry?.runtimeTarget === 'antigravity'
+        missing.app === 'antigravity' && missing.retry?.runtimeTarget === 'antigravity'
           ? 'antigravity_legacy'
-          : appPathMissing.app === 'antigravity' && appPathMissing.retry?.runtimeTarget === 'antigravity_ide'
+          : missing.app === 'antigravity' && missing.retry?.runtimeTarget === 'antigravity_ide'
             ? 'antigravity_ide'
-            : appPathMissing.app;
+            : missing.app;
       const detected = await invoke<string | null>('detect_app_path', {
         app: detectApp,
         force: true,
       });
+      if (!isAppPathMissingSessionActive(session)) return;
       setAppPathActionError('');
       setAppPathDraft((detected || '').trim());
     } catch (error) {
+      if (!isAppPathMissingSessionActive(session)) return;
       console.error('自动探测应用路径失败:', error);
+      setAppPathActionError(String(error));
     } finally {
-      setAppPathDetecting(false);
+      if (isAppPathMissingSessionActive(session)) {
+        setAppPathDetecting(false);
+      }
     }
   };
 
   const handleToggleCodexLaunchInMissingPath = async (enabled: boolean) => {
     if (!appPathMissing || appPathMissing.app !== 'codex') return;
     if (appPathSetting || appPathDetecting || appPathCodexLaunchSetting) return;
+    const session = appPathMissingSessionRef.current;
     setAppPathCodexLaunchSetting(true);
     setAppPathActionError('');
     try {
       await invoke('set_codex_launch_on_switch', { enabled });
+      if (!isAppPathMissingSessionActive(session)) return;
       setAppPathCodexLaunchOnSwitch(enabled);
       if (!enabled) {
-        setAppPathMissing(null);
+        dismissAppPathMissingModal();
       }
     } catch (error) {
+      if (!isAppPathMissingSessionActive(session)) return;
       console.error('更新 Codex 自动启动配置失败:', error);
       setAppPathActionError(String(error));
     } finally {
-      setAppPathCodexLaunchSetting(false);
+      if (isAppPathMissingSessionActive(session)) {
+        setAppPathCodexLaunchSetting(false);
+      }
     }
   };
 
@@ -3073,7 +3175,7 @@ function MainApp() {
             case 'zed':
             case 'manual':
             case 'settings':
-              setPage(target as Page);
+              setPageWithRuntimeGate(target as Page);
               break;
             default:
               break;
@@ -3085,7 +3187,7 @@ function MainApp() {
         unlisten();
       }
     };
-  }, []);
+  }, [setPageWithRuntimeGate]);
 
   useEffect(() => {
     let unlisten: UnlistenFn | undefined;
@@ -3137,14 +3239,14 @@ function MainApp() {
     const handleRequestNavigate = (e: Event) => {
       const custom = e as CustomEvent<Page>;
       if (custom.detail) {
-        setPage(custom.detail);
+        setPageWithRuntimeGate(custom.detail);
       }
     };
     window.addEventListener('app-request-navigate', handleRequestNavigate as EventListener);
     return () => {
       window.removeEventListener('app-request-navigate', handleRequestNavigate as EventListener);
     };
-  }, []);
+  }, [setPageWithRuntimeGate]);
 
   useEffect(() => {
     const handleOpenPlatformLayout = (e: Event) => {
@@ -3190,6 +3292,8 @@ function MainApp() {
                 ? 'Qoder'
               : appPathMissing.app === 'trae'
                 ? 'Trae'
+              : appPathMissing.app === 'zed'
+                ? 'Zed'
               : appPathMissing.app === 'antigravity' && appPathMissingRuntimeTarget === 'antigravity'
                 ? 'Antigravity'
                 : 'Antigravity IDE'
@@ -3216,6 +3320,8 @@ function MainApp() {
                 ? t('quickSettings.qoder.appPath', 'Qoder 路径')
               : appPathMissing.app === 'trae'
                 ? t('quickSettings.trae.appPath', 'Trae 路径')
+              : appPathMissing.app === 'zed'
+                ? t('quickSettings.zed.appPath', 'Zed 路径')
               : t('quickSettings.antigravity.appPath', '启动路径')
     : t('quickSettings.antigravity.appPath', '启动路径');
   const appPathMissingBusy = appPathSetting || appPathDetecting || appPathCodexLaunchSetting;
@@ -3255,15 +3361,10 @@ function MainApp() {
       {/* 版本跳跃通知（更新后首次启动） */}
       {versionJumpInfo && (
         <Suspense fallback={null}>
-          {showVersionJumpNotification && (
-            <VersionJumpNotification
-              info={versionJumpInfo}
-              onClose={() => {
-                setShowVersionJumpNotification(false);
-                setVersionJumpInfo(null);
-              }}
-            />
-          )}
+          <VersionJumpNotification
+            info={versionJumpInfo}
+            onClose={() => setVersionJumpInfo(null)}
+          />
         </Suspense>
       )}
       <GlobalModal />
@@ -3292,9 +3393,8 @@ function MainApp() {
               <span className="qs-title">{t('appPath.missing.title', '未找到应用程序路径')}</span>
               <button
                 className="qs-close"
-                onClick={() => setAppPathMissing(null)}
+                onClick={dismissAppPathMissingModal}
                 aria-label={t('common.close', '关闭')}
-                disabled={appPathMissingBusy}
               >
                 <X size={16} />
               </button>
@@ -3429,6 +3529,8 @@ function MainApp() {
                                       ? t('settings.general.qoderPathReset', '重置默认')
                                     : appPathMissing.app === 'trae'
                                       ? t('settings.general.traePathReset', '重置默认')
+                                    : appPathMissing.app === 'zed'
+                                      ? t('settings.general.zedPathReset', '重置默认')
                                     : t('settings.general.codexPathReset', '重置默认')
                           )
                       }
@@ -3494,8 +3596,7 @@ function MainApp() {
             <div className="modal-footer">
               <button
                 className="btn btn-secondary"
-                onClick={() => setAppPathMissing(null)}
-                disabled={appPathMissingBusy}
+                onClick={dismissAppPathMissingModal}
               >
                 {t('common.cancel', '取消')}
               </button>
@@ -3529,7 +3630,6 @@ function MainApp() {
         updateActionState={updateAction.state}
         updateProgress={updateAction.progress}
         onUpdateActionClick={handleQuickUpdateActionClick}
-        versionJumpAvailable={Boolean(versionJumpInfo)}
         updateRemindersEnabled={updateRemindersEnabled}
         sponsorEntryVisible={sponsorEntryVisible}
         onOpenLogViewer={() => setShowLogViewer(true)}

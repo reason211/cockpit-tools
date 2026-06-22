@@ -272,6 +272,13 @@ impl PlatformId {
             Self::Workbuddy => "workbuddy",
         }
     }
+
+    pub(crate) fn runtime_ready(self) -> bool {
+        match self {
+            Self::Zed => crate::modules::platform_package::is_platform_package_runtime_ready("zed"),
+            _ => true,
+        }
+    }
 }
 
 /// 菜单项 ID
@@ -748,25 +755,36 @@ fn build_platform_details_submenu<R: Runtime>(
     platform: PlatformId,
     lang: &str,
 ) -> Result<Submenu<R>, tauri::Error> {
-    let info = get_account_display_info(platform, lang);
     let mut items: Vec<MenuItem<R>> = Vec::new();
 
-    items.push(MenuItem::with_id(
-        app,
-        format!("platform:{}:account", platform.as_str()),
-        info.account,
-        true,
-        None::<&str>,
-    )?);
-
-    for (idx, line) in info.quota_lines.iter().enumerate() {
+    if !platform.runtime_ready() {
         items.push(MenuItem::with_id(
             app,
-            format!("platform:{}:quota:{}", platform.as_str(), idx),
-            line,
+            format!("platform:{}:install", platform.as_str()),
+            crate::modules::i18n::translate(lang, "platformLayout.packageInstallAndOpen", &[]),
             true,
             None::<&str>,
         )?);
+    } else {
+        let info = get_account_display_info(platform, lang);
+
+        items.push(MenuItem::with_id(
+            app,
+            format!("platform:{}:account", platform.as_str()),
+            info.account,
+            true,
+            None::<&str>,
+        )?);
+
+        for (idx, line) in info.quota_lines.iter().enumerate() {
+            items.push(MenuItem::with_id(
+                app,
+                format!("platform:{}:quota:{}", platform.as_str(), idx),
+                line,
+                true,
+                None::<&str>,
+            )?);
+        }
     }
 
     let refs: Vec<&dyn IsMenuItem<R>> = items
@@ -1489,8 +1507,18 @@ fn build_workbuddy_display_info(lang: &str) -> AccountDisplayInfo {
 
 #[cfg(not(target_os = "macos"))]
 fn build_zed_display_info(lang: &str) -> AccountDisplayInfo {
-    let accounts = crate::modules::zed_account::list_accounts();
-    let current_id = crate::modules::zed_account::resolve_current_account_id();
+    let accounts =
+        crate::modules::platform_adapter::call_zed::<Vec<crate::models::zed::ZedAccount>>(
+            "accounts.list",
+            serde_json::json!({}),
+        )
+        .unwrap_or_default();
+    let current_id = crate::modules::platform_adapter::call_zed::<Option<String>>(
+        "accounts.current",
+        serde_json::json!({}),
+    )
+    .ok()
+    .flatten();
     let account = current_id
         .as_deref()
         .and_then(|id| accounts.iter().find(|item| item.id == id))

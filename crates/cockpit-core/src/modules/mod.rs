@@ -1,5 +1,6 @@
 pub mod account;
 pub mod account_index_repair;
+pub mod account_store;
 pub mod announcement;
 pub mod antigravity_switch_history;
 pub mod atomic_write;

@@ -58,6 +58,7 @@ const CODEX_AUTO_SWITCH_ACCOUNT_SCOPE_ALL: &str = "all_accounts";
 const CODEX_AUTO_SWITCH_ACCOUNT_SCOPE_SELECTED: &str = "selected_accounts";
 const DISK_FULL_ERROR_CODE: &str = "DISK_FULL";
 const CODEX_TOKEN_SOURCE_MANAGED: &str = "managed";
+const ACCOUNT_STORE_PLATFORM: &str = "codex";
 const CODEX_MISSING_REFRESH_TOKEN_REAUTH_REASON: &str =
     "Codex 登录授权缺少 refresh_token，无法自动续期；当前 access_token 已不可用，请重新登录。";
 const CODEX_PROACTIVE_REFRESH_INTERVAL_SECONDS: i64 = 8 * 24 * 60 * 60;
@@ -1185,6 +1186,58 @@ fn get_accounts_dir() -> PathBuf {
     accounts_dir
 }
 
+fn ensure_account_store_migrated() -> Result<(), String> {
+    crate::modules::account_store::ensure_platform_migrated_from_json(
+        ACCOUNT_STORE_PLATFORM,
+        &get_accounts_storage_path(),
+        &get_accounts_dir(),
+    )
+}
+
+fn codex_index_from_accounts(accounts: &[CodexAccount]) -> CodexAccountIndex {
+    let current_account_id =
+        crate::modules::account_store::get_current_account_id(ACCOUNT_STORE_PLATFORM)
+            .ok()
+            .flatten()
+            .filter(|current_id| accounts.iter().any(|account| account.id == *current_id));
+    let mut index = CodexAccountIndex::new();
+    index.accounts = accounts
+        .iter()
+        .map(|account| CodexAccountSummary {
+            id: account.id.clone(),
+            email: account.email.clone(),
+            plan_type: account.plan_type.clone(),
+            subscription_active_until: account.subscription_active_until.clone(),
+            created_at: account.created_at,
+            last_used: account.last_used,
+        })
+        .collect();
+    index.current_account_id = current_account_id;
+    index
+}
+
+fn load_account_index_from_store() -> Result<CodexAccountIndex, String> {
+    ensure_account_store_migrated()?;
+    let values =
+        crate::modules::account_store::list_accounts::<serde_json::Value>(ACCOUNT_STORE_PLATFORM)?;
+    let mut accounts = Vec::new();
+    for value in values {
+        let Some(account_id) = value
+            .get("id")
+            .and_then(|item| item.as_str())
+            .map(str::trim)
+            .filter(|item| !item.is_empty())
+            .map(ToString::to_string)
+        else {
+            continue;
+        };
+        if let Some(account) = parse_codex_account_compat(value, &account_id, None)? {
+            accounts.push(account);
+        }
+    }
+    Ok(codex_index_from_accounts(&accounts))
+}
+
 /// 解析 JWT Token 的 payload
 pub fn decode_jwt_payload(token: &str) -> Result<CodexJwtPayload, String> {
     let parts: Vec<&str> = token.split('.').collect();
@@ -1661,6 +1714,14 @@ pub fn extract_user_info(
 
 /// 读取账号索引
 pub fn load_account_index() -> CodexAccountIndex {
+    match load_account_index_from_store() {
+        Ok(index) => return index,
+        Err(error) => logger::log_warn(&format!(
+            "[Codex Account][Store] 从 SQLite 读取账号索引失败，回退 JSON: {}",
+            error
+        )),
+    }
+
     let path = get_accounts_storage_path();
     if !path.exists() {
         return repair_account_index_from_details("索引文件不存在")
@@ -1690,6 +1751,14 @@ pub fn load_account_index() -> CodexAccountIndex {
 }
 
 fn load_account_index_checked() -> Result<CodexAccountIndex, String> {
+    match load_account_index_from_store() {
+        Ok(index) => return Ok(index),
+        Err(error) => logger::log_warn(&format!(
+            "[Codex Account][Store] 从 SQLite 读取账号索引失败，继续检查 JSON: {}",
+            error
+        )),
+    }
+
     let path = get_accounts_storage_path();
     if !path.exists() {
         logger::log_warn(&format!(
@@ -1786,6 +1855,16 @@ fn load_account_index_checked() -> Result<CodexAccountIndex, String> {
 
 /// 保存账号索引
 pub fn save_account_index(index: &CodexAccountIndex) -> Result<(), String> {
+    crate::modules::account_store::set_current_account_id(
+        ACCOUNT_STORE_PLATFORM,
+        index.current_account_id.as_deref(),
+    )?;
+    let ordered_ids = index
+        .accounts
+        .iter()
+        .map(|summary| summary.id.clone())
+        .collect::<Vec<_>>();
+    crate::modules::account_store::save_account_order(ACCOUNT_STORE_PLATFORM, &ordered_ids)?;
     let path = get_accounts_storage_path();
     let content = serde_json::to_string_pretty(index).map_err(|e| format!("序列化失败: {}", e))?;
     write_string_atomic(&path, &content).map_err(|e| format!("写入账号索引失败: {}", e))?;
@@ -2134,6 +2213,30 @@ fn load_account_with_summary(
     account_id: &str,
     summary: Option<&CodexAccountSummary>,
 ) -> Result<Option<CodexAccount>, String> {
+    if let Err(error) = ensure_account_store_migrated() {
+        logger::log_warn(&format!(
+            "[Codex Account][Store] 账号数据库迁移检查失败，回退文件读取: account_id={}, error={}",
+            account_id, error
+        ));
+    } else if let Some(value) = crate::modules::account_store::load_account::<serde_json::Value>(
+        ACCOUNT_STORE_PLATFORM,
+        account_id,
+    )? {
+        let mut account = parse_codex_account_compat(value.clone(), account_id, summary)?
+            .ok_or_else(|| format!("账号数据库记录缺少可识别凭据: {}", account_id))?;
+        let migrated_bound_oauth =
+            migrate_bound_oauth_use_local_gateway_if_missing(&mut account, &value);
+        if migrate_apikey_fun_wire_api(&mut account) || migrated_bound_oauth {
+            if let Err(error) = save_account(&account) {
+                logger::log_warn(&format!(
+                    "[Codex Account][Store] 账号数据库记录迁移写回失败: account_id={}, error={}",
+                    account.id, error
+                ));
+            }
+        }
+        return Ok(Some(account));
+    }
+
     let path = get_accounts_dir().join(format!("{}.json", account_id));
     if !path.exists() {
         return Ok(None);
@@ -2177,6 +2280,12 @@ fn load_account_with_summary(
 
 /// 保存单个账号详情
 pub fn save_account(account: &CodexAccount) -> Result<(), String> {
+    ensure_account_store_migrated()?;
+    crate::modules::account_store::save_account(
+        ACCOUNT_STORE_PLATFORM,
+        account.id.as_str(),
+        account,
+    )?;
     let path = get_accounts_dir().join(format!("{}.json", &account.id));
     let content =
         serde_json::to_string_pretty(account).map_err(|e| format!("序列化失败: {}", e))?;
@@ -2186,6 +2295,7 @@ pub fn save_account(account: &CodexAccount) -> Result<(), String> {
 
 /// 删除单个账号
 pub fn delete_account_file(account_id: &str) -> Result<(), String> {
+    crate::modules::account_store::delete_account(ACCOUNT_STORE_PLATFORM, account_id)?;
     let path = get_accounts_dir().join(format!("{}.json", account_id));
     if path.exists() {
         fs::remove_file(&path).map_err(|e| format!("删除文件失败: {}", e))?;

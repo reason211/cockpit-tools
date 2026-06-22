@@ -17,6 +17,15 @@ import { useZedAccountStore } from '../stores/useZedAccountStore';
 import { useSponsorStore } from '../stores/useSponsorStore';
 import { useRemoteConfigStore } from '../stores/useRemoteConfigStore';
 import {
+  canOpenPlatformFromPackages,
+  canShowPlatformEntryFromPackages,
+  formatPlatformPackageSize,
+  getPlatformPackageFromPackages,
+  isPlatformPackageInstallRequiredFromPackages,
+  usePlatformPackageStore,
+} from '../stores/usePlatformPackageStore';
+import { usePlatformPackageInstallPrompt } from '../hooks/usePlatformPackageInstallPrompt';
+import {
   API_RELAY_LAYOUT_ENTRY_ID,
   ApiRelayLayoutEntryId,
   parseGroupEntryId,
@@ -27,7 +36,7 @@ import {
   usePlatformLayoutStore,
 } from '../stores/usePlatformLayoutStore';
 import { Page } from '../types/navigation';
-import { Users, CheckCircle2, Sparkles, RotateCw, Play, Github, Tag, ChevronDown, EyeOff } from 'lucide-react';
+import { Users, CheckCircle2, Sparkles, RotateCw, Play, Github, Tag, ChevronDown, EyeOff, Download } from 'lucide-react';
 import { TagEditModal } from '../components/TagEditModal';
 import { Account } from '../types/account';
 import {
@@ -333,10 +342,44 @@ export function DashboardPage({
     [privacyModeEnabled],
   );
   const [agDisplayGroups, setAgDisplayGroups] = React.useState<DisplayGroup[]>([]);
+  const platformPackages = usePlatformPackageStore((state) => state.packages);
+  const platformPackagesInitialized = usePlatformPackageStore((state) => state.initialized);
+  const { ensurePlatformInstalledAndOpen } = usePlatformPackageInstallPrompt();
+  const canOpenPackagePlatform = useCallback(
+    (platformId: PlatformId) => canOpenPlatformFromPackages(
+      platformPackages,
+      platformPackagesInitialized,
+      platformId,
+    ),
+    [platformPackages, platformPackagesInitialized],
+  );
+  const canShowPackagePlatform = useCallback(
+    (platformId: PlatformId) => canShowPlatformEntryFromPackages(
+      platformPackages,
+      platformPackagesInitialized,
+      platformId,
+    ),
+    [platformPackages, platformPackagesInitialized],
+  );
+  const isPackageInstallRequired = useCallback(
+    (platformId: PlatformId) => isPlatformPackageInstallRequiredFromPackages(
+      platformPackages,
+      platformPackagesInitialized,
+      platformId,
+    ),
+    [platformPackages, platformPackagesInitialized],
+  );
   const navigateToPlatform = useCallback((platformId: PlatformId) => {
-    setAntigravityRuntimeTargetFromPlatform(platformId);
-    onNavigate(PLATFORM_PAGE_MAP[platformId]);
-  }, [onNavigate]);
+    const openPlatform = () => {
+      setAntigravityRuntimeTargetFromPlatform(platformId);
+      onNavigate(PLATFORM_PAGE_MAP[platformId]);
+    };
+    const handled = ensurePlatformInstalledAndOpen(platformId, openPlatform);
+    if (!handled) {
+      onNavigate('dashboard');
+      return;
+    }
+  }, [ensurePlatformInstalledAndOpen, onNavigate]);
 
   React.useEffect(() => {
     const syncPrivacyMode = () => {
@@ -467,6 +510,12 @@ export function DashboardPage({
     fetchAccounts: fetchZedAccounts,
     switchAccount: switchZedAccount,
   } = useZedAccountStore();
+  const zedRuntimeReady = canOpenPackagePlatform('zed');
+  const activeZedAccounts = useMemo(
+    () => (zedRuntimeReady ? zedAccounts : []),
+    [zedAccounts, zedRuntimeReady],
+  );
+  const activeZedCurrentId = zedRuntimeReady ? zedCurrentId : null;
 
   const agCurrentId = agCurrent?.id;
   const codexCurrentId = codexCurrent?.id;
@@ -509,7 +558,12 @@ export function DashboardPage({
       fetchCodexAccounts,
       fetchCodexCurrent,
       fetchClaudeAccounts,
-      fetchZedAccounts,
+      async () => {
+        if (!usePlatformPackageStore.getState().canOpenPlatform('zed')) {
+          return undefined;
+        }
+        return fetchZedAccounts();
+      },
       fetchGitHubCopilotAccounts,
       fetchWindsurfAccounts,
       fetchKiroAccounts,
@@ -572,7 +626,7 @@ export function DashboardPage({
         agAccounts.length +
         codexAccounts.length +
         claudeAccounts.length +
-        zedAccounts.length +
+        activeZedAccounts.length +
         githubCopilotAccounts.length +
         windsurfAccounts.length +
         kiroAccounts.length +
@@ -586,7 +640,7 @@ export function DashboardPage({
       antigravity: agAccounts.length,
       codex: codexAccounts.length,
       claude: claudeAccounts.length,
-      zed: zedAccounts.length,
+      zed: activeZedAccounts.length,
       githubCopilot: githubCopilotAccounts.length,
       windsurf: windsurfAccounts.length,
       kiro: kiroAccounts.length,
@@ -598,7 +652,7 @@ export function DashboardPage({
       trae: traeAccounts.length,
       workbuddy: workbuddyAccounts.length,
     };
-  }, [agAccounts, codexAccounts, claudeAccounts, zedAccounts, githubCopilotAccounts, windsurfAccounts, kiroAccounts, cursorAccounts, geminiAccounts, codebuddyAccounts, codebuddyCnAccounts, qoderAccounts, traeAccounts, workbuddyAccounts]);
+  }, [agAccounts, codexAccounts, claudeAccounts, activeZedAccounts, githubCopilotAccounts, windsurfAccounts, kiroAccounts, cursorAccounts, geminiAccounts, codebuddyAccounts, codebuddyCnAccounts, qoderAccounts, traeAccounts, workbuddyAccounts]);
 
   const dashboardAvailableTags = useMemo(() => {
     const tagSet = new Set<string>();
@@ -606,7 +660,7 @@ export function DashboardPage({
       ...agAccounts,
       ...codexAccounts,
       ...claudeAccounts,
-      ...zedAccounts,
+      ...activeZedAccounts,
       ...githubCopilotAccounts,
       ...windsurfAccounts,
       ...kiroAccounts,
@@ -626,7 +680,7 @@ export function DashboardPage({
       }
     }
     return Array.from(tagSet).sort((a, b) => a.localeCompare(b));
-  }, [agAccounts, codexAccounts, claudeAccounts, zedAccounts, githubCopilotAccounts, windsurfAccounts, kiroAccounts, cursorAccounts, geminiAccounts, codebuddyAccounts, codebuddyCnAccounts, qoderAccounts, traeAccounts, workbuddyAccounts]);
+  }, [agAccounts, codexAccounts, claudeAccounts, activeZedAccounts, githubCopilotAccounts, windsurfAccounts, kiroAccounts, cursorAccounts, geminiAccounts, codebuddyAccounts, codebuddyCnAccounts, qoderAccounts, traeAccounts, workbuddyAccounts]);
 
 
   // Refresh States
@@ -883,6 +937,7 @@ export function DashboardPage({
 
   const handleRefreshZedCard = async () => {
     if (cardRefreshing.zed) return;
+    if (!usePlatformPackageStore.getState().canOpenPlatform('zed')) return;
     setCardRefreshing((prev) => ({ ...prev, zed: true }));
     const idsToRefresh = [zedCurrent?.id, zedRecommended?.id].filter(Boolean) as string[];
     try {
@@ -1487,8 +1542,8 @@ export function DashboardPage({
   );
 
   const zedCurrent = useMemo(
-    () => resolveDashboardCurrentAccount(zedAccounts, zedCurrentId),
-    [zedAccounts, zedCurrentId],
+    () => resolveDashboardCurrentAccount(activeZedAccounts, activeZedCurrentId),
+    [activeZedAccounts, activeZedCurrentId],
   );
 
   const githubCopilotRecommended = useMemo(() => {
@@ -1823,9 +1878,9 @@ export function DashboardPage({
   }, [workbuddyAccounts, workbuddyCurrent?.id]);
 
   const zedRecommended = useMemo(() => {
-    if (zedAccounts.length <= 1) return null;
+    if (activeZedAccounts.length <= 1) return null;
     const currentId = zedCurrent?.id;
-    const others = zedAccounts.filter((account) => account.id !== currentId);
+    const others = activeZedAccounts.filter((account) => account.id !== currentId);
     if (others.length === 0) return null;
 
     return others.reduce((best, candidate) => {
@@ -1838,7 +1893,7 @@ export function DashboardPage({
       }
       return candidateScore.freshness > bestScore.freshness ? candidate : best;
     });
-  }, [zedAccounts, zedCurrent?.id]);
+  }, [activeZedAccounts, zedCurrent?.id]);
 
   // Render Helpers
   const formatQuotaValue = (value: number) => {
@@ -2423,7 +2478,7 @@ export function DashboardPage({
     const result = new Map<PlatformLayoutEntryId, number>();
     for (const entryId of visibleEntryOrder) {
       const platformIds = resolveEntryPlatformIds(entryId, platformGroups).filter(
-        (platformId) => !remoteHiddenPlatformSet.has(platformId),
+        (platformId) => !remoteHiddenPlatformSet.has(platformId) && canOpenPackagePlatform(platformId),
       );
       const countedPlatformIds = new Set<PlatformId>();
       const count = platformIds.reduce((sum, platformId) => {
@@ -2440,7 +2495,7 @@ export function DashboardPage({
       result.set(entryId, count);
     }
     return result;
-  }, [visibleEntryOrder, platformGroups, platformCounts, remoteHiddenPlatformSet]);
+  }, [visibleEntryOrder, platformGroups, platformCounts, remoteHiddenPlatformSet, canOpenPackagePlatform]);
 
   const visibleDashboardCardIds = useMemo(() => {
     const seen = new Set<PlatformId>();
@@ -2450,7 +2505,7 @@ export function DashboardPage({
         continue;
       }
       const entryPlatformIds = resolveEntryPlatformIds(entryId, platformGroups).filter(
-        (candidate) => !remoteHiddenPlatformSet.has(candidate),
+        (candidate) => !remoteHiddenPlatformSet.has(candidate) && canShowPackagePlatform(candidate),
       );
       if (entryPlatformIds.length === 0) {
         continue;
@@ -2471,7 +2526,7 @@ export function DashboardPage({
       result.push(normalizedPlatformId);
     }
     return result;
-  }, [platformGroups, remoteHiddenPlatformSet, visibleDashboardEntryOrder]);
+  }, [canShowPackagePlatform, platformGroups, remoteHiddenPlatformSet, visibleDashboardEntryOrder]);
   const isSinglePlatformMode = visibleDashboardCardIds.length === 1;
   const cardRows = useMemo(() => {
     const rows: PlatformId[][] = [];
@@ -2502,7 +2557,61 @@ export function DashboardPage({
     </button>
   );
 
+  const renderPlatformInstallCard = (platformId: PlatformId) => {
+    const platformName = getPlatformLabel(platformId, t);
+    const platformPackage = getPlatformPackageFromPackages(platformPackages, platformId);
+    const version = platformPackage?.latestVersion || platformPackage?.installedVersion || '--';
+    const size = formatPlatformPackageSize(platformPackage?.downloadSizeBytes);
+
+    return (
+      <div className="main-card platform-install-card is-package-install-required" key={platformId}>
+        <div className="main-card-header">
+          <div className="header-title">
+            {renderPlatformIcon(platformId, 18)}
+            <h3>{platformName}</h3>
+            <span className="platform-install-status">
+              {t('platformLayout.packageInstallRequired', '未安装')}
+            </span>
+          </div>
+          <div className="header-action-group">
+            {renderHideCardButton(platformId)}
+          </div>
+        </div>
+
+        <div className="platform-install-body">
+          <div className="platform-install-icon">
+            {renderPlatformIcon(platformId, 36)}
+          </div>
+          <div className="platform-install-copy">
+            <strong>
+              {t('platformLayout.packageInstallCardTitle', {
+                platform: platformName,
+                defaultValue: '{{platform}} 平台包未安装',
+              })}
+            </strong>
+            <p>
+              {t('platformLayout.packageInstallCardDesc', {
+                version,
+                size,
+                defaultValue: '下载版本 {{version}}，大小 {{size}}。安装完成后会自动打开此平台。',
+              })}
+            </p>
+          </div>
+        </div>
+
+        <button className="card-footer-action platform-install-action" onClick={() => navigateToPlatform(platformId)}>
+          <Download size={14} />
+          <span>{t('platformLayout.packageInstallAndOpen', '安装并打开')}</span>
+        </button>
+      </div>
+    );
+  };
+
   const renderPlatformCard = (platformId: PlatformId) => {
+    if (isPackageInstallRequired(platformId)) {
+      return renderPlatformInstallCard(platformId);
+    }
+
     if (platformId === 'antigravity') {
       return (
         <div className="main-card antigravity-card" key={platformId}>
@@ -2684,7 +2793,7 @@ export function DashboardPage({
             </div>
           </div>
 
-          <button className="card-footer-action" onClick={() => onNavigate('zed')}>
+          <button className="card-footer-action" onClick={() => navigateToPlatform('zed')}>
             {t('dashboard.viewAllAccounts', '查看所有账号')}
           </button>
         </div>
@@ -3254,7 +3363,7 @@ export function DashboardPage({
           }
 
           const entryPlatformIds = resolveEntryPlatformIds(entryId, platformGroups).filter(
-            (candidate) => !remoteHiddenPlatformSet.has(candidate),
+            (candidate) => !remoteHiddenPlatformSet.has(candidate) && canShowPackagePlatform(candidate),
           );
           if (entryPlatformIds.length === 0) {
             return null;
@@ -3270,7 +3379,9 @@ export function DashboardPage({
           const groupId = parseGroupEntryId(entryId);
           const group = groupId ? platformGroups.find((item) => item.id === groupId) : null;
           const groupChildLabels = group
-            ? group.platformIds.filter((childPlatformId) => !remoteHiddenPlatformSet.has(childPlatformId)).map((childPlatformId) =>
+            ? group.platformIds.filter((childPlatformId) =>
+              !remoteHiddenPlatformSet.has(childPlatformId) && canShowPackagePlatform(childPlatformId),
+            ).map((childPlatformId) =>
               resolveGroupChildName(group, childPlatformId, getPlatformLabel(childPlatformId, t)),
             )
             : [];
@@ -3279,6 +3390,7 @@ export function DashboardPage({
           const label = group
             ? group.name
             : getPlatformLabel(platformId, t);
+          const packageInstallRequired = isPackageInstallRequired(platformId);
           const iconClass =
             platformId === 'antigravity'
               ? 'success'
@@ -3297,11 +3409,13 @@ export function DashboardPage({
                           : 'windsurf';
           return (
             <button
-              className="stat-card stat-card-button"
+              className={`stat-card stat-card-button ${packageInstallRequired ? 'is-package-install-required' : ''}`}
               key={entryId}
               onClick={() => navigateToPlatform(platformId)}
               title={
-                groupExtraCount > 0
+                packageInstallRequired
+                  ? `${label} · ${t('platformLayout.packageInstallRequired', '未安装')}`
+                  : groupExtraCount > 0
                   ? `${t('dashboard.switchTo', '切换到此账号')} · ${groupTooltip}`
                   : t('dashboard.switchTo', '切换到此账号')
               }
@@ -3332,7 +3446,11 @@ export function DashboardPage({
               </div>
               <div className="stat-info">
                 <span className="stat-label">{label}</span>
-                <span className="stat-value">{entryCounts.get(entryId) ?? 0}</span>
+                <span className={`stat-value ${packageInstallRequired ? 'is-package-install-required-value' : ''}`}>
+                  {packageInstallRequired
+                    ? t('platformLayout.packageInstallRequired', '未安装')
+                    : entryCounts.get(entryId) ?? 0}
+                </span>
               </div>
             </button>
           );

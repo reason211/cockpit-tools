@@ -1,5 +1,6 @@
 pub mod account;
 pub mod account_index_repair;
+pub mod account_store;
 pub mod announcement;
 pub mod antigravity_credential;
 pub mod antigravity_legacy_instance;
@@ -60,6 +61,8 @@ pub mod oauth_pending_state;
 pub mod oauth_server;
 pub mod openclaw_auth;
 pub mod opencode_auth;
+pub mod platform_adapter;
+pub mod platform_package;
 pub mod process;
 pub mod provider_current_state;
 pub mod provider_token_keeper;
@@ -94,9 +97,6 @@ pub mod windsurf_oauth;
 pub mod workbuddy_account;
 pub mod workbuddy_instance;
 pub mod workbuddy_oauth;
-pub mod zed_account;
-pub mod zed_instance;
-pub mod zed_oauth;
 
 // 重新导出常用函数
 pub use account::*;

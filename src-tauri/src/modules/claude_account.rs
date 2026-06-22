@@ -34,6 +34,7 @@ use url::{form_urlencoded, Url};
 
 const ACCOUNTS_INDEX_FILE: &str = "claude_accounts.json";
 const ACCOUNTS_DIR: &str = "claude_accounts";
+const ACCOUNT_STORE_PLATFORM: &str = "claude";
 const CLAUDE_OAUTH_AUTHORIZE_URL: &str = "https://claude.com/cai/oauth/authorize";
 const CLAUDE_OAUTH_MANUAL_REDIRECT_URL: &str = "https://platform.claude.com/oauth/code/callback";
 const CLAUDE_OAUTH_TOKEN_URL: &str = "https://platform.claude.com/v1/oauth/token";
@@ -377,7 +378,32 @@ fn account_file_path(account_id: &str) -> Result<PathBuf, String> {
     Ok(get_accounts_dir()?.join(format!("{}.json", account_id)))
 }
 
+fn ensure_account_store_migrated() -> Result<(), String> {
+    crate::modules::account_store::ensure_platform_migrated_from_json(
+        ACCOUNT_STORE_PLATFORM,
+        &get_accounts_index_path()?,
+        &get_accounts_dir()?,
+    )
+}
+
+fn account_index_from_store() -> Result<ClaudeAccountIndex, String> {
+    ensure_account_store_migrated()?;
+    let accounts =
+        crate::modules::account_store::list_accounts::<ClaudeAccount>(ACCOUNT_STORE_PLATFORM)?;
+    let mut index = ClaudeAccountIndex::new();
+    index.accounts = accounts.iter().map(|account| account.summary()).collect();
+    Ok(index)
+}
+
 fn load_index() -> Result<ClaudeAccountIndex, String> {
+    match account_index_from_store() {
+        Ok(index) => return Ok(index),
+        Err(error) => logger::log_warn(&format!(
+            "[Claude Account][Store] 从 SQLite 读取账号索引失败，回退 JSON: {}",
+            error
+        )),
+    }
+
     let path = get_accounts_index_path()?;
     if !path.exists() {
         return Ok(ClaudeAccountIndex::new());
@@ -392,6 +418,12 @@ fn load_index() -> Result<ClaudeAccountIndex, String> {
 }
 
 fn save_index(index: &ClaudeAccountIndex) -> Result<(), String> {
+    let ordered_ids = index
+        .accounts
+        .iter()
+        .map(|summary| summary.id.clone())
+        .collect::<Vec<_>>();
+    crate::modules::account_store::save_account_order(ACCOUNT_STORE_PLATFORM, &ordered_ids)?;
     let path = get_accounts_index_path()?;
     let content = serde_json::to_string_pretty(index)
         .map_err(|e| format!("序列化 Claude 账号索引失败: {}", e))?;
@@ -399,6 +431,12 @@ fn save_index(index: &ClaudeAccountIndex) -> Result<(), String> {
 }
 
 fn write_account_file(account: &ClaudeAccount) -> Result<(), String> {
+    ensure_account_store_migrated()?;
+    crate::modules::account_store::save_account(
+        ACCOUNT_STORE_PLATFORM,
+        account.id.as_str(),
+        account,
+    )?;
     let path = account_file_path(&account.id)?;
     let content = serde_json::to_string_pretty(account)
         .map_err(|e| format!("序列化 Claude 账号失败: {}", e))?;
@@ -406,6 +444,18 @@ fn write_account_file(account: &ClaudeAccount) -> Result<(), String> {
 }
 
 fn load_account_file(account_id: &str) -> Option<ClaudeAccount> {
+    if let Err(err) = ensure_account_store_migrated() {
+        logger::log_warn(&format!(
+            "[Claude Account][Store] 账号数据库迁移检查失败，回退文件读取: account_id={}, error={}",
+            account_id, err
+        ));
+    } else if let Ok(Some(account)) = crate::modules::account_store::load_account::<ClaudeAccount>(
+        ACCOUNT_STORE_PLATFORM,
+        account_id,
+    ) {
+        return Some(account);
+    }
+
     let path = account_file_path(account_id).ok()?;
     if !path.exists() {
         return None;
@@ -597,6 +647,14 @@ fn remove_desktop_snapshot_if_unused(snapshot: Option<&str>, keep_snapshot: Opti
 }
 
 fn delete_account_file_silent(account_id: &str) {
+    if let Err(error) =
+        crate::modules::account_store::delete_account(ACCOUNT_STORE_PLATFORM, account_id)
+    {
+        logger::log_warn(&format!(
+            "[Claude] 删除重复账号数据库记录失败: account_id={}, error={}",
+            account_id, error
+        ));
+    }
     if let Ok(path) = account_file_path(account_id) {
         if path.exists() {
             if let Err(error) = fs::remove_file(&path) {
@@ -8014,6 +8072,7 @@ pub fn remove_accounts(account_ids: &[String]) -> Result<(), String> {
                 format!("删除 Claude 账号失败: path={}, error={}", path.display(), e)
             })?;
         }
+        crate::modules::account_store::delete_account(ACCOUNT_STORE_PLATFORM, account_id)?;
     }
     index
         .accounts

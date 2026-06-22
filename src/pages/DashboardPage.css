@@ -64,6 +64,22 @@
   background: var(--bg-secondary);
 }
 
+.stat-card.is-package-install-required {
+  border-style: dashed;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-card) 82%, var(--warning) 8%);
+}
+
+.stat-card.is-package-install-required:hover {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--bg-secondary) 84%, var(--warning) 10%);
+}
+
+.stat-value.is-package-install-required-value {
+  font-size: 15px;
+  color: var(--warning);
+}
+
 .stat-icon-bg {
   width: 48px;
   height: 48px;
@@ -198,6 +214,77 @@
 
 .main-card:hover {
   box-shadow: var(--shadow-md);
+}
+
+.main-card.platform-install-card {
+  border-style: dashed;
+  background: color-mix(in srgb, var(--bg-card) 86%, var(--warning) 7%);
+}
+
+.platform-install-status {
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--warning) 36%, transparent);
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.platform-install-body {
+  flex: 1 1 auto;
+  min-height: 220px;
+  padding: 28px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  color: var(--text-secondary);
+}
+
+.platform-install-icon {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-tertiary) 78%, var(--warning) 12%);
+  border: 1px solid color-mix(in srgb, var(--warning) 28%, transparent);
+}
+
+.platform-install-copy {
+  min-width: 0;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.platform-install-copy strong {
+  color: var(--text-primary);
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.platform-install-copy p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.platform-install-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .main-card.main-card-placeholder {

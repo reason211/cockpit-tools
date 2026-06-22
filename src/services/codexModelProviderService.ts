@@ -395,13 +395,14 @@ function ensureApiKeyOnProvider(
   provider: CodexModelProvider,
   apiKey: string,
   apiKeyName?: string | null,
+  options?: { updateExistingName?: boolean },
 ): void {
   const normalized = sanitizeApiKey(apiKey);
   if (!normalized) return;
   const now = Date.now();
   const existing = provider.apiKeys.find((item) => sanitizeApiKey(item.apiKey) === normalized);
   if (existing) {
-    if (apiKeyName && sanitizeName(apiKeyName)) {
+    if (options?.updateExistingName !== false && apiKeyName && sanitizeName(apiKeyName)) {
       existing.name = sanitizeName(apiKeyName);
     }
     existing.updatedAt = now;
@@ -770,7 +771,9 @@ export async function upsertCodexModelProviderFromCredential(
     provider.sourceTag = sanitizeName(input.sourceTag ?? '') || undefined;
   }
 
-  ensureApiKeyOnProvider(provider, apiKey, input.apiKeyName);
+  ensureApiKeyOnProvider(provider, apiKey, input.apiKeyName, {
+    updateExistingName: false,
+  });
   provider.baseUrl = apiBaseUrl;
   provider.modelCatalog =
     normalizeModelCatalog(input.modelCatalog) ??

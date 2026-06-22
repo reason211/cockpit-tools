@@ -239,7 +239,9 @@ pub fn run() {
                     modules::kiro_oauth::restore_pending_oauth_listener();
                     modules::trae_oauth::restore_pending_oauth_listener();
                     modules::gemini_oauth::restore_pending_oauth_state();
-                    modules::zed_oauth::restore_pending_oauth_listener();
+                    if modules::platform_package::is_platform_package_installed("zed") {
+                        modules::platform_adapter::restore_zed_runtime();
+                    }
                 });
             }
 
@@ -592,6 +594,9 @@ pub fn run() {
             commands::codex::refresh_codex_quota,
             commands::codex::get_codex_reset_credits,
             commands::codex::consume_codex_reset_credit,
+            commands::codex::get_codex_referral_invite_eligibility,
+            commands::codex::get_codex_referral_eligibility_rules,
+            commands::codex::send_codex_referral_invites,
             commands::codex::refresh_codex_subscription_info,
             commands::codex::refresh_all_codex_quotas,
             commands::codex::refresh_current_codex_quota,
@@ -843,6 +848,11 @@ pub fn run() {
             commands::zed::zed_stop_default_session,
             commands::zed::zed_restart_default_session,
             commands::zed::zed_focus_default_session,
+            // Platform Package Commands
+            commands::platform_package::list_platform_packages,
+            commands::platform_package::install_platform_package,
+            commands::platform_package::update_platform_package,
+            commands::platform_package::uninstall_platform_package,
             // Qoder Instance Commands
             commands::qoder_instance::qoder_get_instance_defaults,
             commands::qoder_instance::qoder_list_instances,

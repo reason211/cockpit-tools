@@ -183,7 +183,11 @@ async fn run_refresh_for_service(policy: ServiceRefreshPolicy) -> Result<(), Str
             .await
             .map(|_| ()),
         "trae" => super::trae_account::refresh_all_tokens().await.map(|_| ()),
-        "zed" => super::zed_account::refresh_all_accounts().await.map(|_| ()),
+        "zed" => super::platform_adapter::call_zed::<Vec<ZedAccount>>(
+            "accounts.refreshAll",
+            serde_json::json!({}),
+        )
+        .map(|_| ()),
         _ => Err(format!("未知服务: {}", policy.key)),
     }
 }
@@ -1675,7 +1679,11 @@ fn append_workbuddy_rows(rows: &mut Vec<ReportRow>) {
 }
 
 fn append_zed_rows(rows: &mut Vec<ReportRow>) {
-    let accounts = super::zed_account::list_accounts();
+    let accounts = super::platform_adapter::call_zed::<Vec<ZedAccount>>(
+        "accounts.list",
+        serde_json::json!({}),
+    )
+    .unwrap_or_default();
     for account in accounts {
         let account_name = zed_display_name(&account);
         let reset = format_unix_timestamp(account.billing_period_end_at);

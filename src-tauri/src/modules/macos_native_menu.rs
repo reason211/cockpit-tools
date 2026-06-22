@@ -37,6 +37,9 @@ mod imp {
         quit: String,
         empty_title: String,
         empty_desc: String,
+        package_install_required: String,
+        package_install_desc: String,
+        package_install_and_open: String,
     }
 
     #[derive(Debug, Clone, Serialize)]
@@ -53,6 +56,7 @@ mod imp {
         short_title: String,
         nav_target: String,
         accent_hex: String,
+        runtime_ready: bool,
         current_account_id: Option<String>,
         recommended_account_id: Option<String>,
         cards: Vec<RenderedAccountCard>,
@@ -341,8 +345,12 @@ mod imp {
     }
 
     fn build_platform_snapshot(platform: PlatformId, lang: &str) -> PlatformSnapshot {
-        let (cards, current_account_id, recommended_account_id) =
-            build_platform_cards(platform, lang);
+        let runtime_ready = platform.runtime_ready();
+        let (cards, current_account_id, recommended_account_id) = if runtime_ready {
+            build_platform_cards(platform, lang)
+        } else {
+            (Vec::new(), None, None)
+        };
         let cards = cards
             .into_iter()
             .map(|card| RenderedAccountCard {
@@ -360,6 +368,7 @@ mod imp {
             short_title: switcher_title(platform).to_string(),
             nav_target: platform.nav_target().to_string(),
             accent_hex: platform_accent_hex(platform).to_string(),
+            runtime_ready,
             current_account_id,
             recommended_account_id,
             cards,
@@ -395,6 +404,21 @@ mod imp {
             quit: modules::i18n::translate(lang, "closeDialog.quit", &[]),
             empty_title: modules::i18n::translate(lang, "floatingCard.empty.title", &[]),
             empty_desc: modules::i18n::translate(lang, "floatingCard.empty.desc", &[]),
+            package_install_required: modules::i18n::translate(
+                lang,
+                "platformLayout.packageInstallRequired",
+                &[],
+            ),
+            package_install_desc: modules::i18n::translate(
+                lang,
+                "platformLayout.packageInstallCardDesc",
+                &[("version", "--"), ("size", "--")],
+            ),
+            package_install_and_open: modules::i18n::translate(
+                lang,
+                "platformLayout.packageInstallAndOpen",
+                &[],
+            ),
         }
     }
 
@@ -454,11 +478,17 @@ mod imp {
         match action.as_str() {
             "refresh" => {
                 if let Some(platform) = platform {
+                    if !platform.runtime_ready() {
+                        return;
+                    }
                     spawn_refresh(platform, account_id);
                 }
             }
             "switch" => {
                 if let (Some(platform), Some(account_id)) = (platform, account_id) {
+                    if !platform.runtime_ready() {
+                        return;
+                    }
                     spawn_switch_account(platform, account_id);
                 }
             }
@@ -4107,8 +4137,18 @@ mod imp {
     }
 
     fn build_zed_cards(lang: &str) -> (Vec<AccountCard>, Option<String>, Option<String>) {
-        let mut accounts = modules::zed_account::list_accounts();
-        let current_id = modules::zed_account::resolve_current_account_id();
+        let mut accounts =
+            modules::platform_adapter::call_zed::<Vec<crate::models::zed::ZedAccount>>(
+                "accounts.list",
+                serde_json::json!({}),
+            )
+            .unwrap_or_default();
+        let current_id = modules::platform_adapter::call_zed::<Option<String>>(
+            "accounts.current",
+            serde_json::json!({}),
+        )
+        .ok()
+        .flatten();
         accounts
             .sort_by_key(|account| std::cmp::Reverse(account.last_used.max(account.created_at)));
         let recommended = current_id.as_deref().and_then(|id| {
@@ -4116,7 +4156,7 @@ mod imp {
                 .iter()
                 .filter(|account| account.id != id)
                 .filter_map(|account| {
-                    let metrics = modules::zed_account::extract_quota_metrics(account);
+                    let metrics = crate::models::zed::extract_zed_quota_metrics(account);
                     if metrics.is_empty() {
                         return None;
                     }

@@ -665,6 +665,31 @@ pub async fn consume_codex_reset_credit(account_id: String) -> Result<(), String
 }
 
 #[tauri::command]
+pub async fn get_codex_referral_invite_eligibility(
+    account_id: String,
+    referral_key: Option<String>,
+) -> Result<codex_quota::CodexReferralInviteEligibility, String> {
+    codex_quota::fetch_referral_invite_eligibility(&account_id, referral_key).await
+}
+
+#[tauri::command]
+pub async fn get_codex_referral_eligibility_rules(
+    account_id: String,
+    referral_key: Option<String>,
+) -> Result<codex_quota::CodexReferralEligibilityRules, String> {
+    codex_quota::fetch_referral_eligibility_rules(&account_id, referral_key).await
+}
+
+#[tauri::command]
+pub async fn send_codex_referral_invites(
+    account_id: String,
+    referral_key: Option<String>,
+    emails: Vec<String>,
+) -> Result<codex_quota::CodexReferralInviteResponse, String> {
+    codex_quota::send_referral_invites(&account_id, referral_key, emails).await
+}
+
+#[tauri::command]
 pub async fn refresh_codex_subscription_info(
     app: AppHandle,
     account_id: String,
