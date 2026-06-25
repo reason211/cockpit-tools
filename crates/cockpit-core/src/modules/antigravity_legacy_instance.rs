@@ -166,22 +166,127 @@ fn compare_versions(left: &str, right: &str) -> Option<std::cmp::Ordering> {
     Some(std::cmp::Ordering::Equal)
 }
 
+fn normalize_non_empty(value: &str) -> Option<String> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        None
+    } else {
+        Some(trimmed.to_string())
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn normalize_macos_app_root_for_metadata(path: &Path) -> Option<PathBuf> {
+    let path_str = path.to_string_lossy();
+    let app_idx = path_str.find(".app")?;
+    let root = PathBuf::from(&path_str[..app_idx + 4]);
+    root.exists().then_some(root)
+}
+
+#[cfg(target_os = "macos")]
+fn read_macos_plist_string(path: &Path, key: &str) -> Option<String> {
+    let output = std::process::Command::new("plutil")
+        .arg("-p")
+        .arg(path)
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+
+    let prefix = format!("\"{}\"", key);
+    let text = String::from_utf8_lossy(&output.stdout);
+    for line in text.lines() {
+        let line = line.trim();
+        if !line.starts_with(&prefix) {
+            continue;
+        }
+        let value = line.split("=>").nth(1)?.trim().trim_matches('"');
+        if let Some(value) = normalize_non_empty(value) {
+            return Some(value);
+        }
+    }
+    None
+}
+
+fn json_string_field(value: &serde_json::Value, keys: &[&str]) -> Option<String> {
+    keys.iter().find_map(|key| {
+        value
+            .get(*key)
+            .and_then(serde_json::Value::as_str)
+            .and_then(normalize_non_empty)
+    })
+}
+
+fn antigravity_product_json_candidates(root: &Path) -> Vec<PathBuf> {
+    #[cfg(target_os = "macos")]
+    {
+        vec![
+            root.join("Contents")
+                .join("Resources")
+                .join("app")
+                .join("product.json"),
+            root.join("resources").join("app").join("product.json"),
+            root.join("app").join("product.json"),
+        ]
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        vec![
+            root.join("resources").join("app").join("product.json"),
+            root.join("app").join("product.json"),
+        ]
+    }
+}
+
+fn read_antigravity_product_json_version(root: &Path) -> Option<String> {
+    for path in antigravity_product_json_candidates(root) {
+        let Ok(content) = fs::read_to_string(&path) else {
+            continue;
+        };
+        let Ok(value) = serde_json::from_str::<serde_json::Value>(&content) else {
+            continue;
+        };
+        if let Some(version) = json_string_field(&value, &["ideVersion", "version"]) {
+            return Some(version);
+        }
+    }
+    None
+}
+
+fn resolve_installed_antigravity_version() -> Option<String> {
+    let launch_path = modules::process::detect_antigravity_legacy_exec_path()?;
+
+    #[cfg(target_os = "macos")]
+    {
+        let root = normalize_macos_app_root_for_metadata(&launch_path)?;
+        return read_antigravity_product_json_version(&root).or_else(|| {
+            let plist_path = root.join("Contents").join("Info.plist");
+            read_macos_plist_string(&plist_path, "CFBundleShortVersionString")
+                .or_else(|| read_macos_plist_string(&plist_path, "CFBundleVersion"))
+        });
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        let root = if launch_path.is_file() {
+            launch_path.parent()?.to_path_buf()
+        } else {
+            launch_path
+        };
+        read_antigravity_product_json_version(&root)
+    }
+}
+
 fn resolve_auth_mode() -> AntigravityDesktopAuthMode {
-    let info = crate::commands::system::resolve_antigravity_installed_version_info_for_target(
-        Some("antigravity"),
-    )
-    .or_else(|| {
-        crate::commands::system::get_cached_antigravity_installed_version_info_for_target(Some(
-            "antigravity",
-        ))
-    });
-    let Some(info) = info else {
+    let Some(version) = resolve_installed_antigravity_version() else {
         modules::logger::log_warn(
             "[Antigravity Legacy Instance] 无法确认 Antigravity 安装版本，默认采用系统凭据认证模式",
         );
         return AntigravityDesktopAuthMode::SystemCredential;
     };
-    match compare_versions(&info.version, "2.0.0") {
+    match compare_versions(&version, "2.0.0") {
         Some(std::cmp::Ordering::Less) => AntigravityDesktopAuthMode::LegacyStateDb,
         Some(_) => AntigravityDesktopAuthMode::SystemCredential,
         None => AntigravityDesktopAuthMode::SystemCredential,

@@ -7,7 +7,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use crate::modules::{account, logger};
+use crate::modules::logger;
 
 const DB_FILE: &str = "account_store.sqlite";
 const SCHEMA_VERSION: i64 = 1;
@@ -34,7 +34,7 @@ pub fn database_path() -> Result<PathBuf, String> {
         }
     }
 
-    Ok(account::get_data_dir()?.join(DB_FILE))
+    Ok(crate::modules::app_data::get_data_dir()?.join(DB_FILE))
 }
 
 fn now_timestamp() -> i64 {
