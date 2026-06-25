@@ -5,6 +5,7 @@ import {
   checkPlatformPackageUpdate,
   installPlatformPackage,
   listPlatformPackages,
+  preparePlatformPackageUpdates,
   uninstallPlatformPackage,
   updatePlatformPackage,
 } from '../services/platformPackageService';
@@ -328,6 +329,7 @@ interface PlatformPackageStoreState {
   loading: boolean;
   error: string | null;
   refresh: () => Promise<PlatformPackageState[]>;
+  prepareUpdates: () => Promise<PlatformPackageState[] | null>;
   checkUpdate: (platformId: PlatformId) => Promise<PlatformPackageState>;
   installPackage: (platformId: PlatformId) => Promise<PlatformPackageState>;
   updatePackage: (platformId: PlatformId) => Promise<PlatformPackageState>;
@@ -425,6 +427,9 @@ function isPlatformPackageInstallRequired(
   return !isPlatformRuntimeReady(packages, platformId);
 }
 
+let silentPrepareStarted = false;
+let silentPrepareInFlight = false;
+
 export const usePlatformPackageStore = create<PlatformPackageStoreState>((set, get) => ({
   packages: DEFAULT_PLATFORM_PACKAGES,
   initialized: false,
@@ -436,11 +441,30 @@ export const usePlatformPackageStore = create<PlatformPackageStoreState>((set, g
     try {
       const packages = mergeKnownPackages(await listPlatformPackages());
       set({ packages, loading: false, initialized: true });
+      void get().prepareUpdates();
       return packages;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       set({ loading: false, initialized: false, error: message });
       throw error;
+    }
+  },
+
+  prepareUpdates: async () => {
+    if (silentPrepareStarted || silentPrepareInFlight) {
+      return null;
+    }
+    silentPrepareStarted = true;
+    silentPrepareInFlight = true;
+    try {
+      const packages = mergeKnownPackages(await preparePlatformPackageUpdates());
+      set({ packages, initialized: true, error: null });
+      return packages;
+    } catch (error) {
+      console.warn('[PlatformPackage] silent prepare failed', error);
+      return null;
+    } finally {
+      silentPrepareInFlight = false;
     }
   },
 

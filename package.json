@@ -11,6 +11,7 @@
     "build:platform-ui": "node scripts/build-platform-ui.cjs",
     "package:platform": "node scripts/package-platform-package.cjs",
     "package:platform-index": "node scripts/build-platform-package-index.cjs",
+    "prepare:platform-bootstrap": "node scripts/prepare-platform-bootstrap.cjs",
     "prepare:test-channel-version": "node scripts/prepare-test-channel-version.cjs",
     "verify:platform-packages": "node scripts/verify-platform-packages.cjs",
     "verify:codex-platform": "node scripts/verify-codex-platform-contract.cjs",

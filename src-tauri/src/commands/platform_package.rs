@@ -15,6 +15,13 @@ pub fn check_platform_package_update(
 }
 
 #[tauri::command]
+pub fn prepare_platform_package_updates(
+    app: AppHandle,
+) -> Result<Vec<PlatformPackageState>, String> {
+    platform_package::prepare_platform_package_updates(&app)
+}
+
+#[tauri::command]
 pub fn install_platform_package(
     app: AppHandle,
     platform_id: String,

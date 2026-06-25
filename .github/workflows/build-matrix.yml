@@ -26,6 +26,11 @@ on:
         required: false
         default: false
         type: boolean
+      bundle_platform_packages:
+        description: "Bundle current-target platform packages into test-channel app resources"
+        required: false
+        default: false
+        type: boolean
   pull_request:
     branches:
       - "main"
@@ -95,26 +100,32 @@ jobs:
             platform: "macos-latest"
             args: "--target aarch64-apple-darwin"
             release_dir: "target/aarch64-apple-darwin/release"
+            bootstrap_targets: "macos/aarch64"
           - label: "macos-x86_64"
             platform: "macos-latest"
             args: "--target x86_64-apple-darwin"
             release_dir: "target/x86_64-apple-darwin/release"
+            bootstrap_targets: "macos/x86_64"
           - label: "macos-universal"
             platform: "macos-latest"
             args: "--target universal-apple-darwin"
             release_dir: "target/universal-apple-darwin/release"
+            bootstrap_targets: "macos/aarch64,macos/x86_64"
           - label: "ubuntu-22.04"
             platform: "ubuntu-22.04"
             args: ""
             release_dir: "target/release"
+            bootstrap_targets: "linux/x86_64"
           - label: "ubuntu-24.04-arm"
             platform: "ubuntu-24.04-arm"
             args: ""
             release_dir: "target/release"
+            bootstrap_targets: "linux/aarch64"
           - label: "windows-latest"
             platform: "windows-latest"
             args: ""
             release_dir: "target/release"
+            bootstrap_targets: "windows/x86_64"
 
     steps:
       - name: Checkout repository
@@ -155,6 +166,32 @@ jobs:
 
       - name: Sync versions
         run: npm run sync-version
+
+      - name: Prepare bundled platform packages (test full)
+        if: github.event_name == 'workflow_dispatch' && inputs.channel == 'test' && inputs.bundle_platform_packages == true
+        shell: bash
+        env:
+          PLATFORM_PACKAGE_INDEX_URL: ${{ env.COCKPIT_PLATFORM_PACKAGE_INDEX_URL }}
+          BOOTSTRAP_TARGETS: ${{ matrix.bootstrap_targets }}
+        run: |
+          set -euo pipefail
+          npm run prepare:platform-bootstrap -- \
+            --index-url "${PLATFORM_PACKAGE_INDEX_URL}" \
+            --targets "${BOOTSTRAP_TARGETS}"
+
+          node <<'NODE'
+          const fs = require('node:fs');
+          const configPath = 'src-tauri/tauri.test.conf.json';
+          const outputPath = 'src-tauri/tauri.test.full.conf.json';
+          const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+          config.bundle = config.bundle || {};
+          config.bundle.resources = {
+            ...(config.bundle.resources || {}),
+            '../platform-packages/bootstrap/index.json': 'platform-packages/bootstrap/index.json',
+            '../platform-packages/bootstrap/dist': 'platform-packages/bootstrap/dist',
+          };
+          fs.writeFileSync(outputPath, `${JSON.stringify(config, null, 2)}\n`);
+          NODE
 
       - name: Cache Tauri binary dependencies
         uses: actions/cache@v4
@@ -205,9 +242,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          BUNDLE_PLATFORM_PACKAGES: ${{ inputs.bundle_platform_packages }}
         run: |
           set -euo pipefail
-          npx tauri build --ci --config src-tauri/tauri.test.conf.json ${{ matrix.args }} 2>&1 | tee "build-${{ matrix.label }}.log"
+          config_path="src-tauri/tauri.test.conf.json"
+          if [ "${BUNDLE_PLATFORM_PACKAGES}" = "true" ]; then
+            config_path="src-tauri/tauri.test.full.conf.json"
+          fi
+          npx tauri build --ci --config "${config_path}" ${{ matrix.args }} 2>&1 | tee "build-${{ matrix.label }}.log"
 
       - name: Print build logs on failure (Signed)
         if: failure() && github.event_name != 'pull_request'

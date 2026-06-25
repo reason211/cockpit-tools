@@ -15,6 +15,7 @@ const PLATFORM_UI_DIR = path.join(ROOT, 'src', 'platform-ui');
 const BUILD_PLATFORM_UI_SCRIPT_PATH = path.join(ROOT, 'scripts', 'build-platform-ui.cjs');
 const PACKAGE_PLATFORM_SCRIPT_PATH = path.join(ROOT, 'scripts', 'package-platform-package.cjs');
 const PACKAGE_INDEX_SCRIPT_PATH = path.join(ROOT, 'scripts', 'build-platform-package-index.cjs');
+const PREPARE_BOOTSTRAP_SCRIPT_PATH = path.join(ROOT, 'scripts', 'prepare-platform-bootstrap.cjs');
 const PLATFORM_PACKAGES_WORKFLOW_PATH = path.join(ROOT, '.github', 'workflows', 'platform-packages.yml');
 const BUILD_MATRIX_WORKFLOW_PATH = path.join(ROOT, '.github', 'workflows', 'build-matrix.yml');
 const STORE_PATH = path.join(ROOT, 'src', 'stores', 'usePlatformPackageStore.ts');
@@ -880,6 +881,7 @@ function verifyHostLifecycleControls() {
   for (const expected of [
     "invoke('list_platform_packages')",
     "invoke('check_platform_package_update'",
+    "invoke('prepare_platform_package_updates'",
     "invoke('install_platform_package'",
     "invoke('update_platform_package'",
     "invoke('uninstall_platform_package'",
@@ -891,12 +893,14 @@ function verifyHostLifecycleControls() {
   for (const expected of [
     'pub fn list_platform_packages',
     'pub fn check_platform_package_update',
+    'pub fn prepare_platform_package_updates',
     'pub fn install_platform_package',
     'pub fn update_platform_package',
     'pub fn uninstall_platform_package',
     'pub fn get_platform_package_ui_entry',
     'platform_package::list_platform_packages',
     'platform_package::check_platform_package_update',
+    'platform_package::prepare_platform_package_updates',
     'platform_package::install_platform_package',
     'platform_package::update_platform_package',
     'platform_package::uninstall_platform_package',
@@ -913,6 +917,7 @@ function verifyPackagingTooling() {
     assertEqual('package.json scripts.build:platform-ui', scripts['build:platform-ui'], 'node scripts/build-platform-ui.cjs');
     assertEqual('package.json scripts.package:platform', scripts['package:platform'], 'node scripts/package-platform-package.cjs');
     assertEqual('package.json scripts.package:platform-index', scripts['package:platform-index'], 'node scripts/build-platform-package-index.cjs');
+    assertEqual('package.json scripts.prepare:platform-bootstrap', scripts['prepare:platform-bootstrap'], 'node scripts/prepare-platform-bootstrap.cjs');
     assertEqual('package.json scripts.verify:platform-packages', scripts['verify:platform-packages'], 'node scripts/verify-platform-packages.cjs');
     assertEqual(
       'package.json scripts.audit:platform-full-hot-update',
@@ -925,6 +930,7 @@ function verifyPackagingTooling() {
     BUILD_PLATFORM_UI_SCRIPT_PATH,
     PACKAGE_PLATFORM_SCRIPT_PATH,
     PACKAGE_INDEX_SCRIPT_PATH,
+    PREPARE_BOOTSTRAP_SCRIPT_PATH,
   ]) {
     if (!fs.existsSync(scriptPath)) {
       fail(`missing platform package tooling script ${relative(scriptPath)}`);
@@ -980,7 +986,15 @@ function verifyPackagingTooling() {
   }
 
   const buildMatrixWorkflow = readText(BUILD_MATRIX_WORKFLOW_PATH, relative(BUILD_MATRIX_WORKFLOW_PATH));
-  for (const expected of ["'.dmg'", "'.app.tar.gz'", 'Publish Test Release']) {
+  for (const expected of [
+    "'.dmg'",
+    "'.app.tar.gz'",
+    'Publish Test Release',
+    'bundle_platform_packages',
+    'prepare:platform-bootstrap',
+    'platform-packages/bootstrap/index.json',
+    'platform-packages/bootstrap/dist',
+  ]) {
     assertIncludes(relative(BUILD_MATRIX_WORKFLOW_PATH), buildMatrixWorkflow, expected);
   }
 

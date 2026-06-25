@@ -10,7 +10,10 @@ import {
   usePlatformPackageStore,
 } from '../stores/usePlatformPackageStore';
 import { getPlatformLabel, renderPlatformIcon } from '../utils/platformMeta';
-import { getPlatformPackageStatusText } from './PlatformPackageToolbar';
+import {
+  getPlatformPackageStatusText,
+  PlatformPackageOperationProgress,
+} from './PlatformPackageToolbar';
 import './PlatformPackageUnavailablePage.css';
 
 interface PlatformPackageUnavailablePageProps {
@@ -138,6 +141,13 @@ export function PlatformPackageUnavailablePage({
             size,
             defaultValue: '{{platform}} 需要先下载平台包后才能打开。版本 {{version}}，大小 {{size}}。',
           }),
+      content: (
+        <PlatformPackageOperationProgress
+          platformId={platformId}
+          operation="install"
+          fallbackTotalBytes={state.downloadSizeBytes}
+        />
+      ),
       width: 'sm',
       actions: [
         {
@@ -155,7 +165,7 @@ export function PlatformPackageUnavailablePage({
         },
       ],
     });
-  }, [canInstall, operating, platformName, runInstall, showModal, state, t]);
+  }, [canInstall, operating, platformId, platformName, runInstall, showModal, state, t]);
 
   return (
     <section

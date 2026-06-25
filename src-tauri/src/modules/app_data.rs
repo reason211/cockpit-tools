@@ -60,8 +60,8 @@ pub fn get_data_dir() -> Result<PathBuf, String> {
 #[cfg(test)]
 mod tests {
     use super::{
-        resolve_data_dir, resolve_instances_dir, DATA_DIR, DATA_DIR_ENV, DEV_DATA_DIR,
-        PROFILE_ENV, TEST_DATA_DIR,
+        resolve_data_dir, resolve_instances_dir, DATA_DIR, DATA_DIR_ENV, DEV_DATA_DIR, PROFILE_ENV,
+        TEST_DATA_DIR,
     };
     use std::env;
     use std::path::PathBuf;

@@ -10,6 +10,10 @@ export async function checkPlatformPackageUpdate(platformId: PlatformId): Promis
   return await invoke('check_platform_package_update', { platformId });
 }
 
+export async function preparePlatformPackageUpdates(): Promise<PlatformPackageState[]> {
+  return await invoke('prepare_platform_package_updates');
+}
+
 export async function installPlatformPackage(platformId: PlatformId): Promise<PlatformPackageState> {
   return await invoke('install_platform_package', { platformId });
 }

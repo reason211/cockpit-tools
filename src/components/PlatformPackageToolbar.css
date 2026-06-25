@@ -306,6 +306,93 @@
   font-weight: 700;
 }
 
+.platform-package-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-secondary);
+}
+
+.platform-package-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.platform-package-progress-head span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.platform-package-progress-head strong {
+  flex: 0 0 auto;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.platform-package-progress-track {
+  position: relative;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border) 70%, transparent);
+}
+
+.platform-package-progress-bar {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 68%, var(--success)));
+  transition: width 0.22s ease;
+}
+
+.platform-package-progress.is-indeterminate .platform-package-progress-bar {
+  position: absolute;
+  width: 42%;
+  animation: platform-package-progress-indeterminate 1.2s ease-in-out infinite;
+}
+
+.platform-package-progress.is-failed {
+  border-color: color-mix(in srgb, var(--danger) 28%, var(--border));
+  background: color-mix(in srgb, var(--danger) 8%, var(--bg-secondary));
+}
+
+.platform-package-progress.is-failed .platform-package-progress-bar {
+  background: var(--danger);
+}
+
+.platform-package-progress-meta {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.platform-package-progress.is-failed .platform-package-progress-meta {
+  color: var(--danger);
+}
+
+@keyframes platform-package-progress-indeterminate {
+  0% {
+    transform: translateX(-105%);
+  }
+  100% {
+    transform: translateX(245%);
+  }
+}
+
 .platform-package-update-notes {
   display: flex;
   flex-direction: column;

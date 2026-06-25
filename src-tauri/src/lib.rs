@@ -228,7 +228,24 @@ pub fn run() {
             });
 
             {
-                tauri::async_runtime::spawn(async move {
+                let app_handle = app.handle().clone();
+                std::thread::spawn(move || {
+                    match modules::platform_package::bootstrap_platform_packages_from_resources(
+                        &app_handle,
+                    ) {
+                        Ok(installed) if !installed.is_empty() => {
+                            logger::log_info(&format!(
+                                "[PlatformPackage] 启动 bootstrap 导入完成: platforms={}",
+                                installed.join(",")
+                            ));
+                            let _ = modules::tray::update_tray_menu(&app_handle);
+                        }
+                        Ok(_) => {}
+                        Err(error) => logger::log_warn(&format!(
+                            "[PlatformPackage] 启动 bootstrap 导入失败: {}",
+                            error
+                        )),
+                    }
                     modules::platform_adapter::restore_codex_runtime();
                     if modules::platform_package::is_platform_package_installed("zed") {
                         modules::platform_adapter::restore_zed_runtime();
@@ -874,6 +891,7 @@ pub fn run() {
             // Platform Package Commands
             commands::platform_package::list_platform_packages,
             commands::platform_package::check_platform_package_update,
+            commands::platform_package::prepare_platform_package_updates,
             commands::platform_package::install_platform_package,
             commands::platform_package::update_platform_package,
             commands::platform_package::uninstall_platform_package,

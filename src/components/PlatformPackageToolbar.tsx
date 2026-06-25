@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { BookOpenText, Download, MoreHorizontal, RefreshCw, RotateCw, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { PlatformId } from '../types/platform';
-import type { PlatformPackageChangelogEntry, PlatformPackageState } from '../types/platformPackage';
+import type {
+  PlatformPackageChangelogEntry,
+  PlatformPackageOperation,
+  PlatformPackageProgressPayload,
+  PlatformPackageProgressPhase,
+  PlatformPackageState,
+} from '../types/platformPackage';
 import {
   formatPlatformPackageSize,
   getPlatformPackageFromPackages,
@@ -13,7 +20,9 @@ import { useGlobalModal } from '../hooks/useGlobalModal';
 import { getPlatformLabel } from '../utils/platformMeta';
 import './PlatformPackageToolbar.css';
 
-type PackageAction = 'install' | 'update' | 'uninstall';
+const PLATFORM_PACKAGE_PROGRESS_EVENT = 'platform-package://progress';
+
+type PackageAction = PlatformPackageOperation;
 
 interface PlatformPackageToolbarProps {
   platformId: PlatformId;
@@ -242,6 +251,115 @@ function dispatchPlatformPackageChanged(state: PlatformPackageState) {
   );
 }
 
+function getProgressPhaseText(phase: PlatformPackageProgressPhase, t: TFunction): string {
+  switch (phase) {
+    case 'resolving':
+      return t('platformLayout.packageProgressResolving', '正在解析平台包来源');
+    case 'downloading':
+      return t('platformLayout.packageProgressDownloading', '正在下载平台包');
+    case 'verifying':
+      return t('platformLayout.packageProgressVerifying', '正在校验平台包');
+    case 'extracting':
+      return t('platformLayout.packageProgressExtracting', '正在解压平台包');
+    case 'installing':
+      return t('platformLayout.packageProgressInstalling', '正在切换运行组件');
+    case 'completed':
+      return t('platformLayout.packageProgressCompleted', '已完成');
+    case 'failed':
+      return t('platformLayout.packageProgressFailed', '处理失败');
+    default:
+      return t('platformLayout.packageProgressWorking', '正在处理平台包');
+  }
+}
+
+export function PlatformPackageOperationProgress({
+  platformId,
+  operation,
+  fallbackTotalBytes,
+}: {
+  platformId: PlatformId;
+  operation: PlatformPackageOperation;
+  fallbackTotalBytes?: number | null;
+}) {
+  const { t } = useTranslation();
+  const [progress, setProgress] = useState<PlatformPackageProgressPayload | null>(null);
+
+  useEffect(() => {
+    let disposed = false;
+    let unlisten: UnlistenFn | null = null;
+
+    setProgress(null);
+    void listen<PlatformPackageProgressPayload>(PLATFORM_PACKAGE_PROGRESS_EVENT, (event) => {
+      const payload = event.payload;
+      if (payload.platformId !== platformId || payload.operation !== operation) {
+        return;
+      }
+      setProgress(payload);
+    }).then((nextUnlisten) => {
+      if (disposed) {
+        nextUnlisten();
+        return;
+      }
+      unlisten = nextUnlisten;
+    });
+
+    return () => {
+      disposed = true;
+      if (unlisten) {
+        unlisten();
+      }
+    };
+  }, [operation, platformId]);
+
+  const percent = typeof progress?.percent === 'number'
+    ? Math.min(100, Math.max(0, Math.round(progress.percent)))
+    : null;
+  const phaseText = progress
+    ? getProgressPhaseText(progress.phase, t)
+    : t('platformLayout.packageProgressWaiting', '等待开始处理');
+  const downloadedBytes = progress?.downloadedBytes ?? null;
+  const totalBytes = progress?.totalBytes ?? fallbackTotalBytes ?? null;
+  const showBytes = typeof downloadedBytes === 'number' && downloadedBytes > 0;
+  const bytesText = showBytes
+    ? typeof totalBytes === 'number' && totalBytes > 0
+      ? t('platformLayout.packageProgressDownloaded', {
+        downloaded: formatPlatformPackageSize(downloadedBytes),
+        total: formatPlatformPackageSize(totalBytes),
+        defaultValue: '已下载 {{downloaded}} / {{total}}',
+      })
+      : t('platformLayout.packageProgressDownloadedUnknown', {
+        downloaded: formatPlatformPackageSize(downloadedBytes),
+        defaultValue: '已下载 {{downloaded}}',
+      })
+    : null;
+  const isFailed = progress?.phase === 'failed';
+  const isIndeterminate = Boolean(progress && percent === null && !isFailed);
+
+  return (
+    <div
+      className={`platform-package-progress${isIndeterminate ? ' is-indeterminate' : ''}${isFailed ? ' is-failed' : ''}`}
+      role="status"
+      aria-live="polite"
+    >
+      <div className="platform-package-progress-head">
+        <span>{phaseText}</span>
+        {percent !== null && <strong>{percent}%</strong>}
+      </div>
+      <div className="platform-package-progress-track" aria-hidden="true">
+        <div
+          className="platform-package-progress-bar"
+          style={percent !== null ? { width: `${percent}%` } : undefined}
+        />
+      </div>
+      {(bytesText || progress?.message) && (
+        <div className="platform-package-progress-meta">
+          {isFailed && progress?.message ? progress.message : bytesText}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function PlatformPackageToolbar({
   platformId,
   className,
@@ -391,6 +509,15 @@ export function PlatformPackageToolbar({
     showModal({
       title,
       description,
+      content: action === 'uninstall'
+        ? undefined
+        : (
+            <PlatformPackageOperationProgress
+              platformId={platformId}
+              operation={action}
+              fallbackTotalBytes={platformPackage.downloadSizeBytes}
+            />
+          ),
       width: 'sm',
       actions: [
         {
@@ -408,7 +535,7 @@ export function PlatformPackageToolbar({
         },
       ],
     });
-  }, [platformName, platformPackage, runAction, showModal, t]);
+  }, [platformId, platformName, platformPackage, runAction, showModal, t]);
 
   const handleCheckUpdate = useCallback(async () => {
     if (!platformPackage || actionKey) {
@@ -488,6 +615,11 @@ export function PlatformPackageToolbar({
               })}
             </span>
           </div>
+          <PlatformPackageOperationProgress
+            platformId={platformId}
+            operation="update"
+            fallbackTotalBytes={platformPackage.downloadSizeBytes}
+          />
           <div className="platform-package-update-notes">
             <h3>{t('update_notification.whatsNew', '更新内容')}</h3>
             <ChangelogEntryList
@@ -514,7 +646,7 @@ export function PlatformPackageToolbar({
         },
       ],
     });
-  }, [i18n.language, platformPackage, runAction, showModal, t]);
+  }, [i18n.language, platformId, platformPackage, runAction, showModal, t]);
 
   useEffect(() => {
     setOperationError(null);

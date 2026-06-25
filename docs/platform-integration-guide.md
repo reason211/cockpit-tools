@@ -106,7 +106,10 @@ Core Shell + Platform Package + Remote React UI + Sidecar Adapter + runtimeReady
 9. 未安装或 `runtimeReady=false` 时，平台页显示通用不可用页；不可用页可以提供安装或修复主按钮，但必须复用平台包生命周期逻辑和二次确认弹框。
 10. 未安装或 `runtimeReady=false` 时，不加载 remote UI，不读取账号，不启动 OAuth，不切号，不后台刷新配额。
 11. 账号迁移、数据备份/恢复、导入导出、设置页账号覆盖、浮动卡片、Web report、provider current、token keeper、路径重试、托盘、macOS 原生菜单、自动刷新和 App 路由等全局工具也必须 respect `runtimeReady`；未安装时只能跳过或提示平台不可用，禁止调用平台业务命令。
-12. 安装、修复、更新、卸载必须二次确认，失败必须显示在当前弹框或当前操作区。
+12. 安装、修复、更新、卸载必须二次确认，失败必须显示在当前弹框或当前操作区。安装、修复、更新、卸载执行期间必须通过 Core Shell 通用 `platform-package://progress` 事件反馈阶段与进度；下载大小可计算时弹框必须显示百分比和已下载体积，未知大小时至少显示当前阶段的流动进度，禁止只让按钮保持 loading。
+13. 平台包更新允许静默预准备，但只能下载、校验并预解压到用户数据目录 `platform-packages/<platformId>/prepared/<version>`；禁止后台自动替换 `current`。用户点击“更新”并确认后，Core Shell 才能把已准备版本原子切换到 `current`。
+14. 本地平台包目录必须受控：`current` 只保留当前运行版本，`prepared` 最多保留一个待更新版本，`downloads` 不得长期保留历史 zip 或 `.part`。安装、更新、预准备成功后必须清理旧 zip、旧 prepared、`.staging.*`、`.extracting.*`、`.previous.*` 等残留；卸载平台包时删除该平台包目录，但不删除账号数据。
+15. 测试通道或大版本可构建 Full/Bootstrap 主应用包，把当前系统/架构匹配的平台包 zip 作为 App resource 内置到 `platform-packages/bootstrap`；首次启动时必须校验 size/sha256/manifest/runtime 后导入用户数据目录并写入 `installed=true`、`runtimeReady=true`。禁止直接从安装目录运行平台包，禁止覆盖本地更高版本，用户明确卸载过的平台不得自动装回。
 
 ## 5. Artifact 与远端更新
 
@@ -122,7 +125,35 @@ Core Shell + Platform Package + Remote React UI + Sidecar Adapter + runtimeReady
 8. `.github/workflows/platform-packages.yml` 是标准跨系统构建入口；CI 每个 runner 只输出当前 OS/arch 的 zip 和 metadata JSON，不直接改写远端 index。
 9. 远端 `platform-packages/index.json` 必须通过 `npm run package:platform-index` 基于各 OS/arch metadata 汇总生成，确认 size、sha256、downloadUrl 和 artifact 覆盖后再发布。
 
-### 5.1 远端测试通道
+### 5.1 单平台升级流程
+
+单平台升级是“平台包发版”，不是主应用发版。只有改动完全落在某个平台包边界内时才允许使用，包括该平台 remote UI、sidecar adapter、adapter helper、`manifest.json`、`runtime/index.json`、平台包 `changelog`、capabilities、contributions 和平台包资源。
+
+必须走主应用升级的情况：
+
+1. 修改 Core Shell、Host API、平台包协议、平台管理通用 UI、安装/下载/校验/卸载逻辑。
+2. 修改 Tauri/Rust 宿主、数据库结构、全局配置、主应用依赖、updater 或安装器。
+3. 平台包需要的新能力旧主应用无法提供，且无法仅通过提高 `minCoreVersion` 隔离。
+
+单平台升级步骤：
+
+1. 修改目标平台包代码和资源，只触碰该平台边界内文件。
+2. 提升 `platform-packages/<platformId>/manifest.json` 与 `runtime/index.json` 中的平台包版本，并补平台包 `changelog`；不要改 `package.json` 主应用版本，也不要改主应用 `CHANGELOG.md` / `CHANGELOG.zh-CN.md`。
+3. 如平台包依赖新的 Core Shell 能力，必须提高 `minCoreVersion`，避免旧主应用误安装。
+4. 为每个目标 OS/arch 构建 artifact。推荐使用 `.github/workflows/platform-packages.yml`；本地构建示例：
+   ```bash
+   npm run package:platform -- --platform <platformId> --os windows --arch x86_64 --filename-template os-arch --metadata-out /tmp/<platformId>-windows-x86_64.json
+   ```
+5. 用 metadata 汇总远端 index：
+   ```bash
+   npm run package:platform-index -- --metadata-dir platform-packages/dist-ci --verify-zip-dir platform-packages/dist-ci --require-os-arch macos/aarch64,macos/x86_64,linux/x86_64,linux/aarch64,windows/x86_64 --output platform-packages/dist-ci/index.json
+   ```
+6. 带 `--update-index` 的本地索引写入必须串行执行，禁止多个平台并行写 `platform-packages/index.json`。
+7. 正式发布前必须先走 test channel 验证真实远端下载、安装、卸载、检查更新、更新弹框、更新日志、包大小和当前系统 artifact 匹配。
+8. 正式通道只发布平台 zip 与 `platform-packages/index.json`；禁止执行 `npm run sync-version`、`npm run release:preflight`、创建主应用 release commit、创建或推送主应用 tag。
+9. 单平台升级至少执行 `npm run verify:platform-packages`、`node scripts/check_locales.cjs`、`git diff --check`；涉及 adapter、remote UI 或类型风险时，补充对应平台包构建、smoke 或类型检查。
+
+### 5.2 远端测试通道
 
 任何平台包远端测试都必须先进入独立 test channel，不得直接把测试包写入正式通道：
 
@@ -136,7 +167,7 @@ Core Shell + Platform Package + Remote React UI + Sidecar Adapter + runtimeReady
 8. 后续新平台迁移完成后，必须先通过 test channel 验证 Windows/macOS/Linux 对应 artifact 的安装、卸载、检查更新、更新弹框、更新日志和包大小，再考虑进入正式通道。
 9. macOS 测试 release 必须上传 `.dmg` 供人工下载安装；真实 updater 仍使用 `.app.tar.gz` 与 `.sig`。
 
-### 5.2 主应用内置资源边界
+### 5.3 主应用内置资源边界
 
 平台包按需安装是默认分发模型，主应用不得重新变成“全平台大包”：
 

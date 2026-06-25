@@ -237,7 +237,28 @@ npm run package:platform -- --platform zed --os macos --arch aarch64 --filename-
 npm run package:platform-index -- --metadata-dir platform-packages/dist-ci --verify-zip-dir platform-packages/dist-ci --require-os-arch macos/aarch64,macos/x86_64,linux/x86_64,linux/aarch64,windows/x86_64 --output platform-packages/dist-ci/index.json
 ```
 
-### 5.2 远端测试通道
+### 5.2 单平台升级流程
+
+单平台升级是平台包发版，不是主应用 release。它只适用于改动完全落在某个平台包边界内的场景：remote UI、sidecar adapter、adapter helper/二级 sidecar、`manifest.json`、`runtime/index.json`、平台包 `changelog`、capabilities、contributions 和平台包资源。
+
+以下改动必须走主应用升级，不能只发平台包：
+
+1. Core Shell、Host API、平台包协议、平台管理通用 UI、下载/校验/安装/卸载逻辑。
+2. Tauri/Rust 宿主、数据库结构、全局配置、主应用依赖、updater、安装器。
+3. 平台包需要的新宿主能力无法通过 `minCoreVersion` 把旧主应用排除。
+
+单平台升级标准步骤：
+
+1. 修改目标平台包代码与资源。
+2. 提升 `manifest.json` 与 `runtime/index.json` 的平台包版本，补平台包 `changelog`；禁止修改 `package.json` 主应用版本、主应用 `CHANGELOG.md` / `CHANGELOG.zh-CN.md`。
+3. 如依赖新的 Core Shell 能力，提高 `minCoreVersion`，让旧主应用不提示可安装。
+4. 使用 `.github/workflows/platform-packages.yml` 或 `npm run package:platform` 分别构建目标 OS/arch 的 zip 与 metadata；`sidecarAdapter` 平台必须覆盖 Windows/macOS/Linux 目标 artifact，不能把单系统 zip 当全平台包发布。
+5. 使用 `npm run package:platform-index` 汇总 metadata，确认 `downloadUrl`、`downloadSizeBytes`、`sha256`、`changelog`、`contributions` 与包内 manifest/runtime 一致。
+6. 先发布到 test channel 验证真实远端下载、安装、卸载、检查更新、更新弹框、更新日志、包大小和当前系统 artifact 匹配。
+7. 发布正式通道时只更新平台包 zip 与 `platform-packages/index.json`；禁止执行 `npm run sync-version`、`npm run release:preflight`、创建主应用 release commit 或主应用 tag。
+8. 单平台升级至少执行 `npm run verify:platform-packages`、`node scripts/check_locales.cjs`、`git diff --check`；涉及 adapter 或 remote UI 时补充对应构建、smoke 或类型检查。
+
+### 5.3 远端测试通道
 
 远端测试必须使用独立 test channel，禁止把测试包发布到正式 updater endpoint 或正式平台包 index。
 
@@ -250,24 +271,28 @@ npm run package:platform-index -- --metadata-dir platform-packages/dist-ci --ver
 5. 测试平台包必须发布到 `platform-packages/test/dist`，测试索引必须发布到 `platform-packages/test/index.json`；正式 `platform-packages/index.json` 不得被测试包更新。
 6. `.github/workflows/platform-packages.yml` 的 `workflow_dispatch channel=test` 是平台包测试构建入口；需要真实远端下载时，勾选 `publish_test_branch`，把测试 zip 与 index 发布到 `platform-test` 分支。
 7. `.github/workflows/build-matrix.yml` 的 `workflow_dispatch channel=test` 是测试桌面端构建入口；需要真实 Tauri updater 验证时，勾选 `publish_test_release`，把 signed updater artifacts 和 `latest-test.json` 发布到 `test-latest` prerelease。
-8. 需要连续测试多个桌面端版本时，使用 `test_version` 输入临时覆盖测试构建版本；为兼容 Windows MSI，测试版本的 prerelease 标识必须是纯数字且单段不超过 `65535`，例如 `1.0.1-1001`、`1.0.1-1002`。该覆盖只允许用于测试通道，不得写入正式版本号或正式更新日志。
-9. Tauri updater 真机更新依赖签名产物；测试 release 必须使用与 `tauri.test.conf.json` 中 `pubkey` 匹配的签名密钥生成 artifacts。
-10. GitHub Actions artifacts 可用于手动下载 Windows/macOS/Linux 测试包；真实 updater 验证必须使用 `test-latest` prerelease 上的 `latest-test.json` 与对应签名资产。
-11. macOS 测试 release 应上传 `.dmg` 供人工安装测试；Tauri updater 仍使用签名的 `.app.tar.gz` 和 `.sig`，不要把 `.dmg` 当作 updater 输入。
+8. 需要测试“安装后平台已就绪”的 Full 包时，只能在 `.github/workflows/build-matrix.yml` 的 test channel 输入 `bundle_platform_packages=true`。CI 会从测试平台包索引下载当前构建目标匹配的 zip，生成 `platform-packages/bootstrap/index.json` 与 `platform-packages/bootstrap/dist`，再临时加入 Tauri resources；默认测试包与正式包仍保持 Slim。
+9. 需要连续测试多个桌面端版本时，使用 `test_version` 输入临时覆盖测试构建版本；为兼容 Windows MSI，测试版本的 prerelease 标识必须是纯数字且单段不超过 `65535`，例如 `1.0.1-1001`、`1.0.1-1002`。该覆盖只允许用于测试通道，不得写入正式版本号或正式更新日志。
+10. Tauri updater 真机更新依赖签名产物；测试 release 必须使用与 `tauri.test.conf.json` 中 `pubkey` 匹配的签名密钥生成 artifacts。
+11. GitHub Actions artifacts 可用于手动下载 Windows/macOS/Linux 测试包；真实 updater 验证必须使用 `test-latest` prerelease 上的 `latest-test.json` 与对应签名资产。
+12. macOS 测试 release 应上传 `.dmg` 供人工安装测试；Tauri updater 仍使用签名的 `.app.tar.gz` 和 `.sig`，不要把 `.dmg` 当作 updater 输入。
 
-### 5.3 主应用内置资源边界
+### 5.4 主应用内置资源边界
 
-主应用安装包必须保持轻量，禁止把完整平台业务包当作 Tauri resource 内置：
+默认主应用安装包必须保持轻量，禁止把完整平台业务包当作常规 Tauri resource 内置；只有测试通道或明确的大版本 Full/Bootstrap 包允许例外：
 
 1. `src-tauri/tauri.conf.json` 的 `bundle.resources` 只能内置轻量 `../platform-packages/index.seed.json` 到 `platform-packages/index.seed.json`，以及平台图标、通用脚本、Host API 所需的 Core Shell 资源。
 2. 禁止内置完整 `../platform-packages` 目录，禁止内置 `../platform-packages/dist`，也禁止把任意平台的 `ui/remoteEntry.js`、`ui/style.css`、adapter、helper/二级 sidecar 展开目录打进主应用安装包。
 3. `index.seed.json` 只用于远端 index 拉取失败且本地没有缓存时展示平台元信息、包大小、更新日志和安装入口；它不是业务 runtime，不得从 seed 里加载 remote UI 或 adapter。
 4. 已安装平台只能从用户数据目录里的本地平台包 `current` 目录加载业务 UI 和 adapter；未安装平台只能显示通用不可用页和平台包操作入口。
-5. 首次使用平台业务能力必须通过远端 index 下载当前 `os + arch` 匹配的 zip，校验大小和 `sha256` 后安装到用户数据目录。
-6. `scripts/package-platform-package.cjs --update-index` 必须同时更新 `platform-packages/index.json` 和 `platform-packages/index.seed.json`，保证 seed 与本地开发索引的平台集合一致。
-7. `npm run verify:platform-packages` 必须检查 seed 存在、seed 与 index 的平台集合一致、Tauri 主配置只内置 seed，并拦截正式、dev、test 配置重新内置完整 `platform-packages` 或 `platform-packages/dist`。
-8. debug/dev 模式可以从仓库 `platform-packages/<platformId>` 读取本地 source 包以方便开发和修复旧 dev 安装包；release/test 安装包不得依赖仓库 source 包，也不得用 resource 目录中的展开平台包作为安装源。
-9. 如果担心首次打开体验，只能内置平台展示所需的轻量 contribution/seed 和通用未安装页；不能为了“开箱即用”重新内置全平台、全 zip 或全系统 artifact。
+5. 默认 Slim 包首次使用平台业务能力必须通过远端 index 下载当前 `os + arch` 匹配的 zip，校验大小和 `sha256` 后安装到用户数据目录。
+6. Full/Bootstrap 包只能内置当前构建目标匹配的平台包 zip：macOS 单架构包只内置对应架构，macOS universal 包可内置 `macos/aarch64` 与 `macos/x86_64`，Windows/Linux 只内置当前架构；禁止内置全系统 artifact。
+7. Bootstrap 资源必须放在 `platform-packages/bootstrap/index.json` 与 `platform-packages/bootstrap/dist/*.zip`。首次启动时 Core Shell 必须校验 size、sha256、manifest、runtime、UI entry 和 adapter entry，然后导入用户数据目录 `platform-packages/<platformId>/current` 并写 registry；禁止直接从 App resource 目录运行 remote UI 或 adapter。
+8. Bootstrap 不得覆盖本地已安装的同版本或更高版本；如果 registry 记录用户明确卸载过该平台，后续启动不得自动装回。用户重新安装或更新成功后才清除“明确卸载”标记。
+9. `scripts/package-platform-package.cjs --update-index` 必须同时更新 `platform-packages/index.json` 和 `platform-packages/index.seed.json`，保证 seed 与本地开发索引的平台集合一致。
+10. `npm run verify:platform-packages` 必须检查 seed 存在、seed 与 index 的平台集合一致、Tauri 主配置只内置 seed，并拦截正式、dev、test 配置重新内置完整 `platform-packages` 或 `platform-packages/dist`。
+11. debug/dev 模式可以从仓库 `platform-packages/<platformId>` 读取本地 source 包以方便开发和修复旧 dev 安装包；release/test 安装包不得依赖仓库 source 包，也不得用 resource 目录中的展开平台包作为安装源。
+12. 如果担心首次打开体验，优先使用测试/大版本 Full/Bootstrap 包；常规版本继续使用 Slim 包 + seed + 通用未安装页，不能为了“开箱即用”重新内置全平台、全 zip 或全系统 artifact。
 
 ## 6. 安装、更新、卸载流程
 
@@ -281,7 +306,8 @@ npm run package:platform-index -- --metadata-dir platform-packages/dist-ci --ver
 6. 校验 `manifest.json`、`runtime/index.json`、UI entry、adapter entry。
 7. 原子切换到 `current` 包目录。
 8. 写入注册表：`installed=true`、`runtimeReady=true`、版本、包大小。
-9. 平台页加载 remote UI。
+9. 清理旧 zip、`.part`、旧 prepared、`.staging.*`、`.extracting.*`、`.previous.*` 等残留。
+10. 平台页加载 remote UI。
 
 ### 6.2 更新
 
@@ -289,16 +315,17 @@ npm run package:platform-index -- --metadata-dir platform-packages/dist-ci --ver
 2. 比较 `installedVersion` 与 `latestVersion`。
 3. 有新版本时，平台页右上角平台包操作区将主按钮从“检查更新”切换为“更新”，旁边继续保留“卸载”和“更多”入口。
 4. 点击“更新”打开平台更新弹框，在弹框中展示目标版本、包大小和本次更新日志，并提供跳过/取消与更新操作；“更多”菜单只保留检查更新、更新日志、更新、卸载等常态命令，不嵌入大块更新日志预览。
-5. 用户确认后下载并校验新包。
-6. 安装失败必须回滚旧版本并保留错误信息。
-7. 更新成功后重新加载 remote UI 和 adapter。
+5. 后台允许提前静默下载、校验并预解压到 `prepared/<version>`；该阶段不得替换 `current`、不得重启 adapter、不得宣称更新已安装。
+6. 用户确认后优先使用已准备的 `prepared/<version>` 原子切换到 `current`；若未准备好，再下载并校验新包。
+7. 安装失败必须回滚旧版本并保留错误信息。
+8. 更新成功后清理旧 zip、旧 prepared 和临时目录，重新加载 remote UI 和 adapter。
 
 ### 6.3 卸载
 
 1. 只做本项目平台包生命周期清理。
 2. best-effort 停止正在运行的 adapter。
 3. 删除平台包目录和下载缓存。
-4. 写入注册表：`installed=false`、`runtimeReady=false`。
+4. 写入注册表：`installed=false`、`runtimeReady=false`、`explicitlyUninstalled=true`。
 5. 不删除官方客户端。
 6. 不默认删除本项目保存的账号主数据。
 7. 不删除官方客户端真实登录态。
@@ -357,7 +384,7 @@ npm run package:platform-index -- --metadata-dir platform-packages/dist-ci --ver
 
 侧边栏和仪表盘只展示状态，不承载安装、更新、卸载动作。
 
-所有安装、修复、更新、卸载都必须二次确认。失败必须显示在当前弹框或当前操作区。
+所有安装、修复、更新、卸载都必须二次确认。失败必须显示在当前弹框或当前操作区。执行期间必须通过 Core Shell 通用 `platform-package://progress` 事件反馈阶段与进度；下载大小可计算时弹框必须显示百分比和已下载体积，未知大小时至少显示当前阶段的流动进度，禁止只让按钮保持 loading。
 
 ## 8. Remote React UI 协议
 

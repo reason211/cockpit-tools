@@ -6,9 +6,9 @@ use std::fs;
 use std::fs::File;
 use std::io;
 use std::path::{Component, Path, PathBuf};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use std::time::{SystemTime, UNIX_EPOCH};
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 use url::Url;
 
 use crate::modules::{atomic_write, logger};
@@ -21,6 +21,10 @@ const PLATFORM_PACKAGE_INDEX_SEED_FILE: &str = "index.seed.json";
 const MANIFEST_FILE: &str = "manifest.json";
 const CURRENT_DIR: &str = "current";
 const DOWNLOADS_DIR: &str = "downloads";
+const PREPARED_DIR: &str = "prepared";
+const BOOTSTRAP_DIR: &str = "bootstrap";
+const BOOTSTRAP_DIST_DIR: &str = "dist";
+const BOOTSTRAP_INDEX_FILE: &str = "index.json";
 const ANTIGRAVITY_PLATFORM_ID: &str = "antigravity";
 const ANTIGRAVITY_IDE_PLATFORM_ID: &str = "antigravity_ide";
 const ZED_PLATFORM_ID: &str = "zed";
@@ -60,6 +64,61 @@ const PLATFORM_PACKAGE_TEST_INDEX_URL: &str =
     "https://raw.githubusercontent.com/jlcodes99/cockpit-tools/platform-test/platform-packages/test/index.json";
 const PLATFORM_PACKAGE_INDEX_CACHE_TTL_MS: i64 = 30 * 60 * 1000;
 const MAX_PLATFORM_PACKAGE_DOWNLOAD_BYTES: u64 = 80 * 1024 * 1024;
+const PLATFORM_PACKAGE_PROGRESS_EVENT: &str = "platform-package://progress";
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum PlatformPackageOperation {
+    Install,
+    Update,
+    Prepare,
+}
+
+impl PlatformPackageOperation {
+    fn as_str(self) -> &'static str {
+        match self {
+            PlatformPackageOperation::Install => "install",
+            PlatformPackageOperation::Update => "update",
+            PlatformPackageOperation::Prepare => "prepare",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum PlatformPackageProgressPhase {
+    Resolving,
+    Downloading,
+    Verifying,
+    Extracting,
+    Installing,
+    Completed,
+    Failed,
+}
+
+impl PlatformPackageProgressPhase {
+    fn as_str(self) -> &'static str {
+        match self {
+            PlatformPackageProgressPhase::Resolving => "resolving",
+            PlatformPackageProgressPhase::Downloading => "downloading",
+            PlatformPackageProgressPhase::Verifying => "verifying",
+            PlatformPackageProgressPhase::Extracting => "extracting",
+            PlatformPackageProgressPhase::Installing => "installing",
+            PlatformPackageProgressPhase::Completed => "completed",
+            PlatformPackageProgressPhase::Failed => "failed",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PlatformPackageProgressPayload {
+    platform_id: String,
+    operation: String,
+    phase: String,
+    percent: Option<u8>,
+    downloaded_bytes: Option<u64>,
+    total_bytes: Option<u64>,
+    message: Option<String>,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -324,6 +383,8 @@ struct PersistedPlatformPackage {
     installed_version: Option<String>,
     last_checked_at: Option<i64>,
     error_message: Option<String>,
+    #[serde(default)]
+    explicitly_uninstalled: bool,
 }
 
 fn now_ts_ms() -> i64 {
@@ -331,6 +392,63 @@ fn now_ts_ms() -> i64 {
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default()
         .as_millis() as i64
+}
+
+fn emit_platform_package_progress(
+    app: &AppHandle,
+    platform_id: &str,
+    operation: PlatformPackageOperation,
+    phase: PlatformPackageProgressPhase,
+    percent: Option<u8>,
+    downloaded_bytes: Option<u64>,
+    total_bytes: Option<u64>,
+    message: Option<String>,
+) {
+    let payload = PlatformPackageProgressPayload {
+        platform_id: platform_id.to_string(),
+        operation: operation.as_str().to_string(),
+        phase: phase.as_str().to_string(),
+        percent,
+        downloaded_bytes,
+        total_bytes,
+        message,
+    };
+    if let Err(error) = app.emit(PLATFORM_PACKAGE_PROGRESS_EVENT, payload) {
+        logger::log_warn(&format!(
+            "[PlatformPackage] 发射平台包进度事件失败: platform={}, operation={}, phase={}, error={}",
+            platform_id,
+            operation.as_str(),
+            phase.as_str(),
+            error
+        ));
+    }
+}
+
+fn emit_platform_package_failure(
+    app: &AppHandle,
+    platform_id: &str,
+    operation: PlatformPackageOperation,
+    error: &str,
+) {
+    emit_platform_package_progress(
+        app,
+        platform_id,
+        operation,
+        PlatformPackageProgressPhase::Failed,
+        None,
+        None,
+        None,
+        Some(error.to_string()),
+    );
+}
+
+fn scale_progress(base: u8, span: u8, current: u64, total: u64) -> u8 {
+    if total == 0 {
+        return base;
+    }
+    let ratio = (current as f64 / total as f64).clamp(0.0, 1.0);
+    let value = base as f64 + ratio * span as f64;
+    value.round().clamp(base as f64, (base + span) as f64) as u8
 }
 
 fn data_dir() -> Result<PathBuf, String> {
@@ -364,6 +482,26 @@ fn package_downloads_dir(platform_id: &str) -> Result<PathBuf, String> {
     let dir = package_dir(platform_id)?.join(DOWNLOADS_DIR);
     fs::create_dir_all(&dir).map_err(|err| format!("创建平台包下载缓存目录失败: {}", err))?;
     Ok(dir)
+}
+
+fn package_prepared_dir(platform_id: &str) -> Result<PathBuf, String> {
+    let dir = package_dir(platform_id)?.join(PREPARED_DIR);
+    fs::create_dir_all(&dir).map_err(|err| format!("创建平台包预准备目录失败: {}", err))?;
+    Ok(dir)
+}
+
+fn package_prepared_version_dir(platform_id: &str, version: &str) -> Result<PathBuf, String> {
+    let safe_version = version.trim();
+    if safe_version.is_empty()
+        || safe_version.contains('/')
+        || safe_version.contains('\\')
+        || safe_version.contains('\0')
+        || safe_version == "."
+        || safe_version == ".."
+    {
+        return Err(format!("平台包预准备版本号非法: {}", version));
+    }
+    Ok(package_prepared_dir(platform_id)?.join(safe_version))
 }
 
 fn ensure_supported_platform(platform_id: &str) -> Result<(), String> {
@@ -418,6 +556,12 @@ fn get_record<'a>(
         .packages
         .iter()
         .find(|item| item.platform_id == platform_id)
+}
+
+fn record_explicitly_uninstalled(registry: &PlatformPackageRegistry, platform_id: &str) -> bool {
+    get_record(registry, platform_id)
+        .map(|item| item.explicitly_uninstalled)
+        .unwrap_or(false)
 }
 
 fn dir_size(path: &Path) -> u64 {
@@ -1066,6 +1210,171 @@ fn load_bundled_seed_index(app: &AppHandle) -> Result<Option<PlatformPackageRemo
     Ok(None)
 }
 
+fn bundled_bootstrap_index_candidates(app: &AppHandle) -> Vec<PathBuf> {
+    let mut candidates = Vec::new();
+    if let Ok(resource_dir) = app.path().resource_dir() {
+        candidates.push(
+            resource_dir
+                .join(PLATFORM_PACKAGE_DIR)
+                .join(BOOTSTRAP_DIR)
+                .join(BOOTSTRAP_INDEX_FILE),
+        );
+    }
+
+    if cfg!(debug_assertions) {
+        let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        if let Some(repo_root) = manifest_dir.parent() {
+            candidates.push(
+                repo_root
+                    .join(PLATFORM_PACKAGE_DIR)
+                    .join(BOOTSTRAP_DIR)
+                    .join(BOOTSTRAP_INDEX_FILE),
+            );
+        }
+    }
+
+    candidates
+}
+
+fn bootstrap_dist_dir_from_index(index_path: &Path) -> PathBuf {
+    index_path
+        .parent()
+        .map(|parent| parent.join(BOOTSTRAP_DIST_DIR))
+        .unwrap_or_else(|| PathBuf::from(BOOTSTRAP_DIST_DIR))
+}
+
+fn zip_name_from_download_url(raw: &str) -> Result<String, String> {
+    let parsed = Url::parse(raw).map_err(|err| format!("平台包下载 URL 非法: {}", err))?;
+    let Some(segment) = parsed
+        .path_segments()
+        .and_then(|mut segments| segments.next_back())
+        .filter(|value| !value.trim().is_empty())
+    else {
+        return Err(format!("平台包下载 URL 缺少 zip 文件名: {}", raw));
+    };
+    if !segment.ends_with(".zip") || segment.contains('/') || segment.contains('\\') {
+        return Err(format!("平台包 zip 文件名非法: {}", segment));
+    }
+    Ok(segment.to_string())
+}
+
+pub fn bootstrap_platform_packages_from_resources(app: &AppHandle) -> Result<Vec<String>, String> {
+    let mut installed_platforms = Vec::new();
+    for index_path in bundled_bootstrap_index_candidates(app) {
+        if !index_path.exists() {
+            continue;
+        }
+        logger::log_info(&format!(
+            "[PlatformPackage] 发现内置平台包 bootstrap 索引: {}",
+            index_path.display()
+        ));
+        let index = parse_remote_index_file(&index_path)?;
+        let dist_dir = bootstrap_dist_dir_from_index(&index_path);
+        for package in index.packages {
+            match bootstrap_one_platform_package(app, &dist_dir, &package) {
+                Ok(true) => installed_platforms.push(package.platform_id.clone()),
+                Ok(false) => {}
+                Err(error) => logger::log_warn(&format!(
+                    "[PlatformPackage] 内置平台包 bootstrap 失败: platform={}, error={}",
+                    package.platform_id, error
+                )),
+            }
+        }
+        break;
+    }
+    Ok(installed_platforms)
+}
+
+fn bootstrap_one_platform_package(
+    app: &AppHandle,
+    dist_dir: &Path,
+    package: &PlatformPackageRemotePackage,
+) -> Result<bool, String> {
+    let platform_id = package.platform_id.as_str();
+    ensure_supported_platform(platform_id)?;
+    let source_manifest = manifest_from_remote_package(platform_id, package)?;
+    let registry = read_registry()?;
+    if record_explicitly_uninstalled(&registry, platform_id) {
+        logger::log_info(&format!(
+            "[PlatformPackage] 用户已主动卸载，跳过内置平台包 bootstrap: platform={}",
+            platform_id
+        ));
+        return Ok(false);
+    }
+
+    match read_installed_manifest(platform_id) {
+        Ok(Some(installed_manifest))
+            if compare_versions(&installed_manifest.version, &source_manifest.version)
+                != Ordering::Less =>
+        {
+            return Ok(false);
+        }
+        Ok(_) => {}
+        Err(error) => logger::log_warn(&format!(
+            "[PlatformPackage] 已安装平台包不可用，将尝试用内置包修复: platform={}, error={}",
+            platform_id, error
+        )),
+    }
+
+    let artifact = selected_remote_artifact(platform_id, package)?;
+    let zip_name = zip_name_from_download_url(&artifact.download_url)?;
+    let zip_path = dist_dir.join(zip_name);
+    if !zip_path.is_file() {
+        return Err(format!("内置平台包 zip 不存在: {}", zip_path.display()));
+    }
+    if let Some(expected_size) = artifact.download_size_bytes {
+        let actual_size = fs::metadata(&zip_path)
+            .map_err(|err| format!("读取内置平台包大小失败: {}", err))?
+            .len();
+        if expected_size > 0 && actual_size != expected_size {
+            return Err(format!(
+                "内置平台包大小校验失败: expected={}, actual={}",
+                expected_size, actual_size
+            ));
+        }
+    }
+    let actual_sha256 = sha256_file_hex(&zip_path)?;
+    if !actual_sha256.eq_ignore_ascii_case(&artifact.sha256) {
+        return Err(format!(
+            "内置平台包 sha256 校验失败: expected={}, actual={}",
+            artifact.sha256, actual_sha256
+        ));
+    }
+
+    let extracted_root = extract_remote_package_zip(
+        app,
+        platform_id,
+        &zip_path,
+        PlatformPackageOperation::Install,
+    )?;
+    let installed_manifest = replace_current_with_prepared(
+        app,
+        platform_id,
+        &extracted_root,
+        PlatformPackageOperation::Install,
+    )?;
+    let mut registry = read_registry()?;
+    upsert_record(
+        &mut registry,
+        PersistedPlatformPackage {
+            platform_id: platform_id.to_string(),
+            installed: true,
+            runtime_ready: true,
+            installed_version: Some(installed_manifest.version.clone()),
+            last_checked_at: Some(now_ts_ms()),
+            error_message: None,
+            explicitly_uninstalled: false,
+        },
+    );
+    write_registry(&registry)?;
+    cleanup_platform_package_cache(platform_id, None)?;
+    logger::log_info(&format!(
+        "[PlatformPackage] 内置平台包 bootstrap 完成: platform={}, version={}",
+        platform_id, installed_manifest.version
+    ));
+    Ok(true)
+}
+
 fn read_index_cache() -> Result<Option<PlatformPackageIndexCache>, String> {
     let path = index_cache_path()?;
     if !path.exists() {
@@ -1404,9 +1713,21 @@ fn copy_dir_all(source: &Path, target: &Path) -> Result<(), String> {
 }
 
 fn replace_current_with_prepared(
+    app: &AppHandle,
     platform_id: &str,
     prepared_root: &Path,
+    operation: PlatformPackageOperation,
 ) -> Result<PlatformPackageManifest, String> {
+    emit_platform_package_progress(
+        app,
+        platform_id,
+        operation,
+        PlatformPackageProgressPhase::Installing,
+        Some(92),
+        None,
+        None,
+        None,
+    );
     let installed_manifest = validate_manifest(platform_id, prepared_root)?;
     let platform_dir = package_dir(platform_id)?;
     fs::create_dir_all(&platform_dir).map_err(|err| format!("创建平台包目录失败: {}", err))?;
@@ -1450,18 +1771,41 @@ fn replace_current_with_prepared(
         }
     }
 
+    emit_platform_package_progress(
+        app,
+        platform_id,
+        operation,
+        PlatformPackageProgressPhase::Installing,
+        Some(98),
+        None,
+        None,
+        None,
+    );
+
     validate_manifest(platform_id, &current_dir).map(|_| installed_manifest)
 }
 
 fn install_local_source(
+    app: &AppHandle,
     platform_id: &str,
     source_dir: &Path,
+    operation: PlatformPackageOperation,
 ) -> Result<PlatformPackageManifest, String> {
     let platform_dir = package_dir(platform_id)?;
     let staging_dir = unique_work_dir(&platform_dir, "staging");
     remove_path_if_exists(&staging_dir)?;
+    emit_platform_package_progress(
+        app,
+        platform_id,
+        operation,
+        PlatformPackageProgressPhase::Installing,
+        Some(55),
+        None,
+        None,
+        None,
+    );
     copy_dir_all(source_dir, &staging_dir)?;
-    match replace_current_with_prepared(platform_id, &staging_dir) {
+    match replace_current_with_prepared(app, platform_id, &staging_dir, operation) {
         Ok(manifest) => Ok(manifest),
         Err(error) => {
             let _ = remove_path_if_exists(&staging_dir);
@@ -1471,8 +1815,10 @@ fn install_local_source(
 }
 
 fn download_remote_package_zip(
+    app: &AppHandle,
     platform_id: &str,
     package: &PlatformPackageRemotePackage,
+    operation: PlatformPackageOperation,
 ) -> Result<PathBuf, String> {
     let artifact = selected_remote_artifact(platform_id, package)?;
     let downloads_dir = package_downloads_dir(platform_id)?;
@@ -1483,6 +1829,16 @@ fn download_remote_package_zip(
     let expected_sha256 = artifact.sha256.trim().to_ascii_lowercase();
 
     if zip_path.exists() {
+        emit_platform_package_progress(
+            app,
+            platform_id,
+            operation,
+            PlatformPackageProgressPhase::Verifying,
+            Some(8),
+            None,
+            artifact.download_size_bytes,
+            None,
+        );
         match sha256_file_hex(&zip_path) {
             Ok(actual) if actual.eq_ignore_ascii_case(&expected_sha256) => {
                 logger::log_info(&format!(
@@ -1490,6 +1846,16 @@ fn download_remote_package_zip(
                     platform_id,
                     zip_path.display()
                 ));
+                emit_platform_package_progress(
+                    app,
+                    platform_id,
+                    operation,
+                    PlatformPackageProgressPhase::Verifying,
+                    Some(78),
+                    artifact.download_size_bytes,
+                    artifact.download_size_bytes,
+                    None,
+                );
                 return Ok(zip_path);
             }
             Ok(actual) => {
@@ -1513,6 +1879,16 @@ fn download_remote_package_zip(
         "[PlatformPackage] 下载远端平台包: platform={}, url={}",
         platform_id, artifact.download_url
     ));
+    emit_platform_package_progress(
+        app,
+        platform_id,
+        operation,
+        PlatformPackageProgressPhase::Downloading,
+        Some(10),
+        Some(0),
+        artifact.download_size_bytes,
+        None,
+    );
     let client = reqwest::blocking::Client::builder()
         .user_agent("Cockpit-Tools")
         .timeout(Duration::from_secs(10 * 60))
@@ -1529,6 +1905,10 @@ fn download_remote_package_zip(
             artifact.download_url
         ));
     }
+    let expected_download_size = artifact
+        .download_size_bytes
+        .filter(|size| *size > 0)
+        .or_else(|| response.content_length().filter(|size| *size > 0));
 
     let temp_path = zip_path.with_extension("zip.part");
     let mut temp_file = File::create(&temp_path).map_err(|err| {
@@ -1540,6 +1920,9 @@ fn download_remote_package_zip(
     })?;
     let mut hasher = Sha256::new();
     let mut downloaded = 0u64;
+    let mut last_progress_emit = Instant::now();
+    let mut last_progress_percent: Option<u8> = None;
+    let mut last_progress_bytes = 0u64;
     let mut buffer = [0u8; 1024 * 256];
     loop {
         let read = io::Read::read(&mut response, &mut buffer)
@@ -1555,7 +1938,37 @@ fn download_remote_package_zip(
         hasher.update(&buffer[..read]);
         io::Write::write_all(&mut temp_file, &buffer[..read])
             .map_err(|err| format!("写入平台包下载临时文件失败: {}", err))?;
+        let progress_percent =
+            expected_download_size.map(|total| scale_progress(10, 65, downloaded, total));
+        let should_emit = progress_percent != last_progress_percent
+            || downloaded.saturating_sub(last_progress_bytes) >= 1024 * 1024
+            || last_progress_emit.elapsed() >= Duration::from_millis(500);
+        if should_emit {
+            emit_platform_package_progress(
+                app,
+                platform_id,
+                operation,
+                PlatformPackageProgressPhase::Downloading,
+                progress_percent,
+                Some(downloaded),
+                expected_download_size,
+                None,
+            );
+            last_progress_emit = Instant::now();
+            last_progress_percent = progress_percent;
+            last_progress_bytes = downloaded;
+        }
     }
+    emit_platform_package_progress(
+        app,
+        platform_id,
+        operation,
+        PlatformPackageProgressPhase::Verifying,
+        Some(78),
+        Some(downloaded),
+        expected_download_size,
+        None,
+    );
     temp_file
         .sync_all()
         .map_err(|err| format!("同步平台包下载临时文件失败: {}", err))?;
@@ -1591,13 +2004,28 @@ fn download_remote_package_zip(
             err
         )
     })?;
+    emit_platform_package_progress(
+        app,
+        platform_id,
+        operation,
+        PlatformPackageProgressPhase::Verifying,
+        Some(82),
+        Some(downloaded),
+        expected_download_size,
+        None,
+    );
     Ok(zip_path)
 }
 
-fn extract_zip_safely(
+fn extract_zip_safely_with_progress<F>(
     archive: &mut zip::ZipArchive<File>,
     target_dir: &Path,
-) -> Result<(), String> {
+    mut on_progress: Option<F>,
+) -> Result<(), String>
+where
+    F: FnMut(usize, usize),
+{
+    let total = archive.len();
     for index in 0..archive.len() {
         let mut file = archive
             .by_index(index)
@@ -1611,6 +2039,9 @@ fn extract_zip_safely(
         if file.is_dir() {
             fs::create_dir_all(&output_path)
                 .map_err(|err| format!("创建平台包解压目录失败: {}", err))?;
+            if let Some(on_progress) = on_progress.as_mut() {
+                on_progress(index + 1, total);
+            }
             continue;
         }
 
@@ -1634,11 +2065,19 @@ fn extract_zip_safely(
             fs::set_permissions(&output_path, permissions)
                 .map_err(|err| format!("设置平台包文件权限失败: {}", err))?;
         }
+        if let Some(on_progress) = on_progress.as_mut() {
+            on_progress(index + 1, total);
+        }
     }
     Ok(())
 }
 
-fn extract_remote_package_zip(platform_id: &str, zip_path: &Path) -> Result<PathBuf, String> {
+fn extract_remote_package_zip(
+    app: &AppHandle,
+    platform_id: &str,
+    zip_path: &Path,
+    operation: PlatformPackageOperation,
+) -> Result<PathBuf, String> {
     let platform_dir = package_dir(platform_id)?;
     let staging_dir = unique_work_dir(&platform_dir, "extracting");
     remove_path_if_exists(&staging_dir)?;
@@ -1653,7 +2092,33 @@ fn extract_remote_package_zip(platform_id: &str, zip_path: &Path) -> Result<Path
     })?;
     let mut archive = zip::ZipArchive::new(archive_file)
         .map_err(|err| format!("解析平台包 zip 失败: {}", err))?;
-    extract_zip_safely(&mut archive, &staging_dir)?;
+    emit_platform_package_progress(
+        app,
+        platform_id,
+        operation,
+        PlatformPackageProgressPhase::Extracting,
+        Some(84),
+        None,
+        None,
+        None,
+    );
+    extract_zip_safely_with_progress(
+        &mut archive,
+        &staging_dir,
+        Some(|current, total| {
+            let percent = scale_progress(84, 8, current as u64, total as u64);
+            emit_platform_package_progress(
+                app,
+                platform_id,
+                operation,
+                PlatformPackageProgressPhase::Extracting,
+                Some(percent),
+                None,
+                None,
+                None,
+            );
+        }),
+    )?;
 
     if staging_dir.join(MANIFEST_FILE).exists() {
         return Ok(staging_dir);
@@ -1673,15 +2138,257 @@ fn extract_remote_package_zip(platform_id: &str, zip_path: &Path) -> Result<Path
     Err("平台包 zip 根目录缺少 manifest.json".to_string())
 }
 
-fn install_remote_source(
+fn manifest_matches_source(
+    platform_id: &str,
+    manifest: &PlatformPackageManifest,
+    source_manifest: &PlatformPackageManifest,
+) -> bool {
+    if manifest.id != source_manifest.id
+        || manifest.platform_id != source_manifest.platform_id
+        || manifest.version != source_manifest.version
+    {
+        logger::log_warn(&format!(
+            "[PlatformPackage] 预准备平台包元数据不匹配: platform={}, preparedVersion={}, sourceVersion={}",
+            platform_id, manifest.version, source_manifest.version
+        ));
+        return false;
+    }
+    if runtime_contract_mismatch(manifest, source_manifest) {
+        logger::log_warn(&format!(
+            "[PlatformPackage] 预准备平台包运行契约不匹配: platform={}, {}",
+            platform_id,
+            describe_runtime_contract_mismatch(manifest, source_manifest)
+        ));
+        return false;
+    }
+    true
+}
+
+fn try_prepared_source(
+    platform_id: &str,
+    source_manifest: &PlatformPackageManifest,
+) -> Result<Option<(PathBuf, PlatformPackageManifest)>, String> {
+    let prepared_dir = package_prepared_version_dir(platform_id, &source_manifest.version)?;
+    if !prepared_dir.join(MANIFEST_FILE).exists() {
+        return Ok(None);
+    }
+    match validate_manifest(platform_id, &prepared_dir) {
+        Ok(manifest) if manifest_matches_source(platform_id, &manifest, source_manifest) => {
+            Ok(Some((prepared_dir, manifest)))
+        }
+        Ok(manifest) => {
+            logger::log_warn(&format!(
+                "[PlatformPackage] 清理无效预准备平台包: platform={}, preparedVersion={}, sourceVersion={}",
+                platform_id, manifest.version, source_manifest.version
+            ));
+            let _ = remove_path_if_exists(&prepared_dir);
+            Ok(None)
+        }
+        Err(error) => {
+            logger::log_warn(&format!(
+                "[PlatformPackage] 预准备平台包校验失败，清理后重新下载: platform={}, error={}",
+                platform_id, error
+            ));
+            let _ = remove_path_if_exists(&prepared_dir);
+            Ok(None)
+        }
+    }
+}
+
+fn cleanup_platform_package_cache(
+    platform_id: &str,
+    keep_prepared_version: Option<&str>,
+) -> Result<(), String> {
+    let platform_dir = package_dir(platform_id)?;
+    if !platform_dir.exists() {
+        return Ok(());
+    }
+
+    if let Ok(entries) = fs::read_dir(&platform_dir) {
+        for entry in entries.flatten() {
+            let name = entry.file_name().to_string_lossy().to_string();
+            if name.starts_with(".staging.")
+                || name.starts_with(".extracting.")
+                || name.starts_with(".previous.")
+            {
+                let path = entry.path();
+                if let Err(error) = remove_path_if_exists(&path) {
+                    logger::log_warn(&format!(
+                        "[PlatformPackage] 清理平台包临时目录失败: platform={}, path={}, error={}",
+                        platform_id,
+                        path.display(),
+                        error
+                    ));
+                }
+            }
+        }
+    }
+
+    let downloads_dir = platform_dir.join(DOWNLOADS_DIR);
+    if downloads_dir.exists() {
+        if let Ok(entries) = fs::read_dir(&downloads_dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                let should_remove = path
+                    .extension()
+                    .and_then(|item| item.to_str())
+                    .map(|ext| ext.eq_ignore_ascii_case("zip") || ext.eq_ignore_ascii_case("part"))
+                    .unwrap_or(false)
+                    || path
+                        .file_name()
+                        .and_then(|item| item.to_str())
+                        .map(|name| name.ends_with(".zip.part"))
+                        .unwrap_or(false);
+                if should_remove {
+                    if let Err(error) = remove_path_if_exists(&path) {
+                        logger::log_warn(&format!(
+                            "[PlatformPackage] 清理平台包下载缓存失败: platform={}, path={}, error={}",
+                            platform_id,
+                            path.display(),
+                            error
+                        ));
+                    }
+                }
+            }
+        }
+    }
+
+    let prepared_dir = platform_dir.join(PREPARED_DIR);
+    if prepared_dir.exists() {
+        if let Ok(entries) = fs::read_dir(&prepared_dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                let name = entry.file_name().to_string_lossy().to_string();
+                if keep_prepared_version
+                    .map(|version| version == name)
+                    .unwrap_or(false)
+                {
+                    continue;
+                }
+                if let Err(error) = remove_path_if_exists(&path) {
+                    logger::log_warn(&format!(
+                        "[PlatformPackage] 清理旧预准备平台包失败: platform={}, path={}, error={}",
+                        platform_id,
+                        path.display(),
+                        error
+                    ));
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+
+fn move_extracted_package_to_prepared(
+    platform_id: &str,
+    extracted_root: &Path,
+    source_manifest: &PlatformPackageManifest,
+) -> Result<PlatformPackageManifest, String> {
+    let manifest = validate_manifest(platform_id, extracted_root)?;
+    if !manifest_matches_source(platform_id, &manifest, source_manifest) {
+        return Err("预准备平台包与远端索引声明不一致".to_string());
+    }
+
+    let prepared_dir = package_prepared_dir(platform_id)?;
+    let target_dir = package_prepared_version_dir(platform_id, &manifest.version)?;
+    let extracted_parent = extracted_root.parent().map(Path::to_path_buf);
+    fs::create_dir_all(&prepared_dir)
+        .map_err(|err| format!("创建平台包预准备目录失败: {}", err))?;
+    remove_path_if_exists(&target_dir)?;
+    fs::rename(extracted_root, &target_dir).map_err(|err| {
+        format!(
+            "保存预准备平台包失败: from={}, to={}, error={}",
+            extracted_root.display(),
+            target_dir.display(),
+            err
+        )
+    })?;
+    if let Some(parent) = extracted_parent {
+        if parent != prepared_dir
+            && parent
+                .file_name()
+                .and_then(|item| item.to_str())
+                .map(|name| name.starts_with(".extracting."))
+                .unwrap_or(false)
+        {
+            let _ = remove_path_if_exists(&parent);
+        }
+    }
+    validate_manifest(platform_id, &target_dir)
+}
+
+fn prepare_remote_source(
+    app: &AppHandle,
     platform_id: &str,
     package: &PlatformPackageRemotePackage,
 ) -> Result<PlatformPackageManifest, String> {
-    let zip_path = download_remote_package_zip(platform_id, package)?;
-    let prepared_root = extract_remote_package_zip(platform_id, &zip_path)?;
-    match replace_current_with_prepared(platform_id, &prepared_root) {
-        Ok(manifest) => Ok(manifest),
+    let source_manifest = manifest_from_remote_package(platform_id, package)?;
+    if let Some((_, manifest)) = try_prepared_source(platform_id, &source_manifest)? {
+        cleanup_platform_package_cache(platform_id, Some(&manifest.version))?;
+        return Ok(manifest);
+    }
+
+    logger::log_info(&format!(
+        "[PlatformPackage] 静默预准备平台包开始: platform={}, version={}",
+        platform_id, source_manifest.version
+    ));
+    let zip_path =
+        download_remote_package_zip(app, platform_id, package, PlatformPackageOperation::Prepare)?;
+    let extracted_root = extract_remote_package_zip(
+        app,
+        platform_id,
+        &zip_path,
+        PlatformPackageOperation::Prepare,
+    )?;
+    let result = move_extracted_package_to_prepared(platform_id, &extracted_root, &source_manifest);
+    let _ = remove_path_if_exists(&zip_path);
+    match result {
+        Ok(manifest) => {
+            cleanup_platform_package_cache(platform_id, Some(&manifest.version))?;
+            logger::log_info(&format!(
+                "[PlatformPackage] 静默预准备平台包完成: platform={}, version={}",
+                platform_id, manifest.version
+            ));
+            Ok(manifest)
+        }
         Err(error) => {
+            let _ = remove_path_if_exists(&extracted_root);
+            Err(error)
+        }
+    }
+}
+
+fn install_remote_source(
+    app: &AppHandle,
+    platform_id: &str,
+    package: &PlatformPackageRemotePackage,
+    operation: PlatformPackageOperation,
+) -> Result<PlatformPackageManifest, String> {
+    let source_manifest = manifest_from_remote_package(platform_id, package)?;
+    if let Some((prepared_root, _manifest)) = try_prepared_source(platform_id, &source_manifest)? {
+        logger::log_info(&format!(
+            "[PlatformPackage] 使用预准备平台包完成{}: platform={}, version={}",
+            if operation == PlatformPackageOperation::Update {
+                "更新"
+            } else {
+                "安装"
+            },
+            platform_id,
+            source_manifest.version
+        ));
+        return replace_current_with_prepared(app, platform_id, &prepared_root, operation);
+    }
+
+    let zip_path = download_remote_package_zip(app, platform_id, package, operation)?;
+    let prepared_root = extract_remote_package_zip(app, platform_id, &zip_path, operation)?;
+    match replace_current_with_prepared(app, platform_id, &prepared_root, operation) {
+        Ok(manifest) => {
+            let _ = remove_path_if_exists(&zip_path);
+            Ok(manifest)
+        }
+        Err(error) => {
+            let _ = remove_path_if_exists(&zip_path);
             if prepared_root.exists() {
                 let _ = remove_path_if_exists(&prepared_root);
             }
@@ -2032,6 +2739,7 @@ fn read_installed_manifest_and_update_state(
                     installed_version: Some(manifest.version.clone()),
                     last_checked_at: Some(now_ts_ms()),
                     error_message: None,
+                    explicitly_uninstalled: false,
                 },
             );
             write_registry(&registry)?;
@@ -2041,6 +2749,7 @@ fn read_installed_manifest_and_update_state(
             let mut registry = read_registry()?;
             let installed_version =
                 get_record(&registry, platform_id).and_then(|item| item.installed_version.clone());
+            let explicitly_uninstalled = record_explicitly_uninstalled(&registry, platform_id);
             upsert_record(
                 &mut registry,
                 PersistedPlatformPackage {
@@ -2050,6 +2759,7 @@ fn read_installed_manifest_and_update_state(
                     installed_version,
                     last_checked_at: Some(now_ts_ms()),
                     error_message: Some(error.clone()),
+                    explicitly_uninstalled,
                 },
             );
             write_registry(&registry)?;
@@ -2096,6 +2806,10 @@ pub fn check_platform_package_update(
         read_latest_source_manifest_and_root(app, platform_id, true);
     let mut registry = read_registry()?;
     let existing = get_record(&registry, platform_id).cloned();
+    let explicitly_uninstalled = existing
+        .as_ref()
+        .map(|item| item.explicitly_uninstalled)
+        .unwrap_or(false);
     let installed_version = installed_manifest
         .as_ref()
         .map(|manifest| manifest.version.clone())
@@ -2130,6 +2844,7 @@ pub fn check_platform_package_update(
             installed_version,
             last_checked_at: Some(now_ts_ms()),
             error_message,
+            explicitly_uninstalled,
         },
     );
     write_registry(&registry)?;
@@ -2145,28 +2860,194 @@ pub fn check_platform_package_update(
     )
 }
 
+pub fn prepare_platform_package_updates(
+    app: &AppHandle,
+) -> Result<Vec<PlatformPackageState>, String> {
+    let mut states = Vec::new();
+    for platform_id in SUPPORTED_PLATFORM_IDS {
+        let (installed_manifest, validation_error) =
+            read_installed_manifest_and_update_state(platform_id)?;
+        let registry = read_registry()?;
+        let record = get_record(&registry, platform_id).cloned();
+
+        let Some(installed_manifest_for_prepare) = installed_manifest.clone() else {
+            states.push(build_state(
+                platform_id,
+                record.as_ref(),
+                installed_manifest,
+                read_latest_source_manifest(app, platform_id, false),
+                None,
+                validation_error,
+            )?);
+            continue;
+        };
+        if validation_error.is_some()
+            || !record
+                .as_ref()
+                .map(|item| item.installed && item.runtime_ready)
+                .unwrap_or(false)
+            || record
+                .as_ref()
+                .map(|item| item.explicitly_uninstalled)
+                .unwrap_or(false)
+        {
+            states.push(build_state(
+                platform_id,
+                record.as_ref(),
+                installed_manifest,
+                read_latest_source_manifest(app, platform_id, false),
+                None,
+                validation_error,
+            )?);
+            continue;
+        }
+
+        let remote_source = read_remote_source(app, platform_id, true);
+        let source_manifest = remote_source
+            .as_ref()
+            .map(|source| source.manifest().clone());
+        if let Some(PlatformPackageSource::Remote { package, manifest }) = remote_source {
+            if compare_versions(&manifest.version, &installed_manifest_for_prepare.version)
+                == Ordering::Greater
+            {
+                if let Err(error) = prepare_remote_source(app, platform_id, &package) {
+                    logger::log_warn(&format!(
+                        "[PlatformPackage] 静默预准备平台包失败: platform={}, version={}, error={}",
+                        platform_id, manifest.version, error
+                    ));
+                }
+            }
+        }
+
+        let mut refreshed_registry = read_registry()?;
+        let existing = get_record(&refreshed_registry, platform_id).cloned();
+        upsert_record(
+            &mut refreshed_registry,
+            PersistedPlatformPackage {
+                platform_id: platform_id.to_string(),
+                installed: true,
+                runtime_ready: existing
+                    .as_ref()
+                    .map(|item| item.runtime_ready)
+                    .unwrap_or(true),
+                installed_version: Some(installed_manifest_for_prepare.version.clone()),
+                last_checked_at: Some(now_ts_ms()),
+                error_message: existing
+                    .as_ref()
+                    .and_then(|item| item.error_message.clone()),
+                explicitly_uninstalled: existing
+                    .as_ref()
+                    .map(|item| item.explicitly_uninstalled)
+                    .unwrap_or(false),
+            },
+        );
+        write_registry(&refreshed_registry)?;
+        let refreshed_registry = read_registry()?;
+        states.push(build_state(
+            platform_id,
+            get_record(&refreshed_registry, platform_id),
+            installed_manifest,
+            source_manifest,
+            None,
+            validation_error,
+        )?);
+    }
+    Ok(states)
+}
+
 pub fn install_platform_package(
     app: &AppHandle,
     platform_id: &str,
 ) -> Result<PlatformPackageState, String> {
+    install_platform_package_with_operation(app, platform_id, PlatformPackageOperation::Install)
+}
+
+fn install_platform_package_with_operation(
+    app: &AppHandle,
+    platform_id: &str,
+    operation: PlatformPackageOperation,
+) -> Result<PlatformPackageState, String> {
     ensure_supported_platform(platform_id)?;
     logger::log_info(&format!(
-        "[PlatformPackage] 安装平台包开始: {}",
-        platform_id
+        "[PlatformPackage] {}平台包开始: {}",
+        if operation == PlatformPackageOperation::Update {
+            "更新"
+        } else {
+            "安装"
+        },
+        platform_id,
     ));
+    emit_platform_package_progress(
+        app,
+        platform_id,
+        operation,
+        PlatformPackageProgressPhase::Resolving,
+        Some(0),
+        None,
+        None,
+        None,
+    );
     crate::modules::platform_adapter::stop_platform_adapter(platform_id);
 
+    let result = install_platform_package_inner(app, platform_id, operation);
+    match result {
+        Ok(state) => {
+            emit_platform_package_progress(
+                app,
+                platform_id,
+                operation,
+                PlatformPackageProgressPhase::Completed,
+                Some(100),
+                None,
+                None,
+                None,
+            );
+            logger::log_info(&format!(
+                "[PlatformPackage] {}平台包完成: {}",
+                if operation == PlatformPackageOperation::Update {
+                    "更新"
+                } else {
+                    "安装"
+                },
+                platform_id,
+            ));
+            Ok(state)
+        }
+        Err(error) => {
+            emit_platform_package_failure(app, platform_id, operation, &error);
+            Err(error)
+        }
+    }
+}
+
+fn install_platform_package_inner(
+    app: &AppHandle,
+    platform_id: &str,
+    operation: PlatformPackageOperation,
+) -> Result<PlatformPackageState, String> {
     let source = resolve_package_source(app, platform_id, true)?;
     let source_manifest = source.manifest().clone();
     let source_root = match &source {
         PlatformPackageSource::Local { dir, .. } => Some(dir.clone()),
         PlatformPackageSource::Remote { .. } => None,
     };
+    emit_platform_package_progress(
+        app,
+        platform_id,
+        operation,
+        PlatformPackageProgressPhase::Verifying,
+        Some(5),
+        None,
+        source_manifest.download_size_bytes,
+        None,
+    );
 
     let installed_manifest = match match &source {
-        PlatformPackageSource::Local { dir, .. } => install_local_source(platform_id, dir),
+        PlatformPackageSource::Local { dir, .. } => {
+            install_local_source(app, platform_id, dir, operation)
+        }
         PlatformPackageSource::Remote { package, .. } => {
-            install_remote_source(platform_id, package)
+            install_remote_source(app, platform_id, package, operation)
         }
     } {
         Ok(manifest) => manifest,
@@ -2181,6 +3062,7 @@ pub fn install_platform_package(
                     installed_version: None,
                     last_checked_at: Some(now_ts_ms()),
                     error_message: Some(error.clone()),
+                    explicitly_uninstalled: false,
                 },
             );
             write_registry(&registry)?;
@@ -2198,13 +3080,16 @@ pub fn install_platform_package(
             installed_version: Some(installed_manifest.version.clone()),
             last_checked_at: Some(now_ts_ms()),
             error_message: None,
+            explicitly_uninstalled: false,
         },
     );
     write_registry(&registry)?;
-    logger::log_info(&format!(
-        "[PlatformPackage] 安装平台包完成: {}",
-        platform_id
-    ));
+    if let Err(error) = cleanup_platform_package_cache(platform_id, None) {
+        logger::log_warn(&format!(
+            "[PlatformPackage] 安装后清理平台包缓存失败: platform={}, error={}",
+            platform_id, error
+        ));
+    }
 
     build_state(
         platform_id,
@@ -2220,11 +3105,7 @@ pub fn update_platform_package(
     app: &AppHandle,
     platform_id: &str,
 ) -> Result<PlatformPackageState, String> {
-    logger::log_info(&format!(
-        "[PlatformPackage] 更新平台包开始: {}",
-        platform_id
-    ));
-    install_platform_package(app, platform_id)
+    install_platform_package_with_operation(app, platform_id, PlatformPackageOperation::Update)
 }
 
 pub fn uninstall_platform_package(
@@ -2232,10 +3113,20 @@ pub fn uninstall_platform_package(
     platform_id: &str,
 ) -> Result<PlatformPackageState, String> {
     ensure_supported_platform(platform_id)?;
+    let result = uninstall_platform_package_inner(app, platform_id);
+    result
+}
+
+fn uninstall_platform_package_inner(
+    _app: Option<&AppHandle>,
+    platform_id: &str,
+) -> Result<PlatformPackageState, String> {
     logger::log_info(&format!(
         "[PlatformPackage] 卸载平台包开始: {}",
         platform_id
     ));
+    let started_at = Instant::now();
+    let stop_started_at = Instant::now();
     if platform_id == ANTIGRAVITY_PLATFORM_ID {
         crate::modules::platform_adapter::stop_antigravity_runtime_before_uninstall();
     } else if platform_id == ANTIGRAVITY_IDE_PLATFORM_ID {
@@ -2267,11 +3158,16 @@ pub fn uninstall_platform_package(
     } else if platform_id == CODEX_PLATFORM_ID {
         crate::modules::platform_adapter::stop_codex_runtime_before_uninstall();
     }
+    logger::log_info(&format!(
+        "[PlatformPackage] 卸载平台包停止运行组件完成: platform={}, elapsed={}ms",
+        platform_id,
+        stop_started_at.elapsed().as_millis()
+    ));
 
-    let source_manifest = app.and_then(|app| read_latest_source_manifest(app, platform_id, false));
-    let installed_manifest = read_installed_manifest(platform_id).ok().flatten();
+    let manifest_for_state = read_installed_manifest(platform_id).ok().flatten();
     let platform_dir = package_dir(platform_id)?;
     if platform_dir.exists() {
+        let remove_started_at = Instant::now();
         fs::remove_dir_all(&platform_dir).map_err(|err| {
             format!(
                 "删除平台包目录失败: path={}, error={}",
@@ -2279,8 +3175,21 @@ pub fn uninstall_platform_package(
                 err
             )
         })?;
+        logger::log_info(&format!(
+            "[PlatformPackage] 卸载平台包删除目录完成: platform={}, path={}, elapsed={}ms",
+            platform_id,
+            platform_dir.display(),
+            remove_started_at.elapsed().as_millis()
+        ));
+    } else {
+        logger::log_info(&format!(
+            "[PlatformPackage] 卸载平台包目录不存在，跳过删除: platform={}, path={}",
+            platform_id,
+            platform_dir.display()
+        ));
     }
 
+    let registry_started_at = Instant::now();
     let mut registry = read_registry()?;
     upsert_record(
         &mut registry,
@@ -2291,19 +3200,26 @@ pub fn uninstall_platform_package(
             installed_version: None,
             last_checked_at: Some(now_ts_ms()),
             error_message: None,
+            explicitly_uninstalled: true,
         },
     );
     write_registry(&registry)?;
     logger::log_info(&format!(
-        "[PlatformPackage] 卸载平台包完成: {}",
-        platform_id
+        "[PlatformPackage] 卸载平台包写入状态完成: platform={}, elapsed={}ms",
+        platform_id,
+        registry_started_at.elapsed().as_millis()
+    ));
+    logger::log_info(&format!(
+        "[PlatformPackage] 卸载平台包完成: platform={}, elapsed={}ms",
+        platform_id,
+        started_at.elapsed().as_millis()
     ));
 
     build_state(
         platform_id,
         get_record(&registry, platform_id),
         None,
-        source_manifest.or(installed_manifest),
+        manifest_for_state,
         None,
         None,
     )

@@ -13,6 +13,27 @@ export type PlatformPackageInstallStatus =
   | 'error'
   | 'incompatible';
 
+export type PlatformPackageOperation = 'install' | 'update' | 'uninstall' | 'prepare';
+
+export type PlatformPackageProgressPhase =
+  | 'resolving'
+  | 'downloading'
+  | 'verifying'
+  | 'extracting'
+  | 'installing'
+  | 'completed'
+  | 'failed';
+
+export interface PlatformPackageProgressPayload {
+  platformId: PlatformId;
+  operation: PlatformPackageOperation;
+  phase: PlatformPackageProgressPhase;
+  percent?: number | null;
+  downloadedBytes?: number | null;
+  totalBytes?: number | null;
+  message?: string | null;
+}
+
 export interface PlatformPackageState {
   platformId: PlatformId;
   packageMode: PlatformPackageMode;
