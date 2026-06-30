@@ -423,6 +423,7 @@ jobs:
             args+=(--download-base-url "${base_url}")
           elif [ "${CHANNEL}" = "main" ]; then
             args+=(--download-base-url "https://github.com/${GITHUB_REPOSITORY}/releases/download/${MAIN_PLATFORM_RELEASE_TAG}")
+            args+=(--history-dir platform-packages/history)
           fi
           npm run package:platform-index -- "${args[@]}"
 
@@ -453,9 +454,31 @@ jobs:
           upload_platform_assets_immutably() {
             local release_tag="$1"
             local upload_args=()
+            index_asset_metadata() {
+              local asset_name="$1"
+              node -e '
+                const fs = require("node:fs");
+                const [indexPath, assetName] = process.argv.slice(1);
+                const index = JSON.parse(fs.readFileSync(indexPath, "utf8"));
+                for (const pkg of index.packages || []) {
+                  for (const artifact of pkg.artifacts || []) {
+                    const url = String(artifact.downloadUrl || "");
+                    if (url.endsWith(`/${assetName}`)) {
+                      console.log(`${artifact.sha256} ${artifact.downloadSizeBytes}`);
+                      process.exit(0);
+                    }
+                  }
+                }
+                process.exit(1);
+              ' "${tmp_dir}/index.json" "${asset_name}"
+            }
             for zip_path in "${tmp_dir}"/*.zip; do
               local asset_name
               asset_name="$(basename "${zip_path}")"
+              local expected_metadata expected_sha expected_size
+              expected_metadata="$(index_asset_metadata "${asset_name}")"
+              expected_sha="$(awk '{print $1}' <<<"${expected_metadata}")"
+              expected_size="$(awk '{print $2}' <<<"${expected_metadata}")"
               local existing_dir
               existing_dir="$(mktemp -d)"
               if gh release download "${release_tag}" \
@@ -471,12 +494,22 @@ jobs:
                 local_sha="$(shasum -a 256 "${zip_path}" | awk '{print $1}')"
                 remote_sha="$(shasum -a 256 "${existing_path}" | awk '{print $1}')"
                 if [ "${local_sha}" != "${remote_sha}" ]; then
+                  if [ "${expected_sha}" = "${remote_sha}" ]; then
+                    echo "Reusing immutable release asset from index history: ${asset_name}"
+                    continue
+                  fi
                   echo "Refusing to replace immutable platform package asset ${asset_name}: local=${local_sha}, remote=${remote_sha}" >&2
                   echo "Bump the platform package version instead of overwriting an existing zip." >&2
                   exit 1
                 fi
                 echo "Release asset already exists with identical sha256: ${asset_name}"
               else
+                local local_sha
+                local_sha="$(shasum -a 256 "${zip_path}" | awk '{print $1}')"
+                if [ "${expected_sha}" != "${local_sha}" ]; then
+                  echo "Release asset ${asset_name} is missing, but index expects sha=${expected_sha}; local rebuilt sha=${local_sha}" >&2
+                  exit 1
+                fi
                 upload_args+=("${zip_path}")
               fi
             done
@@ -489,6 +522,10 @@ jobs:
             for zip_path in "${tmp_dir}"/*.zip; do
               local asset_name
               asset_name="$(basename "${zip_path}")"
+              local expected_metadata expected_sha expected_size
+              expected_metadata="$(index_asset_metadata "${asset_name}")"
+              expected_sha="$(awk '{print $1}' <<<"${expected_metadata}")"
+              expected_size="$(awk '{print $2}' <<<"${expected_metadata}")"
               gh release download "${release_tag}" \
                 --repo "${GITHUB_REPOSITORY}" \
                 --pattern "${asset_name}" \
@@ -498,10 +535,11 @@ jobs:
               remote_size="$(wc -c < "${verify_dir}/${asset_name}" | tr -d ' ')"
               local_sha="$(shasum -a 256 "${zip_path}" | awk '{print $1}')"
               remote_sha="$(shasum -a 256 "${verify_dir}/${asset_name}" | awk '{print $1}')"
-              if [ "${local_size}" != "${remote_size}" ] || [ "${local_sha}" != "${remote_sha}" ]; then
-                echo "Uploaded release asset verification failed: ${asset_name}" >&2
-                echo "local size=${local_size} sha=${local_sha}" >&2
+              if [ "${remote_size}" != "${expected_size}" ] || [ "${remote_sha}" != "${expected_sha}" ]; then
+                echo "Release asset verification failed against index: ${asset_name}" >&2
+                echo "index size=${expected_size} sha=${expected_sha}" >&2
                 echo "remote size=${remote_size} sha=${remote_sha}" >&2
+                echo "local size=${local_size} sha=${local_sha}" >&2
                 exit 1
               fi
               rm -f "${verify_dir}/${asset_name}"
@@ -575,9 +613,31 @@ jobs:
           upload_platform_assets_immutably() {
             local release_tag="$1"
             local upload_args=()
+            index_asset_metadata() {
+              local asset_name="$1"
+              node -e '
+                const fs = require("node:fs");
+                const [indexPath, assetName] = process.argv.slice(1);
+                const index = JSON.parse(fs.readFileSync(indexPath, "utf8"));
+                for (const pkg of index.packages || []) {
+                  for (const artifact of pkg.artifacts || []) {
+                    const url = String(artifact.downloadUrl || "");
+                    if (url.endsWith(`/${assetName}`)) {
+                      console.log(`${artifact.sha256} ${artifact.downloadSizeBytes}`);
+                      process.exit(0);
+                    }
+                  }
+                }
+                process.exit(1);
+              ' "${tmp_dir}/index.json" "${asset_name}"
+            }
             for zip_path in "${tmp_dir}"/*.zip; do
               local asset_name
               asset_name="$(basename "${zip_path}")"
+              local expected_metadata expected_sha expected_size
+              expected_metadata="$(index_asset_metadata "${asset_name}")"
+              expected_sha="$(awk '{print $1}' <<<"${expected_metadata}")"
+              expected_size="$(awk '{print $2}' <<<"${expected_metadata}")"
               local existing_dir
               existing_dir="$(mktemp -d)"
               if gh release download "${release_tag}" \
@@ -593,12 +653,22 @@ jobs:
                 local_sha="$(shasum -a 256 "${zip_path}" | awk '{print $1}')"
                 remote_sha="$(shasum -a 256 "${existing_path}" | awk '{print $1}')"
                 if [ "${local_sha}" != "${remote_sha}" ]; then
+                  if [ "${expected_sha}" = "${remote_sha}" ]; then
+                    echo "Reusing immutable release asset from index history: ${asset_name}"
+                    continue
+                  fi
                   echo "Refusing to replace immutable platform package asset ${asset_name}: local=${local_sha}, remote=${remote_sha}" >&2
                   echo "Bump the platform package version instead of overwriting an existing zip." >&2
                   exit 1
                 fi
                 echo "Release asset already exists with identical sha256: ${asset_name}"
               else
+                local local_sha
+                local_sha="$(shasum -a 256 "${zip_path}" | awk '{print $1}')"
+                if [ "${expected_sha}" != "${local_sha}" ]; then
+                  echo "Release asset ${asset_name} is missing, but index expects sha=${expected_sha}; local rebuilt sha=${local_sha}" >&2
+                  exit 1
+                fi
                 upload_args+=("${zip_path}")
               fi
             done
@@ -611,6 +681,10 @@ jobs:
             for zip_path in "${tmp_dir}"/*.zip; do
               local asset_name
               asset_name="$(basename "${zip_path}")"
+              local expected_metadata expected_sha expected_size
+              expected_metadata="$(index_asset_metadata "${asset_name}")"
+              expected_sha="$(awk '{print $1}' <<<"${expected_metadata}")"
+              expected_size="$(awk '{print $2}' <<<"${expected_metadata}")"
               gh release download "${release_tag}" \
                 --repo "${GITHUB_REPOSITORY}" \
                 --pattern "${asset_name}" \
@@ -620,10 +694,11 @@ jobs:
               remote_size="$(wc -c < "${verify_dir}/${asset_name}" | tr -d ' ')"
               local_sha="$(shasum -a 256 "${zip_path}" | awk '{print $1}')"
               remote_sha="$(shasum -a 256 "${verify_dir}/${asset_name}" | awk '{print $1}')"
-              if [ "${local_size}" != "${remote_size}" ] || [ "${local_sha}" != "${remote_sha}" ]; then
-                echo "Uploaded release asset verification failed: ${asset_name}" >&2
-                echo "local size=${local_size} sha=${local_sha}" >&2
+              if [ "${remote_size}" != "${expected_size}" ] || [ "${remote_sha}" != "${expected_sha}" ]; then
+                echo "Release asset verification failed against index: ${asset_name}" >&2
+                echo "index size=${expected_size} sha=${expected_sha}" >&2
                 echo "remote size=${remote_size} sha=${remote_sha}" >&2
+                echo "local size=${local_size} sha=${local_sha}" >&2
                 exit 1
               fi
               rm -f "${verify_dir}/${asset_name}"

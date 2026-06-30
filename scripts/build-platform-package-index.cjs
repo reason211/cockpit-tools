@@ -28,6 +28,7 @@ function usage() {
 Options:
   --metadata-dir <path>          Directory containing artifact metadata JSON files.
   --base-index <path>            Base platform-packages/index.json.
+  --history-dir <path>           Existing immutable history dir. Same-version entries reuse published artifacts.
   --output <path>                Output merged index JSON.
   --download-base-url <url>      Override artifact downloadUrl with <url>/<zipName>.
   --require-os-arch <list>       Comma list such as macos/aarch64,linux/x86_64.
@@ -54,6 +55,7 @@ function parseArgs(argv) {
     index += 1;
     if (arg === '--metadata-dir') args.metadataDir = path.resolve(ROOT, next);
     else if (arg === '--base-index') args.baseIndex = path.resolve(ROOT, next);
+    else if (arg === '--history-dir') args.historyDir = path.resolve(ROOT, next);
     else if (arg === '--output') args.output = path.resolve(ROOT, next);
     else if (arg === '--download-base-url') args.downloadBaseUrl = next.replace(/\/+$/, '');
     else if (arg === '--require-os-arch') args.requiredTargets = parseTargets(next);
@@ -162,6 +164,42 @@ function targetSortKey(artifact) {
   return `999:${key}`;
 }
 
+function stableJson(value) {
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;
+  if (value && typeof value === 'object') {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(',')}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function stripArtifactFields(pkg) {
+  const next = JSON.parse(JSON.stringify(pkg));
+  delete next.artifacts;
+  delete next.downloadUrl;
+  delete next.downloadSizeBytes;
+  delete next.sha256;
+  return next;
+}
+
+function readHistoryEntry(historyDir, packageId, version) {
+  if (!historyDir) return null;
+  const historyPath = path.join(historyDir, `${packageId}.json`);
+  if (!fs.existsSync(historyPath)) return null;
+  const history = readJson(historyPath, `${packageId} history`);
+  if (!Array.isArray(history.versions)) return null;
+  return history.versions.find((item) => item && item.version === version) || null;
+}
+
+function assertRequiredArtifacts(packageId, artifacts, requiredTargets) {
+  if (requiredTargets.length === 0) return;
+  const targets = new Set((artifacts || []).map((artifact) => `${artifact.os}/${artifact.arch}`));
+  for (const target of requiredTargets) {
+    if (!targets.has(target.key)) {
+      fail(`${packageId}: missing artifact metadata for ${target.key}`);
+    }
+  }
+}
+
 function verifyMetadataZip(metadata, metadataFile, verifyZipDir) {
   if (!verifyZipDir) return;
   const zipPath = path.join(verifyZipDir, metadata.zipName);
@@ -219,9 +257,7 @@ function main() {
       if (!packageMap) fail(`${pkg.id}: missing artifact metadata`);
       if (args.requiredTargets.length > 0) {
         for (const target of args.requiredTargets) {
-          if (!packageMap.has(target.key)) {
-            fail(`${pkg.id}: missing artifact metadata for ${target.key}`);
-          }
+          if (!packageMap.has(target.key)) fail(`${pkg.id}: missing artifact metadata for ${target.key}`);
         }
       }
 
@@ -236,20 +272,38 @@ function main() {
         .sort((left, right) => targetSortKey(left).localeCompare(targetSortKey(right)));
 
       const primaryArtifact = artifacts[0];
-      rows.push({
-        id: pkg.id,
-        version: pkg.version,
-        artifacts: artifacts.length,
-        primary: `${primaryArtifact.os}/${primaryArtifact.arch}`,
-      });
-
-      return {
+      const candidate = {
         ...pkg,
         artifacts,
         downloadUrl: primaryArtifact.downloadUrl,
         downloadSizeBytes: primaryArtifact.downloadSizeBytes,
         sha256: primaryArtifact.sha256,
       };
+      const existingHistoryEntry = readHistoryEntry(args.historyDir, pkg.id, pkg.version);
+      if (existingHistoryEntry) {
+        assertRequiredArtifacts(pkg.id, existingHistoryEntry.artifacts, args.requiredTargets);
+        if (stableJson(stripArtifactFields(existingHistoryEntry)) !== stableJson(stripArtifactFields(candidate))) {
+          fail(`${pkg.id}@${pkg.version}: existing immutable history metadata differs from current manifest. Bump the platform package version before publishing changed package metadata.`);
+        }
+        rows.push({
+          id: pkg.id,
+          version: pkg.version,
+          artifacts: existingHistoryEntry.artifacts.length,
+          primary: `${existingHistoryEntry.artifacts[0].os}/${existingHistoryEntry.artifacts[0].arch}`,
+          source: 'history',
+        });
+        return existingHistoryEntry;
+      }
+
+      rows.push({
+        id: pkg.id,
+        version: pkg.version,
+        artifacts: artifacts.length,
+        primary: `${primaryArtifact.os}/${primaryArtifact.arch}`,
+        source: 'built',
+      });
+
+      return candidate;
     }),
   };
 
