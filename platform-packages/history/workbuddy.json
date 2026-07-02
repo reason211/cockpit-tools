@@ -131,41 +131,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/workbuddy-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3634104,
-          "sha256": "6e4217e07c76fc4de60125bb05d0533f224625531613c6a44d535c365e2ffdbc"
+          "downloadSizeBytes": 3632496,
+          "sha256": "02dad3c5cf1e980ecfa876fdf3048c4c821740852d40a7975bc70d985cefc9d6"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/workbuddy-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3751170,
-          "sha256": "0e5c4cbc24a369a085ea4254a971a98dd6693c95aef07ef6e190ce5be6583d44"
+          "downloadSizeBytes": 3750116,
+          "sha256": "1bd7df853d48107691791ac59b21d884f6fff9fe549ed5c3488211aa96d20f50"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/workbuddy-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 3969576,
-          "sha256": "b6cc9999a9f08c3af1793eb4e679a841f4845957a3d5deb939853b61d4000e3a"
+          "sha256": "b800fe1c7fe1d13b9cf496498c05fe9519389adbff6ae4eadc05b40aed15762c"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/workbuddy-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 3907732,
-          "sha256": "e06e9875780885717d681937988da035535fdeaa4e1977a57417d97207c0f162"
+          "sha256": "37fd6c16aebb8d5e19411ba363c8c126a5a5683b6ccdbff0f6a653faebfbd8d7"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/workbuddy-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 3749910,
-          "sha256": "858df960ca9c72010a398d9c3c87e47a2744bbba38e01086ce8cca0d5f2cc804"
+          "downloadSizeBytes": 3749911,
+          "sha256": "fcf83b70252a63a0b650fbf4cee6a83009e3b46425919a48ba7b70d226878bd5"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/workbuddy-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3634104,
-      "sha256": "6e4217e07c76fc4de60125bb05d0533f224625531613c6a44d535c365e2ffdbc"
+      "downloadSizeBytes": 3632496,
+      "sha256": "02dad3c5cf1e980ecfa876fdf3048c4c821740852d40a7975bc70d985cefc9d6"
     }
   ]
 }

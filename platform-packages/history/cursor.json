@@ -124,41 +124,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/cursor-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3907392,
-          "sha256": "0feaa44cfe2fa3c8c5410b938bf3af3dec2e339467e1e0ddcdde0a231bfc11ca"
+          "downloadSizeBytes": 3906456,
+          "sha256": "a1d729e00a2cbb82725a1c314ce0e50583574b1540bc87c5c82832bd64fd4fed"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/cursor-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 4018041,
-          "sha256": "e94c9687c43e7d7a74abd0e023202b28d0967fb160f0a03d4ed5636b45db9796"
+          "downloadSizeBytes": 4016489,
+          "sha256": "ba6e9477048e2c423a05a104fb0e8dc7d12693a2d3e4cd2f7799781440cb5494"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/cursor-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 4234683,
-          "sha256": "fd6539c7c3a64d9c20766066d852bc33dbfc30286d215464c9952e4d0cbedc8d"
+          "sha256": "7eb85363cfc65d883a43b999e45add39a8a67c47b109de518a452c430a9f9112"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/cursor-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 4180618,
-          "sha256": "c74fe0bdc4801e07da7d82dc83d00c02354c2374e89e87a697ef825a9f256b50"
+          "sha256": "6f997eda22f42b5b3c97fb925f8736e4309be2f41af2187324191f267534a354"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/cursor-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 4014394,
-          "sha256": "8e333a9e6b03c392e6e016423c8d845a23355b736048ea333173c088c8e634ae"
+          "downloadSizeBytes": 4014395,
+          "sha256": "14c27db6680480ad2384ca57fcec09831b1df72b93e3dc3c6adaf85b4ac240c3"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/cursor-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3907392,
-      "sha256": "0feaa44cfe2fa3c8c5410b938bf3af3dec2e339467e1e0ddcdde0a231bfc11ca"
+      "downloadSizeBytes": 3906456,
+      "sha256": "a1d729e00a2cbb82725a1c314ce0e50583574b1540bc87c5c82832bd64fd4fed"
     }
   ]
 }

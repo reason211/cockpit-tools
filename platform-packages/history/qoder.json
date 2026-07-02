@@ -72,40 +72,40 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/qoder-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3730876,
-          "sha256": "1855b76ac40bfb296b24cd5a735907d5b338919a8973ba09afc4ffcefe6992f0"
+          "downloadSizeBytes": 3729764,
+          "sha256": "eefcd75b8c332302ae4c5f0a8854ea626c21d953de344db8321d22872355c90b"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/qoder-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3838516,
-          "sha256": "a0029b220bf1e2aaee2bf1cbc7c9880eb339918d8d0d20ea4369c3c8afed9e2d"
+          "downloadSizeBytes": 3841084,
+          "sha256": "516703118ffb765af40375caebd2a2b9f4f54ffd24ca46262214e81c494df841"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/qoder-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 4053639,
-          "sha256": "8d2e5561fb264a2a581b53d20c4d7af470c5ea58aee2bf90d1b9f5bc5b96a10a"
+          "sha256": "990126f09833c6d76314a807bb78921b42d92f19f67cb7baa2164a5ccb2d5eed"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/qoder-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 3996602,
-          "sha256": "03dc534cc057f64507561240f4eacae0305b454f8473762c260e1d5296667c2b"
+          "sha256": "ca7a0388f3311def84d010a7b3371f3256da0c5f9ac1cbf8bd06cf331f9b00c1"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/qoder-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 3826835,
-          "sha256": "93f0e608e3e36daa3f35e6447f7d9ff9331127bfab6df43f286953187a54bdf2"
+          "downloadSizeBytes": 3826840,
+          "sha256": "7b15850bf225891189238c06128d16290fd02db18e362838ae30477c3cf10c81"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/qoder-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3730876,
+      "downloadSizeBytes": 3729764,
       "capabilities": [
         "accounts",
         "oauth",
@@ -158,7 +158,7 @@
         ],
         "nativeBoundaries": []
       },
-      "sha256": "1855b76ac40bfb296b24cd5a735907d5b338919a8973ba09afc4ffcefe6992f0"
+      "sha256": "eefcd75b8c332302ae4c5f0a8854ea626c21d953de344db8321d22872355c90b"
     }
   ]
 }

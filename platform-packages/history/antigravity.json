@@ -88,41 +88,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 7069629,
-          "sha256": "cd8dac349f379c15909cebca7f45dacb91b74021680cd541b01f148ca0959e05"
+          "downloadSizeBytes": 7066532,
+          "sha256": "3f185b718945644db3329a325bbea6c1c2639010dda59f6eb70a89c03e2f89fd"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 7360308,
-          "sha256": "91f2642189cd389afc154431302a7793600687029bcc6942e67cb6bddaf55c38"
+          "downloadSizeBytes": 7360764,
+          "sha256": "c43223d6f4c08f4de98fa3cd5b08c9b066b05a5fc5695c504b8867dc1c1be965"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 7927644,
-          "sha256": "a345c1ee443d804ff641f684ab752594475adf0d8ce4cd6666599c37e17439c4"
+          "sha256": "c04bb4cd6bd1f8a0a4a7a561acc0fb5ad3559af4b8939cf0a2793bf4754302c8"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 7698568,
-          "sha256": "6ba21f2c92f4e36b4cd1d4c61b2e7b2b36585be3b5302bd5d8afcbea889fb2ed"
+          "sha256": "855607a22ebd75b940a94ee6a38f6a5de9a3a3116c6c9d8a6f5e60efa24ac25f"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 7151473,
-          "sha256": "75576f0562cd14c717f27d30d9896e010f744a89edbd1f358e0e9c6dae590e3e"
+          "downloadSizeBytes": 7151471,
+          "sha256": "984c47689a9e210907a3f2043c7f5a354e514f0874ca9cabc6443669ae188f1c"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 7069629,
-      "sha256": "cd8dac349f379c15909cebca7f45dacb91b74021680cd541b01f148ca0959e05",
+      "downloadSizeBytes": 7066532,
+      "sha256": "3f185b718945644db3329a325bbea6c1c2639010dda59f6eb70a89c03e2f89fd",
       "adapter": {
         "protocol": "http-json-v1",
         "entry": "adapter/macos/cockpit-antigravity-adapter",

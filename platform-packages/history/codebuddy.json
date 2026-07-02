@@ -126,41 +126,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3614420,
-          "sha256": "0a59d72b1c8b1c274ab95b60378e8901ff45ed217fa1475ea22fc14f29f99bef"
+          "downloadSizeBytes": 3613361,
+          "sha256": "40d2f84a918dfb9be3abdf45945e69ee54c7c9dfcacc6bcfa82baa28c56a73a8"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3729943,
-          "sha256": "e16ee6369699cbc3817972f83813d572323aaff7af68d6f7ae07e493af317456"
+          "downloadSizeBytes": 3731225,
+          "sha256": "7a69677195468e43cd7d13044c653c1621965f943798653fad9c9632b885e0a6"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 3950350,
-          "sha256": "3677515f702782af92bc5513a4ec72088233654e639c9a297c4c00229cd4bde0"
+          "sha256": "0b163effca3195d0e1c8aae7e8298d964b9163059058639202a3463ffa9af471"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 3888368,
-          "sha256": "d12657a5b6cf26c89e7be5621040fb9828892784d160bfb7a66f3096734a9553"
+          "sha256": "fd2b43f71b4caf414c51e110b4c1a778ad5e1291b8f1eb25145a6a7cbe607f67"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 3734372,
-          "sha256": "0262fe807b09532c9aca058d3b74c9d8436f3b43d8f62ddc5ea32a7a2520e858"
+          "downloadSizeBytes": 3734371,
+          "sha256": "15ad48dcf319d5f3d1887e6c79165bab8a50afe88ea9ddfcc527050229bb69fe"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3614420,
-      "sha256": "0a59d72b1c8b1c274ab95b60378e8901ff45ed217fa1475ea22fc14f29f99bef"
+      "downloadSizeBytes": 3613361,
+      "sha256": "40d2f84a918dfb9be3abdf45945e69ee54c7c9dfcacc6bcfa82baa28c56a73a8"
     }
   ]
 }

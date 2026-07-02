@@ -71,40 +71,40 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/github-copilot-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3766226,
-          "sha256": "e00fa42a4aa9332bac5b46a72f848ca9a556793ec0ac2236ff81276c40439ebc"
+          "downloadSizeBytes": 3763801,
+          "sha256": "2e9c251d8b268dbcbffe55cf98a6c6d01125ab7a4b1a5df75d2af25f87c26e49"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/github-copilot-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3878854,
-          "sha256": "30942dc8756eeb2e9c767cfd1aecddb310a321b126236f208711a7bb9007a078"
+          "downloadSizeBytes": 3879379,
+          "sha256": "7d6c2739f63b4ac58083fa9f3fa14a8a7ecc6b6ff4b25e9975d32822b142a3e6"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/github-copilot-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 4100562,
-          "sha256": "bcc5199785c9fecbda9488a2635aa1f608d7e11ba8b1fbe8bf29ec8df20d991f"
+          "sha256": "86c6f87a3507788fe7bc342a1dd3dbda645bbe4a7fdd4205e2dd265aae45ecce"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/github-copilot-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 4042640,
-          "sha256": "2bfc14a47b7e85dab8cd1826be3a6f4666156911310c96e487d12b60f4a0f0e3"
+          "sha256": "fe658fddc30039daac51d5d67a458e94754e5a69b08d0abbbb1919ede2691704"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/github-copilot-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 3877757,
-          "sha256": "5807233ccec312a900563d9763e25e49311e96c3d06464c1f520fd803563a8c9"
+          "downloadSizeBytes": 3877759,
+          "sha256": "d0ca235a50c1afb11913ea11aff089d9118cb1c570d70e6ce02bd95a28aff4fd"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/github-copilot-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3766226,
+      "downloadSizeBytes": 3763801,
       "capabilities": [
         "accounts",
         "oauth",
@@ -157,7 +157,7 @@
         ],
         "nativeBoundaries": []
       },
-      "sha256": "e00fa42a4aa9332bac5b46a72f848ca9a556793ec0ac2236ff81276c40439ebc"
+      "sha256": "2e9c251d8b268dbcbffe55cf98a6c6d01125ab7a4b1a5df75d2af25f87c26e49"
     }
   ]
 }

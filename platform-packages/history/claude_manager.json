@@ -148,41 +148,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/claude_manager-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 4870716,
-          "sha256": "1c0520429cb63e3009c83fa1a6fb4c85c65d85e68b3f86a8d99d9301e8b3a5ec"
+          "downloadSizeBytes": 4869846,
+          "sha256": "6ab42bbed5e95b67bcdf1c7d9f6d91b64b849d3549b24e88552e6d0db432e5aa"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/claude_manager-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 5003952,
-          "sha256": "15b488f5ffb7ef9f335941bc4f76e64564c95c10bd1eed0bbc6f6f2f66698ccf"
+          "downloadSizeBytes": 5004228,
+          "sha256": "d8d8dbb5c1f4ac4a00d9ae038c39612ef7e3577ede10836fd0d21cd382542d05"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/claude_manager-1.0.0-linux-x86_64.zip",
-          "downloadSizeBytes": 5177057,
-          "sha256": "f997bf27f7f61ae51c84211490dcba7fbc0c28ad1e5b8b8b939a7bddc9bd72cd"
+          "downloadSizeBytes": 5177157,
+          "sha256": "daee93b85c36807cca0f86e61f70acae3429d86594007c223bd00eba3846a362"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/claude_manager-1.0.0-linux-aarch64.zip",
-          "downloadSizeBytes": 5116083,
-          "sha256": "62cdf6c7dae1039c7752b783ec988a0e92a93ddb494197bf9d7f7e309dff4af2"
+          "downloadSizeBytes": 5116183,
+          "sha256": "45a67cb8c16f6bf47300325d6c619a0155ab3e50114f171eda04b4fbb6e607aa"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/claude_manager-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 4979448,
-          "sha256": "87167eff56ac3ef7423be4bc8ede6c6c88f3790f5159254805cec6336e148022"
+          "downloadSizeBytes": 4979526,
+          "sha256": "cad03ca4417bf6e229bf79ba6c88934d334b824a55464ae94eb709c8bf51d274"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/claude_manager-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 4870716,
-      "sha256": "1c0520429cb63e3009c83fa1a6fb4c85c65d85e68b3f86a8d99d9301e8b3a5ec"
+      "downloadSizeBytes": 4869846,
+      "sha256": "6ab42bbed5e95b67bcdf1c7d9f6d91b64b849d3549b24e88552e6d0db432e5aa"
     }
   ]
 }

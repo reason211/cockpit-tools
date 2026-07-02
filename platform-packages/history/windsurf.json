@@ -76,40 +76,40 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/windsurf-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3787230,
-          "sha256": "b4506442a72a71d5130ce7e1cfa92fc9708aa489718ffd85fa942769b14f4010"
+          "downloadSizeBytes": 3786221,
+          "sha256": "e198dfefa527d15b9370831163873aa0cb9c701854e6300d26add8670847dcae"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/windsurf-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3900178,
-          "sha256": "c64f10c5562cbe24ea650797bb8787f995fe97c11bc9503a1aa325985fa9e898"
+          "downloadSizeBytes": 3900726,
+          "sha256": "d0299ff45c2ccabbfd45e33b25bf4768c6d134857cfd0eb5bbb7f373c1fd5ab1"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/windsurf-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 4122270,
-          "sha256": "433ca1faeef5c31b209e7baa352f2a2d1d52fc244ad202b16b18c124d5df3d27"
+          "sha256": "6cd1d0e35d51336eeaf7d7f8f7940f99bc6d227a3171fca866d0e4f7f5235d4f"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/windsurf-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 4066093,
-          "sha256": "b9f39c6940104e6b05e53d838d881f0b6010898ecb7b2a995734d2670d087471"
+          "sha256": "a177efe1140a197fc264b13857de9c995f730db79e39786ed6b6684d72189f3d"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/windsurf-1.0.0-windows-x86_64.zip",
           "downloadSizeBytes": 3902170,
-          "sha256": "89a1945bbe5e356536bfa75033da27984f013d90ec5688cb8c23eb5ba58e625c"
+          "sha256": "56dc122418e5a92bd80593548b2fcbb455a27cad76ebfaa5f141a5315d98b06b"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/windsurf-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3787230,
+      "downloadSizeBytes": 3786221,
       "capabilities": [
         "accounts",
         "oauth",
@@ -163,7 +163,7 @@
         ],
         "nativeBoundaries": []
       },
-      "sha256": "b4506442a72a71d5130ce7e1cfa92fc9708aa489718ffd85fa942769b14f4010"
+      "sha256": "e198dfefa527d15b9370831163873aa0cb9c701854e6300d26add8670847dcae"
     }
   ]
 }

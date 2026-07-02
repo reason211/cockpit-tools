@@ -74,40 +74,40 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/kiro-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3777271,
-          "sha256": "4d79dee15123686729e3c49de71545913c9f6cda0abde40a1aab0bf4235f592d"
+          "downloadSizeBytes": 3776467,
+          "sha256": "99e896e01c8a35e1afa1350bab8537ce179e6108b067f974ca07d2232ad42e64"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/kiro-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3888245,
-          "sha256": "9621b9a0ea8103224fde49dfb01b8a7c2b7c66c0d28c561ab7daffcd283e1371"
+          "downloadSizeBytes": 3889627,
+          "sha256": "f288f043083ce6afc17cb5dcce1f1c1039608d2e44fdbd99f13e9bb47bddb523"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/kiro-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 4114480,
-          "sha256": "404ec8c8724b74509f5776ccda29d02209fa00e3d5d3f405ae2cd68cdbb64ea3"
+          "sha256": "4e596c9ecbc3f67777560f7ba832aba1449c7de2d0116e8cc3c1fd3234a008a5"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/kiro-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 4056429,
-          "sha256": "e38e64f1632ebb3fcb5fd320c4459c7a1d3566eda59cc0f58cdbcc1633e85a2e"
+          "sha256": "b8ae93baedd9b8656a72e6b169b6b26e1f093e72a4283aa826bb55849cfc6c97"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/kiro-1.0.0-windows-x86_64.zip",
           "downloadSizeBytes": 3887913,
-          "sha256": "f7cdbbde2fb05a933d42fce93edaa025859339d7efab133bbb70ffcc518c334b"
+          "sha256": "c8b63067de08c915f9812333c1152dace395fe850a605a3c32dbbd207b43fdea"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/kiro-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3777271,
+      "downloadSizeBytes": 3776467,
       "capabilities": [
         "accounts",
         "oauth",
@@ -160,7 +160,7 @@
         ],
         "nativeBoundaries": []
       },
-      "sha256": "4d79dee15123686729e3c49de71545913c9f6cda0abde40a1aab0bf4235f592d"
+      "sha256": "99e896e01c8a35e1afa1350bab8537ce179e6108b067f974ca07d2232ad42e64"
     }
   ]
 }

@@ -111,41 +111,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codex-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 14824198,
-          "sha256": "9915f6cf6531e28ae03da27f0d8755002eaef89e817eaf096b51ce069910caa8"
+          "downloadSizeBytes": 14822300,
+          "sha256": "f3c37155037ccba831023c2978405b17921ebe1674ef153026184bdeee12e8d4"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codex-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 15809109,
-          "sha256": "caaeec76bab17e9829fe3d16b62ed080512932952b4aadc34fd41a586f4d27f7"
+          "downloadSizeBytes": 15814841,
+          "sha256": "af58f58acbbe2e86d8224d445462334f24b9250abe821aa6778cf759c3522c68"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codex-1.0.0-linux-x86_64.zip",
-          "downloadSizeBytes": 16331001,
-          "sha256": "649fb0474fa9a9919f32a777a315c9e90289ba7f45d5c6fa378775318ddf608f"
+          "downloadSizeBytes": 16331118,
+          "sha256": "7a4df9258d5a7654d6e7b89a230f6d2fea72b9e33f231ec7b44b8824d130288c"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codex-1.0.0-linux-aarch64.zip",
-          "downloadSizeBytes": 15321139,
-          "sha256": "edada4425800045a203ff6dc8be56b30829d6912c527a7a586fd890b195c84a3"
+          "downloadSizeBytes": 15321251,
+          "sha256": "237428e02c1997cf078f9b2cdd056761219f7a0a66c66aaaea0354aaf94d4e0e"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codex-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 15593472,
-          "sha256": "0ed44bcdc44b2eb3156861171a7f1730c37bc8b02fa99a326ca8cddbc8b1bad9"
+          "downloadSizeBytes": 15593575,
+          "sha256": "1e4733440f674405a160b2c1308aa4b88c940d074836dbeebbfcaed2da5544f6"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codex-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 14824198,
-      "sha256": "9915f6cf6531e28ae03da27f0d8755002eaef89e817eaf096b51ce069910caa8",
+      "downloadSizeBytes": 14822300,
+      "sha256": "f3c37155037ccba831023c2978405b17921ebe1674ef153026184bdeee12e8d4",
       "adapter": {
         "protocol": "http-json-v1",
         "entry": "adapter/macos/cockpit-codex-adapter",

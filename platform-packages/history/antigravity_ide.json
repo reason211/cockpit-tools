@@ -88,41 +88,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity_ide-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 7070382,
-          "sha256": "a5b0c4c4d85acb8a671a4f0c0b8968ec000d4913d630c8f9a820aa93bdea1586"
+          "downloadSizeBytes": 7068105,
+          "sha256": "8adca52f81e7558c03671a113af7e8c7b2aaa4f2428bd32f90b31d18e092c794"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity_ide-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 7360186,
-          "sha256": "467e0f04b7f5ce97bb0d2b574100ce0f26bbb5a780558db24b7cda9d224c0452"
+          "downloadSizeBytes": 7360817,
+          "sha256": "a0de7d5e012eb23f2c8be6aa3f19945b69100f93f8423ceec5091a00c74aecea"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity_ide-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 7927833,
-          "sha256": "f4903acde09bd1df28367854dda2d9252991534a71977881f8c5886867fbec59"
+          "sha256": "bd7b143731591aff685ef2cf431f72d89a548d2b7b0101ac684db33356a3adc4"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity_ide-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 7699751,
-          "sha256": "1d8c3882f45336434ed7584f4ed4c362058651d47ca40bcd79a9d5bcf31d53d5"
+          "sha256": "876a3901b14789c3c66fbc668bbf6f742138d2466c3496d2a6965604fe036a77"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity_ide-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 7151633,
-          "sha256": "f6b3e99747d07dc8bc49c8530e658bde3e5842439b057c09d27bdb15c7f28c79"
+          "downloadSizeBytes": 7151632,
+          "sha256": "6ef25c409a0b100a8c666cce96093e15bdc4e27707ad18a303530253ea999440"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity_ide-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 7070382,
-      "sha256": "a5b0c4c4d85acb8a671a4f0c0b8968ec000d4913d630c8f9a820aa93bdea1586",
+      "downloadSizeBytes": 7068105,
+      "sha256": "8adca52f81e7558c03671a113af7e8c7b2aaa4f2428bd32f90b31d18e092c794",
       "adapter": {
         "protocol": "http-json-v1",
         "entry": "adapter/macos/cockpit-antigravity-ide-adapter",

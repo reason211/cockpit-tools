@@ -86,41 +86,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 7069629,
-          "sha256": "cd8dac349f379c15909cebca7f45dacb91b74021680cd541b01f148ca0959e05"
+          "downloadSizeBytes": 7066532,
+          "sha256": "3f185b718945644db3329a325bbea6c1c2639010dda59f6eb70a89c03e2f89fd"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 7360308,
-          "sha256": "91f2642189cd389afc154431302a7793600687029bcc6942e67cb6bddaf55c38"
+          "downloadSizeBytes": 7360764,
+          "sha256": "c43223d6f4c08f4de98fa3cd5b08c9b066b05a5fc5695c504b8867dc1c1be965"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 7927644,
-          "sha256": "a345c1ee443d804ff641f684ab752594475adf0d8ce4cd6666599c37e17439c4"
+          "sha256": "c04bb4cd6bd1f8a0a4a7a561acc0fb5ad3559af4b8939cf0a2793bf4754302c8"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 7698568,
-          "sha256": "6ba21f2c92f4e36b4cd1d4c61b2e7b2b36585be3b5302bd5d8afcbea889fb2ed"
+          "sha256": "855607a22ebd75b940a94ee6a38f6a5de9a3a3116c6c9d8a6f5e60efa24ac25f"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 7151473,
-          "sha256": "75576f0562cd14c717f27d30d9896e010f744a89edbd1f358e0e9c6dae590e3e"
+          "downloadSizeBytes": 7151471,
+          "sha256": "984c47689a9e210907a3f2043c7f5a354e514f0874ca9cabc6443669ae188f1c"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 7069629,
-      "sha256": "cd8dac349f379c15909cebca7f45dacb91b74021680cd541b01f148ca0959e05",
+      "downloadSizeBytes": 7066532,
+      "sha256": "3f185b718945644db3329a325bbea6c1c2639010dda59f6eb70a89c03e2f89fd",
       "adapter": {
         "protocol": "http-json-v1",
         "entry": "adapter/macos/cockpit-antigravity-adapter",
@@ -285,41 +285,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity_ide-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 7070382,
-          "sha256": "a5b0c4c4d85acb8a671a4f0c0b8968ec000d4913d630c8f9a820aa93bdea1586"
+          "downloadSizeBytes": 7068105,
+          "sha256": "8adca52f81e7558c03671a113af7e8c7b2aaa4f2428bd32f90b31d18e092c794"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity_ide-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 7360186,
-          "sha256": "467e0f04b7f5ce97bb0d2b574100ce0f26bbb5a780558db24b7cda9d224c0452"
+          "downloadSizeBytes": 7360817,
+          "sha256": "a0de7d5e012eb23f2c8be6aa3f19945b69100f93f8423ceec5091a00c74aecea"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity_ide-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 7927833,
-          "sha256": "f4903acde09bd1df28367854dda2d9252991534a71977881f8c5886867fbec59"
+          "sha256": "bd7b143731591aff685ef2cf431f72d89a548d2b7b0101ac684db33356a3adc4"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity_ide-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 7699751,
-          "sha256": "1d8c3882f45336434ed7584f4ed4c362058651d47ca40bcd79a9d5bcf31d53d5"
+          "sha256": "876a3901b14789c3c66fbc668bbf6f742138d2466c3496d2a6965604fe036a77"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity_ide-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 7151633,
-          "sha256": "f6b3e99747d07dc8bc49c8530e658bde3e5842439b057c09d27bdb15c7f28c79"
+          "downloadSizeBytes": 7151632,
+          "sha256": "6ef25c409a0b100a8c666cce96093e15bdc4e27707ad18a303530253ea999440"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/antigravity_ide-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 7070382,
-      "sha256": "a5b0c4c4d85acb8a671a4f0c0b8968ec000d4913d630c8f9a820aa93bdea1586",
+      "downloadSizeBytes": 7068105,
+      "sha256": "8adca52f81e7558c03671a113af7e8c7b2aaa4f2428bd32f90b31d18e092c794",
       "adapter": {
         "protocol": "http-json-v1",
         "entry": "adapter/macos/cockpit-antigravity-ide-adapter",
@@ -544,41 +544,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/claude_manager-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 4870716,
-          "sha256": "1c0520429cb63e3009c83fa1a6fb4c85c65d85e68b3f86a8d99d9301e8b3a5ec"
+          "downloadSizeBytes": 4869846,
+          "sha256": "6ab42bbed5e95b67bcdf1c7d9f6d91b64b849d3549b24e88552e6d0db432e5aa"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/claude_manager-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 5003952,
-          "sha256": "15b488f5ffb7ef9f335941bc4f76e64564c95c10bd1eed0bbc6f6f2f66698ccf"
+          "downloadSizeBytes": 5004228,
+          "sha256": "d8d8dbb5c1f4ac4a00d9ae038c39612ef7e3577ede10836fd0d21cd382542d05"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/claude_manager-1.0.0-linux-x86_64.zip",
-          "downloadSizeBytes": 5177057,
-          "sha256": "f997bf27f7f61ae51c84211490dcba7fbc0c28ad1e5b8b8b939a7bddc9bd72cd"
+          "downloadSizeBytes": 5177157,
+          "sha256": "daee93b85c36807cca0f86e61f70acae3429d86594007c223bd00eba3846a362"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/claude_manager-1.0.0-linux-aarch64.zip",
-          "downloadSizeBytes": 5116083,
-          "sha256": "62cdf6c7dae1039c7752b783ec988a0e92a93ddb494197bf9d7f7e309dff4af2"
+          "downloadSizeBytes": 5116183,
+          "sha256": "45a67cb8c16f6bf47300325d6c619a0155ab3e50114f171eda04b4fbb6e607aa"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/claude_manager-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 4979448,
-          "sha256": "87167eff56ac3ef7423be4bc8ede6c6c88f3790f5159254805cec6336e148022"
+          "downloadSizeBytes": 4979526,
+          "sha256": "cad03ca4417bf6e229bf79ba6c88934d334b824a55464ae94eb709c8bf51d274"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/claude_manager-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 4870716,
-      "sha256": "1c0520429cb63e3009c83fa1a6fb4c85c65d85e68b3f86a8d99d9301e8b3a5ec"
+      "downloadSizeBytes": 4869846,
+      "sha256": "6ab42bbed5e95b67bcdf1c7d9f6d91b64b849d3549b24e88552e6d0db432e5aa"
     },
     {
       "id": "zed",
@@ -638,40 +638,40 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/zed-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3882753,
-          "sha256": "887acda63b7117d20db511e7a35cdbd6836b4cf951b6e6e64bf25bca88bd8135"
+          "downloadSizeBytes": 3880798,
+          "sha256": "076650eafaf2f2463abf4f84263f968b92f0b0ec7b365d38a7bf3abcf1071b5a"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/zed-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3982406,
-          "sha256": "b062fb586863066d012145a3d0ee74e1903ed4248a84ef1b90c77958b8b6f6b0"
+          "downloadSizeBytes": 3982861,
+          "sha256": "4d19ded3c5491a923e8b79ac8535f134873b26514a2a7d89c61cac31773f0166"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/zed-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 4189727,
-          "sha256": "146dc715f0a63cb51d63394d2e738234cca3eceb31a912b4fbefad3bd8fff891"
+          "sha256": "f7d5c966999001911e5f180f34dc076261094cc753e99d62e5d0ddd2a8d2776f"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/zed-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 4142739,
-          "sha256": "8d13d48ebdb4ecc8838dcfc43c7abea8566f8866a594e906af722f266345aacf"
+          "sha256": "50e77db40a08e5ba80ce6512cc8efec12ecadbd8e75c460299517072401dcbbc"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/zed-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 3981519,
-          "sha256": "0f1fa052a4cd80ac52a69f88b2e0568870f94de362e8eb9b54a1ba3569bc1bf6"
+          "downloadSizeBytes": 3981517,
+          "sha256": "c72a9b6a4b4cd0b77121680c57c631ebc3f5baaeaad39bb0a2141be997946a87"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/zed-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3882753,
+      "downloadSizeBytes": 3880798,
       "capabilities": [
         "accounts",
         "oauth",
@@ -721,7 +721,7 @@
         ],
         "nativeBoundaries": []
       },
-      "sha256": "887acda63b7117d20db511e7a35cdbd6836b4cf951b6e6e64bf25bca88bd8135"
+      "sha256": "076650eafaf2f2463abf4f84263f968b92f0b0ec7b365d38a7bf3abcf1071b5a"
     },
     {
       "id": "kiro",
@@ -794,40 +794,40 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/kiro-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3777271,
-          "sha256": "4d79dee15123686729e3c49de71545913c9f6cda0abde40a1aab0bf4235f592d"
+          "downloadSizeBytes": 3776467,
+          "sha256": "99e896e01c8a35e1afa1350bab8537ce179e6108b067f974ca07d2232ad42e64"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/kiro-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3888245,
-          "sha256": "9621b9a0ea8103224fde49dfb01b8a7c2b7c66c0d28c561ab7daffcd283e1371"
+          "downloadSizeBytes": 3889627,
+          "sha256": "f288f043083ce6afc17cb5dcce1f1c1039608d2e44fdbd99f13e9bb47bddb523"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/kiro-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 4114480,
-          "sha256": "404ec8c8724b74509f5776ccda29d02209fa00e3d5d3f405ae2cd68cdbb64ea3"
+          "sha256": "4e596c9ecbc3f67777560f7ba832aba1449c7de2d0116e8cc3c1fd3234a008a5"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/kiro-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 4056429,
-          "sha256": "e38e64f1632ebb3fcb5fd320c4459c7a1d3566eda59cc0f58cdbcc1633e85a2e"
+          "sha256": "b8ae93baedd9b8656a72e6b169b6b26e1f093e72a4283aa826bb55849cfc6c97"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/kiro-1.0.0-windows-x86_64.zip",
           "downloadSizeBytes": 3887913,
-          "sha256": "f7cdbbde2fb05a933d42fce93edaa025859339d7efab133bbb70ffcc518c334b"
+          "sha256": "c8b63067de08c915f9812333c1152dace395fe850a605a3c32dbbd207b43fdea"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/kiro-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3777271,
+      "downloadSizeBytes": 3776467,
       "capabilities": [
         "accounts",
         "oauth",
@@ -880,7 +880,7 @@
         ],
         "nativeBoundaries": []
       },
-      "sha256": "4d79dee15123686729e3c49de71545913c9f6cda0abde40a1aab0bf4235f592d"
+      "sha256": "99e896e01c8a35e1afa1350bab8537ce179e6108b067f974ca07d2232ad42e64"
     },
     {
       "id": "github-copilot",
@@ -950,40 +950,40 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/github-copilot-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3766226,
-          "sha256": "e00fa42a4aa9332bac5b46a72f848ca9a556793ec0ac2236ff81276c40439ebc"
+          "downloadSizeBytes": 3763801,
+          "sha256": "2e9c251d8b268dbcbffe55cf98a6c6d01125ab7a4b1a5df75d2af25f87c26e49"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/github-copilot-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3878854,
-          "sha256": "30942dc8756eeb2e9c767cfd1aecddb310a321b126236f208711a7bb9007a078"
+          "downloadSizeBytes": 3879379,
+          "sha256": "7d6c2739f63b4ac58083fa9f3fa14a8a7ecc6b6ff4b25e9975d32822b142a3e6"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/github-copilot-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 4100562,
-          "sha256": "bcc5199785c9fecbda9488a2635aa1f608d7e11ba8b1fbe8bf29ec8df20d991f"
+          "sha256": "86c6f87a3507788fe7bc342a1dd3dbda645bbe4a7fdd4205e2dd265aae45ecce"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/github-copilot-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 4042640,
-          "sha256": "2bfc14a47b7e85dab8cd1826be3a6f4666156911310c96e487d12b60f4a0f0e3"
+          "sha256": "fe658fddc30039daac51d5d67a458e94754e5a69b08d0abbbb1919ede2691704"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/github-copilot-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 3877757,
-          "sha256": "5807233ccec312a900563d9763e25e49311e96c3d06464c1f520fd803563a8c9"
+          "downloadSizeBytes": 3877759,
+          "sha256": "d0ca235a50c1afb11913ea11aff089d9118cb1c570d70e6ce02bd95a28aff4fd"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/github-copilot-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3766226,
+      "downloadSizeBytes": 3763801,
       "capabilities": [
         "accounts",
         "oauth",
@@ -1036,7 +1036,7 @@
         ],
         "nativeBoundaries": []
       },
-      "sha256": "e00fa42a4aa9332bac5b46a72f848ca9a556793ec0ac2236ff81276c40439ebc"
+      "sha256": "2e9c251d8b268dbcbffe55cf98a6c6d01125ab7a4b1a5df75d2af25f87c26e49"
     },
     {
       "id": "windsurf",
@@ -1111,40 +1111,40 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/windsurf-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3787230,
-          "sha256": "b4506442a72a71d5130ce7e1cfa92fc9708aa489718ffd85fa942769b14f4010"
+          "downloadSizeBytes": 3786221,
+          "sha256": "e198dfefa527d15b9370831163873aa0cb9c701854e6300d26add8670847dcae"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/windsurf-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3900178,
-          "sha256": "c64f10c5562cbe24ea650797bb8787f995fe97c11bc9503a1aa325985fa9e898"
+          "downloadSizeBytes": 3900726,
+          "sha256": "d0299ff45c2ccabbfd45e33b25bf4768c6d134857cfd0eb5bbb7f373c1fd5ab1"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/windsurf-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 4122270,
-          "sha256": "433ca1faeef5c31b209e7baa352f2a2d1d52fc244ad202b16b18c124d5df3d27"
+          "sha256": "6cd1d0e35d51336eeaf7d7f8f7940f99bc6d227a3171fca866d0e4f7f5235d4f"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/windsurf-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 4066093,
-          "sha256": "b9f39c6940104e6b05e53d838d881f0b6010898ecb7b2a995734d2670d087471"
+          "sha256": "a177efe1140a197fc264b13857de9c995f730db79e39786ed6b6684d72189f3d"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/windsurf-1.0.0-windows-x86_64.zip",
           "downloadSizeBytes": 3902170,
-          "sha256": "89a1945bbe5e356536bfa75033da27984f013d90ec5688cb8c23eb5ba58e625c"
+          "sha256": "56dc122418e5a92bd80593548b2fcbb455a27cad76ebfaa5f141a5315d98b06b"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/windsurf-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3787230,
+      "downloadSizeBytes": 3786221,
       "capabilities": [
         "accounts",
         "oauth",
@@ -1198,7 +1198,7 @@
         ],
         "nativeBoundaries": []
       },
-      "sha256": "b4506442a72a71d5130ce7e1cfa92fc9708aa489718ffd85fa942769b14f4010"
+      "sha256": "e198dfefa527d15b9370831163873aa0cb9c701854e6300d26add8670847dcae"
     },
     {
       "id": "cursor",
@@ -1321,41 +1321,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/cursor-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3907392,
-          "sha256": "0feaa44cfe2fa3c8c5410b938bf3af3dec2e339467e1e0ddcdde0a231bfc11ca"
+          "downloadSizeBytes": 3906456,
+          "sha256": "a1d729e00a2cbb82725a1c314ce0e50583574b1540bc87c5c82832bd64fd4fed"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/cursor-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 4018041,
-          "sha256": "e94c9687c43e7d7a74abd0e023202b28d0967fb160f0a03d4ed5636b45db9796"
+          "downloadSizeBytes": 4016489,
+          "sha256": "ba6e9477048e2c423a05a104fb0e8dc7d12693a2d3e4cd2f7799781440cb5494"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/cursor-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 4234683,
-          "sha256": "fd6539c7c3a64d9c20766066d852bc33dbfc30286d215464c9952e4d0cbedc8d"
+          "sha256": "7eb85363cfc65d883a43b999e45add39a8a67c47b109de518a452c430a9f9112"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/cursor-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 4180618,
-          "sha256": "c74fe0bdc4801e07da7d82dc83d00c02354c2374e89e87a697ef825a9f256b50"
+          "sha256": "6f997eda22f42b5b3c97fb925f8736e4309be2f41af2187324191f267534a354"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/cursor-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 4014394,
-          "sha256": "8e333a9e6b03c392e6e016423c8d845a23355b736048ea333173c088c8e634ae"
+          "downloadSizeBytes": 4014395,
+          "sha256": "14c27db6680480ad2384ca57fcec09831b1df72b93e3dc3c6adaf85b4ac240c3"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/cursor-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3907392,
-      "sha256": "0feaa44cfe2fa3c8c5410b938bf3af3dec2e339467e1e0ddcdde0a231bfc11ca"
+      "downloadSizeBytes": 3906456,
+      "sha256": "a1d729e00a2cbb82725a1c314ce0e50583574b1540bc87c5c82832bd64fd4fed"
     },
     {
       "id": "gemini",
@@ -1482,41 +1482,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/gemini-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3749269,
-          "sha256": "cd7b302cfa0bc394fafa3d45561c8b2f00883d0e7af5059dd31fae521316693f"
+          "downloadSizeBytes": 3748022,
+          "sha256": "c6da0dc16ef34c0de6c1f0d4a0f5e062f01e00ad1c5744237bfd3af30c209cad"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/gemini-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3855673,
-          "sha256": "46e1b4bc4e1c99d7fa8a6b682e028dd22adbd84345c30f231efde212aa483f28"
+          "downloadSizeBytes": 3857925,
+          "sha256": "477e6bcb5772056f8c5141da7c0911eba178f507bfa15e8135060febfda70d1f"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/gemini-1.0.0-linux-x86_64.zip",
-          "downloadSizeBytes": 4032107,
-          "sha256": "f5612814318570c82bb01af988ffd3436194f6f8ca6da22b26a89c8e70c01a25"
+          "downloadSizeBytes": 4032283,
+          "sha256": "e97eed78f56604c3a2ca6a3f89939e399885aa1526cbb67e42220f3742068fed"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/gemini-1.0.0-linux-aarch64.zip",
-          "downloadSizeBytes": 3980710,
-          "sha256": "ae16578f6145be2d35a459fed32329b6cf9561bffc911d59a210e36b5c728d22"
+          "downloadSizeBytes": 3980886,
+          "sha256": "8dd6170a012660e8bcc48d6f05792775fbbfc6f0226fb66e22755a305324698d"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/gemini-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 3817229,
-          "sha256": "ee1a057363b3ed90fcd8d244d07b2f68a872a7f58e02835430c49fbef057918b"
+          "downloadSizeBytes": 3817398,
+          "sha256": "b37161cacae7e2eafacb353006bf476579171fe8a007497307da3a97ca1375c5"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/gemini-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3749269,
-      "sha256": "cd7b302cfa0bc394fafa3d45561c8b2f00883d0e7af5059dd31fae521316693f"
+      "downloadSizeBytes": 3748022,
+      "sha256": "c6da0dc16ef34c0de6c1f0d4a0f5e062f01e00ad1c5744237bfd3af30c209cad"
     },
     {
       "id": "trae",
@@ -1643,41 +1643,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/trae-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3954821,
-          "sha256": "3490e1c56d548c4b451ce3c854237b8c6ef77426fa9555e804f52c488ba1934c"
+          "downloadSizeBytes": 3953993,
+          "sha256": "47ffc6fa15c6399dc6eaa52268ad31d9f74fe8ac3a34448430f8e1f459971b13"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/trae-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 4077485,
-          "sha256": "4b8a7e76faf3074d204d2b6e25e6690963f85f1a6e2d0722d0b920faf99c36bc"
+          "downloadSizeBytes": 4079748,
+          "sha256": "903d6037982a7c99bf83ba0e2ddf821af3b60227538e85756821f0655b2d09b2"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/trae-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 4301742,
-          "sha256": "ff9ba7ecb67a92cd90b86e5bd80ba26a11499e8c2d1c4bcfbd4ee950e9680a23"
+          "sha256": "047f1f82b1f2b2427851f8df66adfc46819a8d453e792ffd0e0dad33b5e00450"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/trae-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 4230212,
-          "sha256": "2b7e43bda1827a0040484500a1271f855c7eb4379e969d5305227457fed390c6"
+          "sha256": "5f6e53f886d3065d460d1cfa3c579016e6dad8396ff24106215950a262fcd1de"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/trae-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 4067371,
-          "sha256": "a21b6d183373703126cb122583635c801aa4ee8673122ed47ab08d5fa1fd9b6c"
+          "downloadSizeBytes": 4067372,
+          "sha256": "a2e2c468d799d4b14a99c3a66dc360869f3dc8d5c10a3f91120ac4018d4e7b0f"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/trae-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3954821,
-      "sha256": "3490e1c56d548c4b451ce3c854237b8c6ef77426fa9555e804f52c488ba1934c"
+      "downloadSizeBytes": 3953993,
+      "sha256": "47ffc6fa15c6399dc6eaa52268ad31d9f74fe8ac3a34448430f8e1f459971b13"
     },
     {
       "id": "qoder",
@@ -1748,40 +1748,40 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/qoder-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3730876,
-          "sha256": "1855b76ac40bfb296b24cd5a735907d5b338919a8973ba09afc4ffcefe6992f0"
+          "downloadSizeBytes": 3729764,
+          "sha256": "eefcd75b8c332302ae4c5f0a8854ea626c21d953de344db8321d22872355c90b"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/qoder-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3838516,
-          "sha256": "a0029b220bf1e2aaee2bf1cbc7c9880eb339918d8d0d20ea4369c3c8afed9e2d"
+          "downloadSizeBytes": 3841084,
+          "sha256": "516703118ffb765af40375caebd2a2b9f4f54ffd24ca46262214e81c494df841"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/qoder-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 4053639,
-          "sha256": "8d2e5561fb264a2a581b53d20c4d7af470c5ea58aee2bf90d1b9f5bc5b96a10a"
+          "sha256": "990126f09833c6d76314a807bb78921b42d92f19f67cb7baa2164a5ccb2d5eed"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/qoder-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 3996602,
-          "sha256": "03dc534cc057f64507561240f4eacae0305b454f8473762c260e1d5296667c2b"
+          "sha256": "ca7a0388f3311def84d010a7b3371f3256da0c5f9ac1cbf8bd06cf331f9b00c1"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/qoder-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 3826835,
-          "sha256": "93f0e608e3e36daa3f35e6447f7d9ff9331127bfab6df43f286953187a54bdf2"
+          "downloadSizeBytes": 3826840,
+          "sha256": "7b15850bf225891189238c06128d16290fd02db18e362838ae30477c3cf10c81"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/qoder-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3730876,
+      "downloadSizeBytes": 3729764,
       "capabilities": [
         "accounts",
         "oauth",
@@ -1834,7 +1834,7 @@
         ],
         "nativeBoundaries": []
       },
-      "sha256": "1855b76ac40bfb296b24cd5a735907d5b338919a8973ba09afc4ffcefe6992f0"
+      "sha256": "eefcd75b8c332302ae4c5f0a8854ea626c21d953de344db8321d22872355c90b"
     },
     {
       "id": "codebuddy",
@@ -1959,41 +1959,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3614420,
-          "sha256": "0a59d72b1c8b1c274ab95b60378e8901ff45ed217fa1475ea22fc14f29f99bef"
+          "downloadSizeBytes": 3613361,
+          "sha256": "40d2f84a918dfb9be3abdf45945e69ee54c7c9dfcacc6bcfa82baa28c56a73a8"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3729943,
-          "sha256": "e16ee6369699cbc3817972f83813d572323aaff7af68d6f7ae07e493af317456"
+          "downloadSizeBytes": 3731225,
+          "sha256": "7a69677195468e43cd7d13044c653c1621965f943798653fad9c9632b885e0a6"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 3950350,
-          "sha256": "3677515f702782af92bc5513a4ec72088233654e639c9a297c4c00229cd4bde0"
+          "sha256": "0b163effca3195d0e1c8aae7e8298d964b9163059058639202a3463ffa9af471"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 3888368,
-          "sha256": "d12657a5b6cf26c89e7be5621040fb9828892784d160bfb7a66f3096734a9553"
+          "sha256": "fd2b43f71b4caf414c51e110b4c1a778ad5e1291b8f1eb25145a6a7cbe607f67"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 3734372,
-          "sha256": "0262fe807b09532c9aca058d3b74c9d8436f3b43d8f62ddc5ea32a7a2520e858"
+          "downloadSizeBytes": 3734371,
+          "sha256": "15ad48dcf319d5f3d1887e6c79165bab8a50afe88ea9ddfcc527050229bb69fe"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3614420,
-      "sha256": "0a59d72b1c8b1c274ab95b60378e8901ff45ed217fa1475ea22fc14f29f99bef"
+      "downloadSizeBytes": 3613361,
+      "sha256": "40d2f84a918dfb9be3abdf45945e69ee54c7c9dfcacc6bcfa82baa28c56a73a8"
     },
     {
       "id": "codebuddy_cn",
@@ -2120,41 +2120,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy_cn-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3641000,
-          "sha256": "37abaf71942909cafdc38d6c7fd79adf584b64ea6594d4ade6fb89965a2b4bb7"
+          "downloadSizeBytes": 3639579,
+          "sha256": "4a70d263278999134cdb6a88e59832b01871e139717293b777b1245c25f8d70c"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy_cn-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3761554,
-          "sha256": "d5951f545052a84b48a9827e62cb59ed3139de60965440ebb5955359cc930bc4"
+          "downloadSizeBytes": 3760748,
+          "sha256": "ceee1494d9e69f659d4f48dc6cf81f46c62f2f56f7f531a6314de13604a4e5c9"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy_cn-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 3981055,
-          "sha256": "5eaf0dfc3871720674a9ae3d37e6016319478d6473501a5bce30dbe44be0ea4a"
+          "sha256": "a368612f6a52b6e789a55bf9742f1a9476c2798f067a2161093d825e06255fda"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy_cn-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 3919307,
-          "sha256": "9e4f0ee23d9c734fd078880ed6b600bcb096580e5b21aa1cac61b7241c18244e"
+          "sha256": "5c09dd0a163112feaaced28333499d781f3af9f8372f86a07354c5f882148574"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy_cn-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 3764576,
-          "sha256": "f19a8946dc2c1ee8d992423ccef5a2a414f361b9910ca54f94734470acbcef41"
+          "downloadSizeBytes": 3764577,
+          "sha256": "b9a4e246e461ee600c1e0e155c66bc1b7e9ca052501ccdafaf4e493808669921"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codebuddy_cn-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3641000,
-      "sha256": "37abaf71942909cafdc38d6c7fd79adf584b64ea6594d4ade6fb89965a2b4bb7"
+      "downloadSizeBytes": 3639579,
+      "sha256": "4a70d263278999134cdb6a88e59832b01871e139717293b777b1245c25f8d70c"
     },
     {
       "id": "workbuddy",
@@ -2284,41 +2284,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/workbuddy-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3634104,
-          "sha256": "6e4217e07c76fc4de60125bb05d0533f224625531613c6a44d535c365e2ffdbc"
+          "downloadSizeBytes": 3632496,
+          "sha256": "02dad3c5cf1e980ecfa876fdf3048c4c821740852d40a7975bc70d985cefc9d6"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/workbuddy-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3751170,
-          "sha256": "0e5c4cbc24a369a085ea4254a971a98dd6693c95aef07ef6e190ce5be6583d44"
+          "downloadSizeBytes": 3750116,
+          "sha256": "1bd7df853d48107691791ac59b21d884f6fff9fe549ed5c3488211aa96d20f50"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/workbuddy-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 3969576,
-          "sha256": "b6cc9999a9f08c3af1793eb4e679a841f4845957a3d5deb939853b61d4000e3a"
+          "sha256": "b800fe1c7fe1d13b9cf496498c05fe9519389adbff6ae4eadc05b40aed15762c"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/workbuddy-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 3907732,
-          "sha256": "e06e9875780885717d681937988da035535fdeaa4e1977a57417d97207c0f162"
+          "sha256": "37fd6c16aebb8d5e19411ba363c8c126a5a5683b6ccdbff0f6a653faebfbd8d7"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/workbuddy-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 3749910,
-          "sha256": "858df960ca9c72010a398d9c3c87e47a2744bbba38e01086ce8cca0d5f2cc804"
+          "downloadSizeBytes": 3749911,
+          "sha256": "fcf83b70252a63a0b650fbf4cee6a83009e3b46425919a48ba7b70d226878bd5"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/workbuddy-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3634104,
-      "sha256": "6e4217e07c76fc4de60125bb05d0533f224625531613c6a44d535c365e2ffdbc"
+      "downloadSizeBytes": 3632496,
+      "sha256": "02dad3c5cf1e980ecfa876fdf3048c4c821740852d40a7975bc70d985cefc9d6"
     },
     {
       "id": "codex",
@@ -2428,41 +2428,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codex-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 14824198,
-          "sha256": "9915f6cf6531e28ae03da27f0d8755002eaef89e817eaf096b51ce069910caa8"
+          "downloadSizeBytes": 14822300,
+          "sha256": "f3c37155037ccba831023c2978405b17921ebe1674ef153026184bdeee12e8d4"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codex-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 15809109,
-          "sha256": "caaeec76bab17e9829fe3d16b62ed080512932952b4aadc34fd41a586f4d27f7"
+          "downloadSizeBytes": 15814841,
+          "sha256": "af58f58acbbe2e86d8224d445462334f24b9250abe821aa6778cf759c3522c68"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codex-1.0.0-linux-x86_64.zip",
-          "downloadSizeBytes": 16331001,
-          "sha256": "649fb0474fa9a9919f32a777a315c9e90289ba7f45d5c6fa378775318ddf608f"
+          "downloadSizeBytes": 16331118,
+          "sha256": "7a4df9258d5a7654d6e7b89a230f6d2fea72b9e33f231ec7b44b8824d130288c"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codex-1.0.0-linux-aarch64.zip",
-          "downloadSizeBytes": 15321139,
-          "sha256": "edada4425800045a203ff6dc8be56b30829d6912c527a7a586fd890b195c84a3"
+          "downloadSizeBytes": 15321251,
+          "sha256": "237428e02c1997cf078f9b2cdd056761219f7a0a66c66aaaea0354aaf94d4e0e"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codex-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 15593472,
-          "sha256": "0ed44bcdc44b2eb3156861171a7f1730c37bc8b02fa99a326ca8cddbc8b1bad9"
+          "downloadSizeBytes": 15593575,
+          "sha256": "1e4733440f674405a160b2c1308aa4b88c940d074836dbeebbfcaed2da5544f6"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/codex-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 14824198,
-      "sha256": "9915f6cf6531e28ae03da27f0d8755002eaef89e817eaf096b51ce069910caa8",
+      "downloadSizeBytes": 14822300,
+      "sha256": "f3c37155037ccba831023c2978405b17921ebe1674ef153026184bdeee12e8d4",
       "adapter": {
         "protocol": "http-json-v1",
         "entry": "adapter/macos/cockpit-codex-adapter",

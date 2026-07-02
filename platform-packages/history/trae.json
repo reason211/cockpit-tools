@@ -128,41 +128,41 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/trae-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3954821,
-          "sha256": "3490e1c56d548c4b451ce3c854237b8c6ef77426fa9555e804f52c488ba1934c"
+          "downloadSizeBytes": 3953993,
+          "sha256": "47ffc6fa15c6399dc6eaa52268ad31d9f74fe8ac3a34448430f8e1f459971b13"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/trae-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 4077485,
-          "sha256": "4b8a7e76faf3074d204d2b6e25e6690963f85f1a6e2d0722d0b920faf99c36bc"
+          "downloadSizeBytes": 4079748,
+          "sha256": "903d6037982a7c99bf83ba0e2ddf821af3b60227538e85756821f0655b2d09b2"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/trae-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 4301742,
-          "sha256": "ff9ba7ecb67a92cd90b86e5bd80ba26a11499e8c2d1c4bcfbd4ee950e9680a23"
+          "sha256": "047f1f82b1f2b2427851f8df66adfc46819a8d453e792ffd0e0dad33b5e00450"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/trae-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 4230212,
-          "sha256": "2b7e43bda1827a0040484500a1271f855c7eb4379e969d5305227457fed390c6"
+          "sha256": "5f6e53f886d3065d460d1cfa3c579016e6dad8396ff24106215950a262fcd1de"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/trae-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 4067371,
-          "sha256": "a21b6d183373703126cb122583635c801aa4ee8673122ed47ab08d5fa1fd9b6c"
+          "downloadSizeBytes": 4067372,
+          "sha256": "a2e2c468d799d4b14a99c3a66dc360869f3dc8d5c10a3f91120ac4018d4e7b0f"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/trae-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3954821,
-      "sha256": "3490e1c56d548c4b451ce3c854237b8c6ef77426fa9555e804f52c488ba1934c"
+      "downloadSizeBytes": 3953993,
+      "sha256": "47ffc6fa15c6399dc6eaa52268ad31d9f74fe8ac3a34448430f8e1f459971b13"
     }
   ]
 }

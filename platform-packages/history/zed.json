@@ -61,40 +61,40 @@
           "os": "macos",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/zed-1.0.0-macos-aarch64.zip",
-          "downloadSizeBytes": 3882753,
-          "sha256": "887acda63b7117d20db511e7a35cdbd6836b4cf951b6e6e64bf25bca88bd8135"
+          "downloadSizeBytes": 3880798,
+          "sha256": "076650eafaf2f2463abf4f84263f968b92f0b0ec7b365d38a7bf3abcf1071b5a"
         },
         {
           "os": "macos",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/zed-1.0.0-macos-x86_64.zip",
-          "downloadSizeBytes": 3982406,
-          "sha256": "b062fb586863066d012145a3d0ee74e1903ed4248a84ef1b90c77958b8b6f6b0"
+          "downloadSizeBytes": 3982861,
+          "sha256": "4d19ded3c5491a923e8b79ac8535f134873b26514a2a7d89c61cac31773f0166"
         },
         {
           "os": "linux",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/zed-1.0.0-linux-x86_64.zip",
           "downloadSizeBytes": 4189727,
-          "sha256": "146dc715f0a63cb51d63394d2e738234cca3eceb31a912b4fbefad3bd8fff891"
+          "sha256": "f7d5c966999001911e5f180f34dc076261094cc753e99d62e5d0ddd2a8d2776f"
         },
         {
           "os": "linux",
           "arch": "aarch64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/zed-1.0.0-linux-aarch64.zip",
           "downloadSizeBytes": 4142739,
-          "sha256": "8d13d48ebdb4ecc8838dcfc43c7abea8566f8866a594e906af722f266345aacf"
+          "sha256": "50e77db40a08e5ba80ce6512cc8efec12ecadbd8e75c460299517072401dcbbc"
         },
         {
           "os": "windows",
           "arch": "x86_64",
           "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/zed-1.0.0-windows-x86_64.zip",
-          "downloadSizeBytes": 3981519,
-          "sha256": "0f1fa052a4cd80ac52a69f88b2e0568870f94de362e8eb9b54a1ba3569bc1bf6"
+          "downloadSizeBytes": 3981517,
+          "sha256": "c72a9b6a4b4cd0b77121680c57c631ebc3f5baaeaad39bb0a2141be997946a87"
         }
       ],
       "downloadUrl": "https://github.com/jlcodes99/cockpit-tools/releases/download/platform-packages-main/zed-1.0.0-macos-aarch64.zip",
-      "downloadSizeBytes": 3882753,
+      "downloadSizeBytes": 3880798,
       "capabilities": [
         "accounts",
         "oauth",
@@ -144,7 +144,7 @@
         ],
         "nativeBoundaries": []
       },
-      "sha256": "887acda63b7117d20db511e7a35cdbd6836b4cf951b6e6e64bf25bca88bd8135"
+      "sha256": "076650eafaf2f2463abf4f84263f968b92f0b0ec7b365d38a7bf3abcf1071b5a"
     }
   ]
 }
