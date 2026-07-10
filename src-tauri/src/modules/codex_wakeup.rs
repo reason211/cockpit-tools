@@ -2517,7 +2517,8 @@ pub fn get_task(task_id: &str) -> Result<Option<CodexWakeupTask>, String> {
 mod tests {
     use super::{
         apply_model_preset_migrations, default_model_presets, CodexWakeupModelPreset,
-        CodexWakeupState, PRUNE_LEGACY_MODEL_PRESETS_MIGRATION_ID, REASONING_EFFORT_MEDIUM,
+        CodexWakeupState, GPT_5_6_MODEL_PRESETS_MIGRATION_ID,
+        PRUNE_LEGACY_MODEL_PRESETS_MIGRATION_ID, REASONING_EFFORT_MEDIUM,
     };
 
     fn model_preset(id: &str, name: &str, model: &str) -> CodexWakeupModelPreset {
