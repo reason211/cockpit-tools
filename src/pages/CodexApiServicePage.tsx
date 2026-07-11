@@ -51,11 +51,13 @@ import {
 } from "../utils/codexApiKeyAccountScope";
 import { resolveCodexApiServiceCompatibilityBaseUrls } from "../utils/codexApiServiceCompatibility";
 import * as codexLocalAccessService from "../services/codexLocalAccessService";
+import * as codexInstanceService from "../services/codexInstanceService";
 import {
   getCodexAccountGroups,
   type CodexAccountGroup,
 } from "../services/codexAccountGroupService";
 import type { CodexAccount } from "../types/codex";
+import { CODEX_API_SERVICE_BIND_ID } from "../types/instance";
 import type {
   CodexLocalAccessAddressKind,
   CodexLocalAccessAccountModelRule,
@@ -88,6 +90,7 @@ import { filterCodexLocalAccessAccountIds } from "../utils/codexLocalAccessAccou
 import { SingleSelectDropdown } from "../components/SingleSelectDropdown";
 import { CodexLocalAccessModal } from "../components/CodexLocalAccessModal";
 import { PaginationControls } from "../components/PaginationControls";
+import { useCodexAccountOverviewMemberView } from "../hooks/useCodexAccountOverviewMemberView";
 import "./CodexApiServicePage.css";
 
 type ServiceTab = "overview" | "keys" | "accounts" | "models" | "logs";
@@ -581,7 +584,8 @@ function gatewayModeLabel(
 export function CodexApiServicePage() {
   const { t } = useTranslation();
   const { platformGroups } = usePlatformLayoutStore();
-  const { accounts, fetchAccounts } = useCodexAccountStore();
+  const { accounts, currentAccount, fetchAccounts, fetchCurrentAccount } =
+    useCodexAccountStore();
   const [state, setState] = useState<CodexLocalAccessState | null>(null);
   const [groups, setGroups] = useState<CodexAccountGroup[]>([]);
   const [activeTab, setActiveTab] = useState<ServiceTab>("overview");
@@ -609,6 +613,7 @@ export function CodexApiServicePage() {
   const [proxyInput, setProxyInput] = useState("");
   const [selectedModelId, setSelectedModelId] = useState("");
   const [memberModalOpen, setMemberModalOpen] = useState(false);
+  const [apiServiceIsCurrent, setApiServiceIsCurrent] = useState(false);
   const [apiKeyDrafts, setApiKeyDrafts] = useState<Record<string, string>>({});
   const [apiKeyPolicyDrafts, setApiKeyPolicyDrafts] = useState<
     Record<string, ApiKeyPolicyDraft>
@@ -666,6 +671,11 @@ export function CodexApiServicePage() {
 
   const collection = state?.collection ?? null;
   const stats = state?.stats ?? null;
+  const memberView = useCodexAccountOverviewMemberView({
+    accounts,
+    groups,
+    currentAccountId: apiServiceIsCurrent ? null : (currentAccount?.id ?? null),
+  });
   const builtinTimeoutPresets = useMemo(
     () => [
       {
@@ -975,6 +985,22 @@ export function CodexApiServicePage() {
       setError(String(err).replace(/^Error:\s*/, "")),
     );
     void fetchAccounts();
+    void fetchCurrentAccount();
+    void codexInstanceService
+      .listInstances()
+      .then((instances) => {
+        const defaultInstance = instances.find((instance) => instance.isDefault);
+        if (mountedRef.current) {
+          setApiServiceIsCurrent(
+            defaultInstance?.bindAccountId === CODEX_API_SERVICE_BIND_ID,
+          );
+        }
+      })
+      .catch(() => {
+        if (mountedRef.current) {
+          setApiServiceIsCurrent(false);
+        }
+      });
     void getCodexAccountGroups()
       .then(setGroups)
       .catch(() => setGroups([]));
@@ -986,7 +1012,7 @@ export function CodexApiServicePage() {
       mountedRef.current = false;
       window.removeEventListener("codex-local-access-state-updated", onUpdated);
     };
-  }, [fetchAccounts, reloadState]);
+  }, [fetchAccounts, fetchCurrentAccount, reloadState]);
 
   useEffect(() => {
     persistStatsRange(statsRange);
@@ -5520,6 +5546,7 @@ export function CodexApiServicePage() {
         }
         accounts={accounts}
         accountGroups={groups}
+        memberView={memberView}
         initialSelectedIds={memberIds}
         maskAccountText={maskAccountText}
         onClose={() => setMemberModalOpen(false)}

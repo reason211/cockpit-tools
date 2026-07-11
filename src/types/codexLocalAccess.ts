@@ -33,6 +33,11 @@ export interface CodexLocalAccessCustomRoutingRule {
   weight: number;
 }
 
+export interface CodexLocalAccessOAuthQuotaReserve {
+  hourlyPercent: number;
+  weeklyPercent: number;
+}
+
 export interface CodexLocalAccessAccountModelRule {
   accountId: string;
   excludedModels: string[];
@@ -128,6 +133,7 @@ export interface CodexLocalAccessCollection {
   disableCooling: boolean;
   restrictFreeAccounts: boolean;
   boundOauthAccountId?: string | null;
+  boundOauthQuotaReserve?: CodexLocalAccessOAuthQuotaReserve | null;
   accountIds: string[];
   createdAt: number;
   updatedAt: number;
@@ -277,6 +283,17 @@ export interface CodexLocalAccessProfileAttachment {
   error: string | null;
 }
 
+export interface CodexLocalAccessQuotaReserveStatus {
+  accountId: string;
+  snapshotUpdatedAt: number | null;
+  snapshotFresh: boolean;
+  blocked: boolean;
+  warning: boolean;
+  effectiveWindow: "hourly" | "weekly" | null;
+  effectiveRemainingPercent: number | null;
+  effectiveReservePercent: number | null;
+}
+
 export interface CodexLocalAccessState {
   collection: CodexLocalAccessCollection | null;
   running: boolean;
@@ -290,6 +307,7 @@ export interface CodexLocalAccessState {
   memberCount: number;
   stats: CodexLocalAccessStats;
   accountHealth: CodexLocalAccessAccountHealth[];
+  quotaReserveStatus: CodexLocalAccessQuotaReserveStatus | null;
 }
 
 export interface CodexLocalAccessTestResult {
