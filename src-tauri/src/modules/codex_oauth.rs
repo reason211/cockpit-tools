@@ -10,7 +10,9 @@ use std::net::{TcpListener, TcpStream};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Emitter, Manager};
+#[cfg(not(any(target_os = "windows", target_os = "macos")))]
+use tauri::{WebviewUrl, WebviewWindowBuilder};
 use url::Url;
 
 const CLIENT_ID: &str = "app_EMoamEEZ73f0CkXaXp7hrann";
@@ -291,6 +293,225 @@ fn is_callback_navigation(url: &Url, callback_port: u16) -> bool {
         && url.path() == "/auth/callback"
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum PrivateBrowserKind {
+    Edge,
+    Chrome,
+    Brave,
+    Firefox,
+}
+
+impl PrivateBrowserKind {
+    fn from_system_identifier(identifier: &str) -> Option<Self> {
+        let value = identifier.to_ascii_lowercase();
+        if value.contains("edge") || value.contains("microsoft-edge") {
+            Some(Self::Edge)
+        } else if value.contains("brave") {
+            Some(Self::Brave)
+        } else if value.contains("chrome") || value.contains("chromium") {
+            Some(Self::Chrome)
+        } else if value.contains("firefox") {
+            Some(Self::Firefox)
+        } else {
+            None
+        }
+    }
+
+    fn private_argument(self) -> &'static str {
+        match self {
+            Self::Edge => "--inprivate",
+            Self::Chrome | Self::Brave => "--incognito",
+            Self::Firefox => "-private-window",
+        }
+    }
+}
+
+#[cfg(target_os = "windows")]
+fn windows_default_browser_kind() -> Option<PrivateBrowserKind> {
+    use std::os::windows::process::CommandExt;
+    let output = std::process::Command::new("reg.exe")
+        .creation_flags(0x08000000)
+        .args([
+            "query",
+            r"HKCU\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice",
+            "/v",
+            "ProgId",
+        ])
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    stdout
+        .lines()
+        .find(|line| line.to_ascii_lowercase().contains("progid"))
+        .and_then(|line| line.split_whitespace().last())
+        .and_then(PrivateBrowserKind::from_system_identifier)
+}
+
+#[cfg(target_os = "windows")]
+fn open_windows_private_browser(
+    auth_url: &str,
+) -> Result<(std::path::PathBuf, PrivateBrowserKind), String> {
+    let mut candidates = Vec::new();
+    for (variable, relative_path, kind) in [
+        (
+            "ProgramFiles(x86)",
+            "Microsoft/Edge/Application/msedge.exe",
+            PrivateBrowserKind::Edge,
+        ),
+        (
+            "ProgramFiles",
+            "Microsoft/Edge/Application/msedge.exe",
+            PrivateBrowserKind::Edge,
+        ),
+        (
+            "LOCALAPPDATA",
+            "Microsoft/Edge/Application/msedge.exe",
+            PrivateBrowserKind::Edge,
+        ),
+        (
+            "ProgramFiles",
+            "Google/Chrome/Application/chrome.exe",
+            PrivateBrowserKind::Chrome,
+        ),
+        (
+            "ProgramFiles(x86)",
+            "Google/Chrome/Application/chrome.exe",
+            PrivateBrowserKind::Chrome,
+        ),
+        (
+            "LOCALAPPDATA",
+            "Google/Chrome/Application/chrome.exe",
+            PrivateBrowserKind::Chrome,
+        ),
+        (
+            "ProgramFiles",
+            "BraveSoftware/Brave-Browser/Application/brave.exe",
+            PrivateBrowserKind::Brave,
+        ),
+        (
+            "LOCALAPPDATA",
+            "BraveSoftware/Brave-Browser/Application/brave.exe",
+            PrivateBrowserKind::Brave,
+        ),
+        (
+            "ProgramFiles",
+            "Mozilla Firefox/firefox.exe",
+            PrivateBrowserKind::Firefox,
+        ),
+        (
+            "ProgramFiles(x86)",
+            "Mozilla Firefox/firefox.exe",
+            PrivateBrowserKind::Firefox,
+        ),
+    ] {
+        if let Some(root) = std::env::var_os(variable) {
+            candidates.push((std::path::PathBuf::from(root).join(relative_path), kind));
+        }
+    }
+
+    let default_kind = windows_default_browser_kind();
+    let selected = default_kind
+        .and_then(|kind| {
+            candidates
+                .iter()
+                .find(|(path, candidate_kind)| *candidate_kind == kind && path.is_file())
+                .cloned()
+        })
+        .or_else(|| candidates.into_iter().find(|(path, _)| path.is_file()));
+    let (browser, kind) = selected
+        .into_iter()
+        .next()
+        .ok_or_else(|| "未找到支持无痕启动的浏览器".to_string())?;
+
+    use std::os::windows::process::CommandExt;
+    std::process::Command::new(&browser)
+        .creation_flags(0x08000000)
+        .args([kind.private_argument(), "--new-window", auth_url])
+        .spawn()
+        .map_err(|error| format!("启动 Windows 无痕浏览器失败: {}", error))?;
+    Ok((browser, kind))
+}
+
+#[cfg(target_os = "macos")]
+fn macos_default_browser_kind() -> Option<PrivateBrowserKind> {
+    let plist = dirs::home_dir()?.join(
+        "Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist",
+    );
+    let output = std::process::Command::new("/usr/bin/plutil")
+        .args(["-extract", "LSHandlers", "json", "-o", "-"])
+        .arg(plist)
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let handlers: serde_json::Value = serde_json::from_slice(&output.stdout).ok()?;
+    handlers.as_array()?.iter().find_map(|handler| {
+        let scheme = handler.get("LSHandlerURLScheme")?.as_str()?;
+        if !scheme.eq_ignore_ascii_case("https") {
+            return None;
+        }
+        handler
+            .get("LSHandlerRoleAll")
+            .or_else(|| handler.get("LSHandlerRoleViewer"))
+            .and_then(serde_json::Value::as_str)
+            .and_then(PrivateBrowserKind::from_system_identifier)
+    })
+}
+
+#[cfg(target_os = "macos")]
+fn macos_browser_bundle(kind: PrivateBrowserKind) -> &'static str {
+    match kind {
+        PrivateBrowserKind::Edge => "com.microsoft.edgemac",
+        PrivateBrowserKind::Chrome => "com.google.Chrome",
+        PrivateBrowserKind::Brave => "com.brave.Browser",
+        PrivateBrowserKind::Firefox => "org.mozilla.firefox",
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn macos_browser_is_installed(kind: PrivateBrowserKind) -> bool {
+    std::process::Command::new("/usr/bin/open")
+        .args(["-Ra", "-b", macos_browser_bundle(kind)])
+        .status()
+        .is_ok_and(|status| status.success())
+}
+
+#[cfg(target_os = "macos")]
+fn open_macos_private_browser(auth_url: &str) -> Result<(String, PrivateBrowserKind), String> {
+    let fallback_order = [
+        PrivateBrowserKind::Edge,
+        PrivateBrowserKind::Chrome,
+        PrivateBrowserKind::Brave,
+        PrivateBrowserKind::Firefox,
+    ];
+    let default_kind = macos_default_browser_kind();
+    let kind = default_kind
+        .filter(|kind| macos_browser_is_installed(*kind))
+        .or_else(|| {
+            fallback_order
+                .into_iter()
+                .find(|kind| macos_browser_is_installed(*kind))
+        })
+        .ok_or_else(|| "未找到支持无痕启动的浏览器".to_string())?;
+    let bundle = macos_browser_bundle(kind);
+    std::process::Command::new("/usr/bin/open")
+        .args([
+            "-b",
+            bundle,
+            "--args",
+            kind.private_argument(),
+            "--new-window",
+            auth_url,
+        ])
+        .spawn()
+        .map_err(|error| format!("启动 macOS 无痕浏览器失败: {}", error))?;
+    Ok((bundle.to_string(), kind))
+}
+
 pub fn open_incognito_oauth_window(app: &AppHandle, auth_url: &str) -> Result<(), String> {
     hydrate_oauth_state_if_missing();
     let parsed = Url::parse(auth_url.trim())
@@ -314,35 +535,68 @@ pub fn open_incognito_oauth_window(app: &AppHandle, auth_url: &str) -> Result<()
             .map_err(|error| format!("重置 Codex OAuth 无痕窗口失败: {}", error))?;
     }
 
-    let callback_port = pending.port;
-    WebviewWindowBuilder::new(app, OAUTH_WINDOW_LABEL, WebviewUrl::External(parsed))
-        .title("Codex OAuth")
-        .inner_size(920.0, 720.0)
-        .min_inner_size(640.0, 560.0)
-        .center()
-        .incognito(true)
-        .on_navigation(move |url| {
-            if is_callback_navigation(url, callback_port) {
-                logger::log_info("Codex OAuth 无痕窗口正在访问本地回调地址");
-                return true;
-            }
-            let allowed = matches!(url.scheme(), "https" | "about");
-            if !allowed {
-                logger::log_warn(&format!(
-                    "Codex OAuth 无痕窗口已阻止非 HTTPS 导航: scheme={}",
-                    url.scheme()
-                ));
-            }
-            allowed
-        })
-        .build()
-        .map_err(|error| format!("创建 Codex OAuth 无痕窗口失败: {}", error))?;
+    #[cfg(target_os = "windows")]
+    {
+        let (browser, kind) = open_windows_private_browser(parsed.as_str())?;
+        logger::log_info(&format!(
+            "Codex OAuth Windows 无痕浏览器已打开: browser={}, kind={:?}, login_id={}, port={}",
+            browser.display(),
+            kind,
+            pending.login_id,
+            pending.port
+        ));
+        Ok(())
+    }
 
-    logger::log_info(&format!(
-        "Codex OAuth 无痕窗口已打开: login_id={}, port={}",
-        pending.login_id, pending.port
-    ));
-    Ok(())
+    #[cfg(target_os = "macos")]
+    {
+        let (bundle, kind) = open_macos_private_browser(parsed.as_str())?;
+        logger::log_info(&format!(
+            "Codex OAuth macOS 无痕浏览器已打开: bundle={}, kind={:?}, login_id={}, port={}",
+            bundle, kind, pending.login_id, pending.port
+        ));
+        Ok(())
+    }
+
+    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+    {
+        let callback_port = pending.port;
+        WebviewWindowBuilder::new(app, OAUTH_WINDOW_LABEL, WebviewUrl::External(parsed))
+            .title("Codex OAuth")
+            .inner_size(920.0, 720.0)
+            .min_inner_size(640.0, 560.0)
+            .center()
+            .incognito(true)
+            .on_page_load(|_, payload| {
+                logger::log_info(&format!(
+                    "Codex OAuth 页面加载事件: event={:?}, url={}",
+                    payload.event(),
+                    payload.url()
+                ));
+            })
+            .on_navigation(move |url| {
+                if is_callback_navigation(url, callback_port) {
+                    logger::log_info("Codex OAuth 无痕窗口正在访问本地回调地址");
+                    return true;
+                }
+                let allowed = matches!(url.scheme(), "https" | "about");
+                if !allowed {
+                    logger::log_warn(&format!(
+                        "Codex OAuth 无痕窗口已阻止非 HTTPS 导航: scheme={}",
+                        url.scheme()
+                    ));
+                }
+                allowed
+            })
+            .build()
+            .map_err(|error| format!("创建 Codex OAuth 无痕窗口失败: {}", error))?;
+
+        logger::log_info(&format!(
+            "Codex OAuth 无痕窗口已打开: login_id={}, port={}",
+            pending.login_id, pending.port
+        ));
+        Ok(())
+    }
 }
 
 pub fn close_oauth_window(app: &AppHandle) -> Result<(), String> {
@@ -1035,7 +1289,7 @@ pub async fn refresh_access_token_with_fallback(
 mod tests {
     use super::{
         authorize_url_matches_pending, is_callback_navigation, is_token_expired, OAuthState,
-        TOKEN_REFRESH_SKEW_SECONDS,
+        PrivateBrowserKind, TOKEN_REFRESH_SKEW_SECONDS,
     };
     use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
 
@@ -1090,6 +1344,30 @@ mod tests {
             &url::Url::parse("http://localhost:1455/other").unwrap(),
             1455
         ));
+    }
+
+    #[test]
+    fn private_browser_kind_maps_platform_identifiers() {
+        assert_eq!(
+            PrivateBrowserKind::from_system_identifier("MSEdgeHTM"),
+            Some(PrivateBrowserKind::Edge)
+        );
+        assert_eq!(
+            PrivateBrowserKind::from_system_identifier("ChromeHTML"),
+            Some(PrivateBrowserKind::Chrome)
+        );
+        assert_eq!(
+            PrivateBrowserKind::from_system_identifier("BraveHTML"),
+            Some(PrivateBrowserKind::Brave)
+        );
+        assert_eq!(
+            PrivateBrowserKind::from_system_identifier("org.mozilla.firefox"),
+            Some(PrivateBrowserKind::Firefox)
+        );
+        assert_eq!(
+            PrivateBrowserKind::from_system_identifier("com.apple.Safari"),
+            None
+        );
     }
 
     #[test]
