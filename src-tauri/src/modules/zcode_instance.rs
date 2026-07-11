@@ -575,12 +575,15 @@ fn configure_managed_environment(
             "ZCODE_CREDENTIAL_SECRET",
             modules::zcode_account::credential_secret_for_home(real_home),
         )
-        .env("HOME", &data)
-        .env("USERPROFILE", &data)
         .env(
             "ZCODE_DESKTOP_APPLICATION_NAME",
             format!("ZCode [{}]", instance_name),
         );
+
+    // ZCode 3.3.4 fails Electron initialization on Windows when these generic
+    // home variables are redirected. Its ZCODE_* variables provide isolation.
+    #[cfg(not(target_os = "windows"))]
+    command.env("HOME", &data).env("USERPROFILE", &data);
 }
 
 pub fn start_default(extra_args: &[String]) -> Result<u32, String> {
@@ -749,10 +752,16 @@ mod tests {
             .filter_map(|(key, value)| value.map(|value| (key.to_owned(), value.to_owned())))
             .collect();
 
+        #[cfg(not(target_os = "windows"))]
         assert_eq!(
             env.get(std::ffi::OsStr::new("HOME")),
             Some(&root.join("data").into_os_string())
         );
+        #[cfg(target_os = "windows")]
+        {
+            assert!(!env.contains_key(std::ffi::OsStr::new("HOME")));
+            assert!(!env.contains_key(std::ffi::OsStr::new("USERPROFILE")));
+        }
         assert_eq!(
             env.get(std::ffi::OsStr::new("ZCODE_DATA_BASE_DIR")),
             Some(&root.join("data").into_os_string())
@@ -763,7 +772,7 @@ mod tests {
         );
         assert_eq!(
             env.get(std::ffi::OsStr::new("ZCODE_DESKTOP_SESSION_DATA_DIR")),
-            Some(&root.join("electron/session").into_os_string())
+            Some(&root.join("electron").join("session").into_os_string())
         );
         assert_eq!(
             env.get(std::ffi::OsStr::new("ZCODE_DESKTOP_APPLICATION_NAME")),
