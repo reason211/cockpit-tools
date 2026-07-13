@@ -60,6 +60,8 @@ use toml_edit::{value, Document};
 
 const CODEX_LOCAL_ACCESS_FILE: &str = "codex_local_access.json";
 const CODEX_LOCAL_ACCESS_CHAT_TEST_STREAM_EVENT: &str = "codex-local-access-chat-test-stream";
+const CODEX_LOCAL_ACCESS_MODEL_PRICING_REPRICE_EVENT: &str =
+    "codex-local-access-model-pricing-reprice";
 const CODEX_LOCAL_ACCESS_TEST_DISABLE_IMAGE_GENERATION_HEADER: &str =
     "x-agtools-disable-image-generation";
 const CODEX_LOCAL_ACCESS_STATS_FILE: &str = "codex_local_access_stats.json";
@@ -127,6 +129,9 @@ const WEEK_WINDOW_MS: i64 = 7 * DAY_WINDOW_MS;
 const MONTH_WINDOW_MS: i64 = 30 * DAY_WINDOW_MS;
 const STATE_RECENT_USAGE_EVENT_LIMIT: usize = 100;
 const DEFAULT_MODEL_PRICING_VERSION: u64 = 1;
+const MODEL_PRICING_REPRICE_BATCH_SIZE: i64 = 50_000;
+const MODEL_PRICING_REPRICE_PARALLEL_MIN_ROWS: usize = 2_000;
+const LOCAL_ACCESS_LOGS_DB_BUSY_TIMEOUT: Duration = Duration::from_secs(5);
 const COOLDOWN_KEY_SEPARATOR: &str = "\u{1f}";
 const CUSTOM_ROUTING_PRIORITY_MIN: i32 = 0;
 const CUSTOM_ROUTING_PRIORITY_MAX: i32 = 100;
@@ -171,6 +176,7 @@ const CODEX_IMAGE_MODEL_ID: &str = "gpt-image-2";
 const CODEX_AUTO_REVIEW_MODEL_ID: &str = "codex-auto-review";
 const DEFAULT_IMAGES_MAIN_MODEL: &str = "gpt-5.4-mini";
 const MAX_MODEL_PRICE_USD_PER_MILLION: f64 = 1_000_000.0;
+const CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS: u64 = 272_000;
 const CHAT_COMPLETIONS_PATH: &str = "/v1/chat/completions";
 const RESPONSES_PATH: &str = "/v1/responses";
 const RESPONSES_COMPACT_PATH: &str = "/v1/responses/compact";
@@ -181,6 +187,10 @@ const IMAGES_GENERATIONS_PATH: &str = "/v1/images/generations";
 const IMAGES_EDITS_PATH: &str = "/v1/images/edits";
 static GATEWAY_RUNTIME: OnceLock<TokioMutex<GatewayRuntime>> = OnceLock::new();
 static GATEWAY_LIFECYCLE_LOCK: OnceLock<TokioMutex<()>> = OnceLock::new();
+static MODEL_PRICING_REPRICE_WORKER: OnceLock<TokioMutex<ModelPricingRepriceWorkerState>> =
+    OnceLock::new();
+// ponytail: 单进程 SQLite 写队列；只有写入吞吐成为瓶颈时再换专用 DB writer task。
+static LOCAL_ACCESS_LOGS_DB_WRITE_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
 static PROVIDER_GATEWAY_RUNTIMES: OnceLock<TokioMutex<HashMap<String, ProviderGatewayRuntime>>> =
     OnceLock::new();
 static PROVIDER_GATEWAY_LIFECYCLE_LOCK: OnceLock<TokioMutex<()>> = OnceLock::new();
@@ -217,6 +227,48 @@ struct GatewayRuntime {
     shutdown_sender: Option<watch::Sender<bool>>,
     task: Option<tokio::task::JoinHandle<()>>,
     sidecar_child: Option<Child>,
+}
+
+#[derive(Default)]
+struct ModelPricingRepriceWorkerState {
+    running: bool,
+    pending: Option<ModelPricingRepriceJob>,
+    next_job_id: u64,
+    active_model_ids: Vec<String>,
+}
+
+#[derive(Clone)]
+struct ModelPricingRepriceJob {
+    job_id: u64,
+    collection: CodexLocalAccessCollection,
+    model_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone)]
+struct RequestLogRepriceRow {
+    id: i64,
+    event_key: String,
+    timestamp: i64,
+    account_id: String,
+    api_key_id: String,
+    model_id: String,
+    usage: UsageCapture,
+    previous_cost_usd: f64,
+    previous_model_pricing_version: u64,
+    previous_input_usd_per_million: f64,
+    previous_output_usd_per_million: f64,
+    previous_cached_input_usd_per_million: Option<f64>,
+    service_tier: String,
+}
+
+struct RequestLogRepriceUpdate {
+    id: i64,
+    estimated_cost_usd: f64,
+    model_pricing_version: u64,
+    input_usd_per_million: f64,
+    output_usd_per_million: f64,
+    cached_input_usd_per_million: Option<f64>,
+    change: Option<RequestLogRepriceChange>,
 }
 
 #[derive(Default)]
@@ -491,6 +543,21 @@ struct RoutingCandidate {
 
 fn gateway_runtime() -> &'static TokioMutex<GatewayRuntime> {
     GATEWAY_RUNTIME.get_or_init(|| TokioMutex::new(GatewayRuntime::default()))
+}
+
+fn model_pricing_reprice_worker() -> &'static TokioMutex<ModelPricingRepriceWorkerState> {
+    MODEL_PRICING_REPRICE_WORKER
+        .get_or_init(|| TokioMutex::new(ModelPricingRepriceWorkerState::default()))
+}
+
+fn local_access_logs_db_write_lock() -> &'static Mutex<()> {
+    LOCAL_ACCESS_LOGS_DB_WRITE_LOCK.get_or_init(|| Mutex::new(()))
+}
+
+fn lock_local_access_logs_db_write() -> Result<std::sync::MutexGuard<'static, ()>, String> {
+    local_access_logs_db_write_lock()
+        .lock()
+        .map_err(|_| "API 服务日志写入队列已损坏".to_string())
 }
 
 fn gateway_lifecycle_lock() -> &'static TokioMutex<()> {
@@ -3393,6 +3460,16 @@ fn request_body_has_service_tier(body_value: &Value) -> bool {
         .unwrap_or(false)
 }
 
+fn service_tier_from_request_body(body: &[u8]) -> Option<String> {
+    parse_request_body_json(body).and_then(|value| {
+        value
+            .get("service_tier")
+            .and_then(Value::as_str)
+            .and_then(normalize_proxy_service_tier)
+            .map(str::to_string)
+    })
+}
+
 fn api_service_default_service_tier() -> Result<Option<&'static str>, String> {
     crate::modules::codex_speed::get_api_service_app_speed_config()
         .map(|config| codex_app_speed_service_tier(&config.speed))
@@ -4896,39 +4973,316 @@ fn sort_usage_api_keys(api_keys: &mut [CodexLocalAccessApiKeyStats]) {
 
 fn model_pricing(
     model_id: &str,
-    input_usd_per_million: f64,
-    cached_input_usd_per_million: Option<f64>,
-    output_usd_per_million: f64,
+    long_context_threshold_tokens: Option<u64>,
+    standard: CodexLocalAccessPrice,
+    standard_long: Option<CodexLocalAccessPrice>,
+    priority: Option<CodexLocalAccessPrice>,
+    priority_long: Option<CodexLocalAccessPrice>,
 ) -> CodexLocalAccessModelPricing {
     CodexLocalAccessModelPricing {
         model_id: model_id.to_string(),
+        long_context_threshold_tokens,
+        input_usd_per_million: standard.input_usd_per_million,
+        output_usd_per_million: standard.output_usd_per_million,
+        cached_input_usd_per_million: Some(standard.cached_input_usd_per_million),
+        standard_long_input_usd_per_million: standard_long.map(|price| price.input_usd_per_million),
+        standard_long_output_usd_per_million: standard_long
+            .map(|price| price.output_usd_per_million),
+        standard_long_cached_input_usd_per_million: standard_long
+            .map(|price| price.cached_input_usd_per_million),
+        priority_input_usd_per_million: priority.map(|price| price.input_usd_per_million),
+        priority_output_usd_per_million: priority.map(|price| price.output_usd_per_million),
+        priority_cached_input_usd_per_million: priority
+            .map(|price| price.cached_input_usd_per_million),
+        priority_long_input_usd_per_million: priority_long.map(|price| price.input_usd_per_million),
+        priority_long_output_usd_per_million: priority_long
+            .map(|price| price.output_usd_per_million),
+        priority_long_cached_input_usd_per_million: priority_long
+            .map(|price| price.cached_input_usd_per_million),
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum CodexPricingServiceTier {
+    Standard,
+    Priority,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum CodexPricingContextBand {
+    Short,
+    Long,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct CodexLocalAccessPrice {
+    input_usd_per_million: f64,
+    cached_input_usd_per_million: f64,
+    output_usd_per_million: f64,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct CodexLocalAccessPriceBookEntry {
+    model_id: &'static str,
+    max_context_tokens: u64,
+    long_context_threshold_tokens: u64,
+    standard: CodexLocalAccessPrice,
+    standard_long: Option<CodexLocalAccessPrice>,
+    priority: Option<CodexLocalAccessPrice>,
+    priority_long: Option<CodexLocalAccessPrice>,
+}
+
+#[derive(Debug, Clone)]
+struct RequestLogRepriceChange {
+    event_key: String,
+    timestamp: i64,
+    account_id: String,
+    api_key_id: String,
+    model_id: String,
+    estimated_cost_delta_usd: f64,
+}
+
+const fn codex_price(
+    input_usd_per_million: f64,
+    cached_input_usd_per_million: f64,
+    output_usd_per_million: f64,
+) -> CodexLocalAccessPrice {
+    CodexLocalAccessPrice {
         input_usd_per_million,
-        output_usd_per_million,
         cached_input_usd_per_million,
+        output_usd_per_million,
+    }
+}
+
+const CODEX_LOCAL_ACCESS_PRICE_BOOK: &[CodexLocalAccessPriceBookEntry] = &[
+    CodexLocalAccessPriceBookEntry {
+        model_id: "gpt-5.6-sol",
+        max_context_tokens: 1_050_000,
+        long_context_threshold_tokens: CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS,
+        standard: codex_price(5.0, 0.5, 30.0),
+        standard_long: Some(codex_price(10.0, 1.0, 45.0)),
+        priority: Some(codex_price(10.0, 1.0, 60.0)),
+        priority_long: None,
+    },
+    CodexLocalAccessPriceBookEntry {
+        model_id: "gpt-5.6-terra",
+        max_context_tokens: 1_050_000,
+        long_context_threshold_tokens: CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS,
+        standard: codex_price(2.5, 0.25, 15.0),
+        standard_long: Some(codex_price(5.0, 0.5, 22.5)),
+        priority: Some(codex_price(5.0, 0.5, 30.0)),
+        priority_long: None,
+    },
+    CodexLocalAccessPriceBookEntry {
+        model_id: "gpt-5.6-luna",
+        max_context_tokens: 1_050_000,
+        long_context_threshold_tokens: CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS,
+        standard: codex_price(1.0, 0.1, 6.0),
+        standard_long: Some(codex_price(2.0, 0.2, 9.0)),
+        priority: Some(codex_price(2.0, 0.2, 12.0)),
+        priority_long: None,
+    },
+    CodexLocalAccessPriceBookEntry {
+        model_id: "gpt-5.5",
+        max_context_tokens: 1_050_000,
+        long_context_threshold_tokens: CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS,
+        standard: codex_price(5.0, 0.5, 30.0),
+        standard_long: Some(codex_price(10.0, 1.0, 45.0)),
+        priority: Some(codex_price(12.5, 1.25, 75.0)),
+        priority_long: None,
+    },
+    CodexLocalAccessPriceBookEntry {
+        model_id: "gpt-5.4",
+        max_context_tokens: 1_050_000,
+        long_context_threshold_tokens: CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS,
+        standard: codex_price(2.5, 0.25, 15.0),
+        standard_long: Some(codex_price(5.0, 0.5, 22.5)),
+        priority: Some(codex_price(5.0, 0.5, 30.0)),
+        priority_long: None,
+    },
+    CodexLocalAccessPriceBookEntry {
+        model_id: "gpt-5.4-mini",
+        max_context_tokens: 400_000,
+        long_context_threshold_tokens: CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS,
+        standard: codex_price(0.75, 0.075, 4.5),
+        standard_long: None,
+        priority: Some(codex_price(1.5, 0.15, 9.0)),
+        priority_long: None,
+    },
+    CodexLocalAccessPriceBookEntry {
+        model_id: "gpt-5.3-codex",
+        max_context_tokens: 400_000,
+        long_context_threshold_tokens: CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS,
+        standard: codex_price(1.75, 0.175, 14.0),
+        standard_long: None,
+        priority: Some(codex_price(3.5, 0.35, 28.0)),
+        priority_long: None,
+    },
+    CodexLocalAccessPriceBookEntry {
+        model_id: "gpt-5.3-codex-spark",
+        max_context_tokens: 128_000,
+        long_context_threshold_tokens: CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS,
+        standard: codex_price(1.75, 0.175, 14.0),
+        standard_long: None,
+        priority: None,
+        priority_long: None,
+    },
+    CodexLocalAccessPriceBookEntry {
+        model_id: "gpt-5.2",
+        max_context_tokens: 400_000,
+        long_context_threshold_tokens: CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS,
+        standard: codex_price(1.75, 0.175, 14.0),
+        standard_long: None,
+        priority: Some(codex_price(3.5, 0.35, 28.0)),
+        priority_long: None,
+    },
+    CodexLocalAccessPriceBookEntry {
+        model_id: "gpt-5.2-codex",
+        max_context_tokens: 400_000,
+        long_context_threshold_tokens: CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS,
+        standard: codex_price(1.75, 0.175, 14.0),
+        standard_long: None,
+        priority: Some(codex_price(3.5, 0.35, 28.0)),
+        priority_long: None,
+    },
+    CodexLocalAccessPriceBookEntry {
+        model_id: "gpt-5.1-codex-max",
+        max_context_tokens: 400_000,
+        long_context_threshold_tokens: CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS,
+        standard: codex_price(1.25, 0.125, 10.0),
+        standard_long: None,
+        priority: Some(codex_price(2.5, 0.25, 20.0)),
+        priority_long: None,
+    },
+    CodexLocalAccessPriceBookEntry {
+        model_id: "gpt-5.1-codex-mini",
+        max_context_tokens: 400_000,
+        long_context_threshold_tokens: CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS,
+        standard: codex_price(0.25, 0.025, 2.0),
+        standard_long: None,
+        priority: None,
+        priority_long: None,
+    },
+    CodexLocalAccessPriceBookEntry {
+        model_id: "gpt-5-codex",
+        max_context_tokens: 400_000,
+        long_context_threshold_tokens: CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS,
+        standard: codex_price(1.25, 0.125, 10.0),
+        standard_long: None,
+        priority: Some(codex_price(2.5, 0.25, 20.0)),
+        priority_long: None,
+    },
+];
+
+fn price_book_entry_to_model_pricing(
+    entry: &CodexLocalAccessPriceBookEntry,
+) -> CodexLocalAccessModelPricing {
+    model_pricing(
+        entry.model_id,
+        Some(entry.long_context_threshold_tokens),
+        entry.standard,
+        entry.standard_long,
+        entry.priority,
+        entry.priority_long,
+    )
+}
+
+fn price_book_entry_for_model(model_id: &str) -> Option<&'static CodexLocalAccessPriceBookEntry> {
+    CODEX_LOCAL_ACCESS_PRICE_BOOK
+        .iter()
+        .find(|item| item.model_id.eq_ignore_ascii_case(model_id.trim()))
+}
+
+fn context_band_for_usage(
+    usage: Option<&UsageCapture>,
+    long_context_threshold_tokens: Option<u64>,
+) -> CodexPricingContextBand {
+    let threshold =
+        long_context_threshold_tokens.unwrap_or(CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS);
+    match usage.map(|item| item.input_tokens).unwrap_or_default() {
+        value if value > threshold => CodexPricingContextBand::Long,
+        _ => CodexPricingContextBand::Short,
+    }
+}
+
+fn service_tier_for_pricing(service_tier: Option<&str>) -> CodexPricingServiceTier {
+    match service_tier.and_then(normalize_proxy_service_tier) {
+        Some("priority") => CodexPricingServiceTier::Priority,
+        _ => CodexPricingServiceTier::Standard,
+    }
+}
+
+fn resolve_price_book_price(
+    pricing: &CodexLocalAccessModelPricing,
+    service_tier: CodexPricingServiceTier,
+    context_band: CodexPricingContextBand,
+) -> CodexLocalAccessPrice {
+    let standard = CodexLocalAccessPrice {
+        input_usd_per_million: pricing.input_usd_per_million,
+        cached_input_usd_per_million: pricing
+            .cached_input_usd_per_million
+            .unwrap_or(pricing.input_usd_per_million),
+        output_usd_per_million: pricing.output_usd_per_million,
+    };
+    let standard_long = CodexLocalAccessPrice {
+        input_usd_per_million: pricing
+            .standard_long_input_usd_per_million
+            .unwrap_or(standard.input_usd_per_million),
+        cached_input_usd_per_million: pricing
+            .standard_long_cached_input_usd_per_million
+            .unwrap_or(standard.cached_input_usd_per_million),
+        output_usd_per_million: pricing
+            .standard_long_output_usd_per_million
+            .unwrap_or(standard.output_usd_per_million),
+    };
+    let priority = CodexLocalAccessPrice {
+        input_usd_per_million: pricing
+            .priority_input_usd_per_million
+            .unwrap_or(standard.input_usd_per_million),
+        cached_input_usd_per_million: pricing
+            .priority_cached_input_usd_per_million
+            .unwrap_or(standard.cached_input_usd_per_million),
+        output_usd_per_million: pricing
+            .priority_output_usd_per_million
+            .unwrap_or(standard.output_usd_per_million),
+    };
+    match (service_tier, context_band) {
+        (CodexPricingServiceTier::Priority, CodexPricingContextBand::Long) => priority,
+        (CodexPricingServiceTier::Priority, CodexPricingContextBand::Short) => priority,
+        (CodexPricingServiceTier::Standard, CodexPricingContextBand::Long) => standard_long,
+        (CodexPricingServiceTier::Standard, CodexPricingContextBand::Short) => standard,
     }
 }
 
 fn default_model_pricing_presets() -> Vec<CodexLocalAccessModelPricing> {
-    vec![
-        model_pricing("gpt-5.5", 1.25, Some(0.125), 10.0),
-        model_pricing("gpt-5.4", 1.25, Some(0.125), 10.0),
-        model_pricing("gpt-5.4-mini", 0.25, Some(0.025), 2.0),
-        model_pricing("gpt-5-codex", 1.25, Some(0.125), 10.0),
-        model_pricing("gpt-5-codex-mini", 0.25, Some(0.025), 2.0),
-        model_pricing("gpt-5.3-codex", 1.25, Some(0.125), 10.0),
-        model_pricing("gpt-5.3-codex-spark", 0.25, Some(0.025), 2.0),
-        model_pricing("gpt-5.2", 1.25, Some(0.125), 10.0),
-        model_pricing("gpt-5.2-codex", 1.25, Some(0.125), 10.0),
-        model_pricing("gpt-5.1-codex-max", 1.25, Some(0.125), 10.0),
-        model_pricing("gpt-5.1-codex-mini", 0.25, Some(0.025), 2.0),
-    ]
+    CODEX_LOCAL_ACCESS_PRICE_BOOK
+        .iter()
+        .map(price_book_entry_to_model_pricing)
+        .collect()
 }
 
-fn default_model_pricing_for_model(model_id: &str) -> Option<CodexLocalAccessModelPricing> {
-    let key = model_id.trim().to_ascii_lowercase();
-    default_model_pricing_presets()
-        .into_iter()
-        .find(|item| item.model_id.eq_ignore_ascii_case(&key))
+fn effective_price_book_model_ids(collection: Option<&CodexLocalAccessCollection>) -> Vec<String> {
+    let mut seen = HashSet::new();
+    let mut model_ids = Vec::new();
+    for preset in default_model_pricing_presets() {
+        let key = normalize_model_key(&preset.model_id);
+        if seen.insert(key) {
+            model_ids.push(preset.model_id);
+        }
+    }
+    if let Some(collection) = collection {
+        for pricing in &collection.model_pricings {
+            let model_id = pricing.model_id.trim();
+            if model_id.is_empty() {
+                continue;
+            }
+            let key = normalize_model_key(model_id);
+            if seen.insert(key) {
+                model_ids.push(model_id.to_string());
+            }
+        }
+    }
+    model_ids
 }
 
 fn normalize_price_value(value: f64) -> f64 {
@@ -4937,6 +5291,10 @@ fn normalize_price_value(value: f64) -> f64 {
     } else {
         value.min(MAX_MODEL_PRICE_USD_PER_MILLION)
     }
+}
+
+fn normalize_positive_tokens(value: Option<u64>) -> Option<u64> {
+    value.filter(|item| *item > 0)
 }
 
 fn normalize_model_pricings(
@@ -4953,32 +5311,202 @@ fn normalize_model_pricings(
         if !seen.insert(key) {
             continue;
         }
-        normalized.push(CodexLocalAccessModelPricing {
-            model_id,
-            input_usd_per_million: normalize_price_value(pricing.input_usd_per_million),
-            output_usd_per_million: normalize_price_value(pricing.output_usd_per_million),
-            cached_input_usd_per_million: pricing
+        let preset = price_book_entry_for_model(&model_id);
+        let has_tier_pricing = pricing.long_context_threshold_tokens.is_some()
+            || pricing.standard_long_input_usd_per_million.is_some()
+            || pricing.standard_long_cached_input_usd_per_million.is_some()
+            || pricing.standard_long_output_usd_per_million.is_some()
+            || pricing.priority_input_usd_per_million.is_some()
+            || pricing.priority_cached_input_usd_per_million.is_some()
+            || pricing.priority_output_usd_per_million.is_some()
+            || pricing.priority_long_input_usd_per_million.is_some()
+            || pricing.priority_long_cached_input_usd_per_million.is_some()
+            || pricing.priority_long_output_usd_per_million.is_some();
+        if preset.is_some() && !has_tier_pricing {
+            continue;
+        }
+        let long_context_threshold_tokens =
+            normalize_positive_tokens(pricing.long_context_threshold_tokens)
+                .or_else(|| preset.map(|item| item.long_context_threshold_tokens))
+                .unwrap_or(CODEX_LOCAL_ACCESS_LONG_CONTEXT_THRESHOLD_TOKENS);
+        let standard = price_from_base_triple(
+            normalize_price_value(pricing.input_usd_per_million),
+            pricing
                 .cached_input_usd_per_million
                 .map(normalize_price_value),
+            normalize_price_value(pricing.output_usd_per_million),
+        );
+        normalized.push(CodexLocalAccessModelPricing {
+            model_id,
+            long_context_threshold_tokens: Some(long_context_threshold_tokens),
+            input_usd_per_million: standard.input_usd_per_million,
+            output_usd_per_million: standard.output_usd_per_million,
+            cached_input_usd_per_million: Some(standard.cached_input_usd_per_million),
+            standard_long_input_usd_per_million: pricing
+                .standard_long_input_usd_per_million
+                .map(normalize_price_value),
+            standard_long_output_usd_per_million: pricing
+                .standard_long_output_usd_per_million
+                .map(normalize_price_value),
+            standard_long_cached_input_usd_per_million: pricing
+                .standard_long_cached_input_usd_per_million
+                .map(normalize_price_value),
+            priority_input_usd_per_million: pricing
+                .priority_input_usd_per_million
+                .map(normalize_price_value),
+            priority_output_usd_per_million: pricing
+                .priority_output_usd_per_million
+                .map(normalize_price_value),
+            priority_cached_input_usd_per_million: pricing
+                .priority_cached_input_usd_per_million
+                .map(normalize_price_value),
+            priority_long_input_usd_per_million: None,
+            priority_long_output_usd_per_million: None,
+            priority_long_cached_input_usd_per_million: None,
         });
     }
     normalized
 }
 
-fn resolve_model_pricing(
+fn price_from_base_triple(
+    input_usd_per_million: f64,
+    cached_input_usd_per_million: Option<f64>,
+    output_usd_per_million: f64,
+) -> CodexLocalAccessPrice {
+    CodexLocalAccessPrice {
+        input_usd_per_million,
+        cached_input_usd_per_million: cached_input_usd_per_million.unwrap_or(input_usd_per_million),
+        output_usd_per_million,
+    }
+}
+
+fn selected_model_pricing(
+    pricing: &CodexLocalAccessModelPricing,
+    selected_price: CodexLocalAccessPrice,
+) -> CodexLocalAccessModelPricing {
+    let mut selected = pricing.clone();
+    selected.input_usd_per_million = selected_price.input_usd_per_million;
+    selected.cached_input_usd_per_million = Some(selected_price.cached_input_usd_per_million);
+    selected.output_usd_per_million = selected_price.output_usd_per_million;
+    selected
+}
+
+fn same_model_pricing_fields(
+    left: &CodexLocalAccessModelPricing,
+    right: &CodexLocalAccessModelPricing,
+) -> bool {
+    left.long_context_threshold_tokens == right.long_context_threshold_tokens
+        && left.input_usd_per_million == right.input_usd_per_million
+        && left.output_usd_per_million == right.output_usd_per_million
+        && left.cached_input_usd_per_million == right.cached_input_usd_per_million
+        && left.standard_long_input_usd_per_million == right.standard_long_input_usd_per_million
+        && left.standard_long_output_usd_per_million == right.standard_long_output_usd_per_million
+        && left.standard_long_cached_input_usd_per_million
+            == right.standard_long_cached_input_usd_per_million
+        && left.priority_input_usd_per_million == right.priority_input_usd_per_million
+        && left.priority_output_usd_per_million == right.priority_output_usd_per_million
+        && left.priority_cached_input_usd_per_million == right.priority_cached_input_usd_per_million
+        && left.priority_long_input_usd_per_million == right.priority_long_input_usd_per_million
+        && left.priority_long_output_usd_per_million == right.priority_long_output_usd_per_million
+        && left.priority_long_cached_input_usd_per_million
+            == right.priority_long_cached_input_usd_per_million
+}
+
+fn changed_model_pricing_ids(
+    previous: &[CodexLocalAccessModelPricing],
+    next: &[CodexLocalAccessModelPricing],
+) -> Vec<String> {
+    let mut previous_map: HashMap<String, &CodexLocalAccessModelPricing> = HashMap::new();
+    for pricing in previous {
+        previous_map.insert(normalize_model_key(&pricing.model_id), pricing);
+    }
+    let mut next_map: HashMap<String, &CodexLocalAccessModelPricing> = HashMap::new();
+    for pricing in next {
+        next_map.insert(normalize_model_key(&pricing.model_id), pricing);
+    }
+
+    let mut changed = HashSet::new();
+    for model_id in previous_map.keys().chain(next_map.keys()) {
+        match (previous_map.get(model_id), next_map.get(model_id)) {
+            (Some(previous), Some(current)) if same_model_pricing_fields(previous, current) => {}
+            _ => {
+                if let Some(previous) = previous_map.get(model_id) {
+                    changed.insert(previous.model_id.trim().to_string());
+                }
+                if let Some(current) = next_map.get(model_id) {
+                    changed.insert(current.model_id.trim().to_string());
+                }
+            }
+        }
+    }
+
+    let mut changed = changed.into_iter().collect::<Vec<_>>();
+    changed.sort_unstable();
+    changed
+}
+
+fn normalize_reprice_model_ids(model_ids: Vec<String>) -> Vec<String> {
+    let mut seen = HashSet::new();
+    let mut normalized = Vec::new();
+    for model_id in model_ids {
+        let model_id = model_id.trim();
+        if model_id.is_empty() {
+            continue;
+        }
+        if seen.insert(normalize_model_key(model_id)) {
+            normalized.push(model_id.to_string());
+        }
+    }
+    normalized.sort_unstable();
+    normalized
+}
+
+fn resolve_effective_model_pricing(
     collection: Option<&CodexLocalAccessCollection>,
     model_id: Option<&str>,
+    usage: Option<&UsageCapture>,
+    service_tier: Option<&str>,
 ) -> Option<CodexLocalAccessModelPricing> {
-    let model_id = model_id.map(str::trim).filter(|value| !value.is_empty())?;
-    collection
-        .and_then(|collection| {
-            collection
-                .model_pricings
-                .iter()
-                .find(|item| item.model_id.eq_ignore_ascii_case(model_id))
-                .cloned()
-        })
-        .or_else(|| default_model_pricing_for_model(model_id))
+    let requested_tier = service_tier_for_pricing(service_tier);
+    let Some(model_id) = model_id.map(str::trim).filter(|value| !value.is_empty()) else {
+        return None;
+    };
+
+    if let Some(custom) = collection.and_then(|collection| {
+        collection
+            .model_pricings
+            .iter()
+            .find(|item| item.model_id.eq_ignore_ascii_case(model_id))
+            .cloned()
+    }) {
+        if let Some(entry) = price_book_entry_for_model(model_id) {
+            if usage
+                .map(|item| item.input_tokens > entry.max_context_tokens)
+                .unwrap_or(false)
+            {
+                return None;
+            }
+        }
+        let context_band = context_band_for_usage(usage, custom.long_context_threshold_tokens);
+        let selected_price = resolve_price_book_price(&custom, requested_tier, context_band);
+        return Some(selected_model_pricing(&custom, selected_price));
+    }
+
+    let Some(entry) = price_book_entry_for_model(model_id) else {
+        return None;
+    };
+
+    if usage
+        .map(|item| item.input_tokens > entry.max_context_tokens)
+        .unwrap_or(false)
+    {
+        return None;
+    }
+
+    let entry_pricing = price_book_entry_to_model_pricing(entry);
+    let context_band = context_band_for_usage(usage, Some(entry.long_context_threshold_tokens));
+    let price = resolve_price_book_price(&entry_pricing, requested_tier, context_band);
+    Some(selected_model_pricing(&entry_pricing, price))
 }
 
 fn calculate_usage_cost_usd(
@@ -5143,9 +5671,23 @@ fn quarantine_local_access_logs_db(
     Ok(backup_path)
 }
 
-fn open_local_access_logs_db_once(path: &Path) -> Result<Connection, SqliteError> {
-    let conn = Connection::open(path)?;
-    conn.execute_batch(
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum RequestLogsSchemaState {
+    MissingTable,
+    MissingServiceTier,
+    HasServiceTier,
+}
+
+fn create_request_logs_table(
+    conn: &Connection,
+    include_service_tier_column: bool,
+) -> Result<(), SqliteError> {
+    let service_tier_column = if include_service_tier_column {
+        "\n            service_tier TEXT NOT NULL DEFAULT '',"
+    } else {
+        ""
+    };
+    let create_table_sql = format!(
         r#"
         PRAGMA journal_mode = WAL;
         PRAGMA synchronous = NORMAL;
@@ -5160,7 +5702,7 @@ fn open_local_access_logs_db_once(path: &Path) -> Result<Connection, SqliteError
             api_key_label TEXT NOT NULL DEFAULT '',
             model_id TEXT NOT NULL DEFAULT '',
             gateway_mode TEXT NOT NULL DEFAULT '',
-            request_kind TEXT NOT NULL DEFAULT 'other',
+            request_kind TEXT NOT NULL DEFAULT 'other',{service_tier_column}
             success INTEGER NOT NULL DEFAULT 0,
             http_status INTEGER,
             error_category TEXT NOT NULL DEFAULT '',
@@ -5177,8 +5719,19 @@ fn open_local_access_logs_db_once(path: &Path) -> Result<Connection, SqliteError
             output_usd_per_million REAL NOT NULL DEFAULT 0,
             cached_input_usd_per_million REAL
         );
-        "#,
-    )?;
+        "#
+    );
+    conn.execute_batch(create_table_sql.as_str())?;
+    Ok(())
+}
+
+fn open_local_access_logs_db_once(
+    path: &Path,
+    include_service_tier_column: bool,
+) -> Result<Connection, SqliteError> {
+    let conn = Connection::open(path)?;
+    conn.busy_timeout(LOCAL_ACCESS_LOGS_DB_BUSY_TIMEOUT)?;
+    create_request_logs_table(&conn, include_service_tier_column)?;
     ensure_request_logs_column(&conn, "event_key", "event_key TEXT NOT NULL DEFAULT ''")?;
     ensure_request_logs_column(&conn, "request_id", "request_id TEXT NOT NULL DEFAULT ''")?;
     ensure_request_logs_column(&conn, "account_id", "account_id TEXT NOT NULL DEFAULT ''")?;
@@ -5269,6 +5822,8 @@ fn open_local_access_logs_db_once(path: &Path) -> Result<Connection, SqliteError
             ON request_logs(timestamp DESC);
         CREATE INDEX IF NOT EXISTS idx_codex_local_access_logs_model
             ON request_logs(model_id, timestamp DESC);
+        CREATE INDEX IF NOT EXISTS idx_codex_local_access_logs_model_id
+            ON request_logs(model_id, id);
         CREATE INDEX IF NOT EXISTS idx_codex_local_access_logs_account
             ON request_logs(account_id, timestamp DESC);
         CREATE INDEX IF NOT EXISTS idx_codex_local_access_logs_email
@@ -5327,12 +5882,7 @@ fn ensure_request_logs_column(
     column_name: &str,
     column_definition: &str,
 ) -> Result<(), SqliteError> {
-    let exists: i64 = conn.query_row(
-        "SELECT COUNT(*) FROM pragma_table_info('request_logs') WHERE name = ?1",
-        params![column_name],
-        |row| row.get(0),
-    )?;
-    if exists == 0 {
+    if !request_logs_has_column(conn, column_name)? {
         conn.execute(
             format!("ALTER TABLE request_logs ADD COLUMN {column_definition}").as_str(),
             [],
@@ -5341,164 +5891,171 @@ fn ensure_request_logs_column(
     Ok(())
 }
 
-fn open_local_access_logs_db() -> Result<Connection, String> {
+fn request_logs_has_column(conn: &Connection, column_name: &str) -> Result<bool, SqliteError> {
+    let exists: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM pragma_table_info('request_logs') WHERE name = ?1",
+        params![column_name],
+        |row| row.get(0),
+    )?;
+    Ok(exists != 0)
+}
+
+fn request_logs_table_exists(conn: &Connection) -> Result<bool, SqliteError> {
+    let exists: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'request_logs'",
+        [],
+        |row| row.get(0),
+    )?;
+    Ok(exists != 0)
+}
+
+fn request_logs_has_service_tier_column(conn: &Connection) -> Result<bool, SqliteError> {
+    request_logs_has_column(conn, "service_tier")
+}
+
+fn inspect_request_logs_schema_state() -> Result<RequestLogsSchemaState, String> {
+    let path = local_access_logs_db_path()?;
+    if !path.exists() {
+        return Ok(RequestLogsSchemaState::MissingTable);
+    }
+    let conn = Connection::open(&path)
+        .map_err(|e| format!("打开 API 服务日志数据库以检查 schema 失败: {}", e))?;
+    if !request_logs_table_exists(&conn)
+        .map_err(|e| format!("检查 API 服务日志 request_logs 表失败: {}", e))?
+    {
+        return Ok(RequestLogsSchemaState::MissingTable);
+    }
+    if request_logs_has_service_tier_column(&conn)
+        .map_err(|e| format!("检查 API 服务日志 service_tier 列失败: {}", e))?
+    {
+        return Ok(RequestLogsSchemaState::HasServiceTier);
+    }
+    Ok(RequestLogsSchemaState::MissingServiceTier)
+}
+
+fn open_local_access_logs_db_with_schema_unlocked(
+    include_service_tier_column: bool,
+) -> Result<Connection, String> {
     let path = local_access_logs_db_path()?;
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent).map_err(|e| format!("创建 API 服务日志目录失败: {}", e))?;
     }
-    match open_local_access_logs_db_once(&path) {
+    match open_local_access_logs_db_once(&path, include_service_tier_column) {
         Ok(conn) => Ok(conn),
         Err(error) if is_recoverable_logs_db_error(&error) => {
             quarantine_local_access_logs_db(&path, &error)?;
-            open_local_access_logs_db_once(&path)
+            open_local_access_logs_db_once(&path, include_service_tier_column)
                 .map_err(|e| format!("重建 API 服务日志数据库失败: {}", e))
         }
         Err(error) => Err(format!("打开 API 服务日志数据库失败: {}", error)),
     }
 }
 
+fn open_local_access_logs_db_with_schema(
+    include_service_tier_column: bool,
+) -> Result<Connection, String> {
+    let _write_guard = lock_local_access_logs_db_write()?;
+    open_local_access_logs_db_with_schema_unlocked(include_service_tier_column)
+}
+
+fn open_local_access_logs_db() -> Result<Connection, String> {
+    open_local_access_logs_db_with_schema(true)
+}
+
+fn open_local_access_logs_db_with_schema_for_write(
+    include_service_tier_column: bool,
+) -> Result<(std::sync::MutexGuard<'static, ()>, Connection), String> {
+    let write_guard = lock_local_access_logs_db_write()?;
+    let conn = open_local_access_logs_db_with_schema_unlocked(include_service_tier_column)?;
+    Ok((write_guard, conn))
+}
+
+fn open_local_access_logs_db_for_write(
+) -> Result<(std::sync::MutexGuard<'static, ()>, Connection), String> {
+    open_local_access_logs_db_with_schema_for_write(true)
+}
+
 fn insert_local_access_usage_event(
     conn: &Connection,
     event: &CodexLocalAccessUsageEvent,
 ) -> Result<(), String> {
-    conn.execute(
-        r#"
-        INSERT OR IGNORE INTO request_logs (
-            event_key,
-            timestamp,
-            request_id,
-            account_id,
-            email,
-            api_key_id,
-            api_key_label,
-            model_id,
-            gateway_mode,
-            request_kind,
-            success,
-            http_status,
-            error_category,
-            error_message,
-            latency_ms,
-            input_tokens,
-            output_tokens,
-            total_tokens,
-            cached_tokens,
-            reasoning_tokens,
-            estimated_cost_usd,
-            model_pricing_version,
-            input_usd_per_million,
-            output_usd_per_million,
-            cached_input_usd_per_million
-        ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25)
-        "#,
-        params![
-            local_access_log_event_key(event),
-            event.timestamp,
-            event.request_id.trim(),
-            event.account_id.trim(),
-            event.email.trim(),
-            event.api_key_id.trim(),
-            event.api_key_label.trim(),
-            event.model_id.trim(),
-            event
-                .gateway_mode
-                .map(gateway_mode_to_db_value)
-                .unwrap_or_default(),
-            request_kind_to_db_value(event.request_kind),
-            bool_to_db_value(event.success),
-            event.http_status.map(|value| value as i64),
-            event.error_category.trim(),
-            event.error_message.trim(),
-            event.latency_ms as i64,
-            event.input_tokens as i64,
-            event.output_tokens as i64,
-            event.total_tokens as i64,
-            event.cached_tokens as i64,
-            event.reasoning_tokens as i64,
-            event.estimated_cost_usd,
-            event.model_pricing_version as i64,
-            event.input_usd_per_million,
-            event.output_usd_per_million,
-            event.cached_input_usd_per_million,
-        ],
-    )
-    .map_err(|e| format!("写入 API 服务请求日志失败: {}", e))?;
-    Ok(())
-}
-
-fn persist_local_access_usage_event(event: &CodexLocalAccessUsageEvent) -> Result<(), String> {
-    let conn = open_local_access_logs_db()?;
-    insert_local_access_usage_event(&conn, event)
-}
-
-fn migrate_local_access_json_events(events: &[CodexLocalAccessUsageEvent]) -> Result<(), String> {
-    if events.is_empty() {
-        return Ok(());
-    }
-    let mut conn = open_local_access_logs_db()?;
-    let tx = conn
-        .transaction()
-        .map_err(|e| format!("开始迁移 API 服务请求日志失败: {}", e))?;
-    for event in events {
-        insert_local_access_usage_event(&tx, event)?;
-    }
-    tx.commit()
-        .map_err(|e| format!("提交 API 服务请求日志迁移失败: {}", e))?;
-    Ok(())
-}
-
-fn clear_local_access_usage_events_db() -> Result<(), String> {
-    let conn = open_local_access_logs_db()?;
-    conn.execute("DELETE FROM request_logs", [])
-        .map_err(|e| format!("清空 API 服务请求日志失败: {}", e))?;
-    Ok(())
-}
-
-fn usage_event_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<CodexLocalAccessUsageEvent> {
-    let request_kind: String = row.get("request_kind")?;
-    let success: i64 = row.get("success")?;
-    let http_status: Option<i64> = row.get("http_status")?;
-    let gateway_mode: String = row.get("gateway_mode")?;
-    let read_u64 = |name: &str| -> rusqlite::Result<u64> {
-        let value: i64 = row.get(name)?;
-        Ok(value.max(0) as u64)
-    };
-    Ok(CodexLocalAccessUsageEvent {
-        timestamp: row.get("timestamp")?,
-        request_id: row.get("request_id")?,
-        account_id: row.get("account_id")?,
-        email: row.get("email")?,
-        api_key_id: row.get("api_key_id")?,
-        api_key_label: row.get("api_key_label")?,
-        model_id: row.get("model_id")?,
-        gateway_mode: gateway_mode_from_db_value(gateway_mode.as_str()),
-        request_kind: request_kind_from_db_value(request_kind.as_str()),
-        success: success != 0,
-        http_status: http_status.and_then(|value| u16::try_from(value).ok()),
-        error_category: row.get("error_category")?,
-        error_message: row.get("error_message")?,
-        latency_ms: read_u64("latency_ms")?,
-        input_tokens: read_u64("input_tokens")?,
-        output_tokens: read_u64("output_tokens")?,
-        total_tokens: read_u64("total_tokens")?,
-        cached_tokens: read_u64("cached_tokens")?,
-        reasoning_tokens: read_u64("reasoning_tokens")?,
-        estimated_cost_usd: row.get("estimated_cost_usd")?,
-        model_pricing_version: read_u64("model_pricing_version")?,
-        input_usd_per_million: row.get("input_usd_per_million")?,
-        output_usd_per_million: row.get("output_usd_per_million")?,
-        cached_input_usd_per_million: row.get("cached_input_usd_per_million")?,
-    })
-}
-
-fn load_local_access_usage_events_since(
-    since: i64,
-) -> Result<Vec<CodexLocalAccessUsageEvent>, String> {
-    let conn = open_local_access_logs_db()?;
-    let mut stmt = conn
-        .prepare(
+    let has_service_tier_column = request_logs_has_service_tier_column(conn)
+        .map_err(|e| format!("检查 API 服务日志 service_tier 列失败: {}", e))?;
+    let service_tier = event
+        .service_tier
+        .as_deref()
+        .and_then(normalize_proxy_service_tier)
+        .unwrap_or_default();
+    if has_service_tier_column {
+        conn.execute(
             r#"
-            SELECT
+            INSERT OR IGNORE INTO request_logs (
+                event_key,
+                timestamp,
+                request_id,
+                account_id,
+                email,
+                api_key_id,
+                api_key_label,
+                model_id,
+                gateway_mode,
+                request_kind,
+                service_tier,
+                success,
+                http_status,
+                error_category,
+                error_message,
+                latency_ms,
+                input_tokens,
+                output_tokens,
+                total_tokens,
+                cached_tokens,
+                reasoning_tokens,
+                estimated_cost_usd,
+                model_pricing_version,
+                input_usd_per_million,
+                output_usd_per_million,
+                cached_input_usd_per_million
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26)
+            "#,
+            params![
+                local_access_log_event_key(event),
+                event.timestamp,
+                event.request_id.trim(),
+                event.account_id.trim(),
+                event.email.trim(),
+                event.api_key_id.trim(),
+                event.api_key_label.trim(),
+                event.model_id.trim(),
+                event
+                    .gateway_mode
+                    .map(gateway_mode_to_db_value)
+                    .unwrap_or_default(),
+                request_kind_to_db_value(event.request_kind),
+                service_tier,
+                bool_to_db_value(event.success),
+                event.http_status.map(|value| value as i64),
+                event.error_category.trim(),
+                event.error_message.trim(),
+                event.latency_ms as i64,
+                event.input_tokens as i64,
+                event.output_tokens as i64,
+                event.total_tokens as i64,
+                event.cached_tokens as i64,
+                event.reasoning_tokens as i64,
+                event.estimated_cost_usd,
+                event.model_pricing_version as i64,
+                event.input_usd_per_million,
+                event.output_usd_per_million,
+                event.cached_input_usd_per_million,
+            ],
+        )
+        .map_err(|e| format!("写入 API 服务请求日志失败: {}", e))?;
+    } else {
+        conn.execute(
+            r#"
+            INSERT OR IGNORE INTO request_logs (
+                event_key,
                 timestamp,
                 request_id,
                 account_id,
@@ -5523,11 +6080,824 @@ fn load_local_access_usage_events_since(
                 input_usd_per_million,
                 output_usd_per_million,
                 cached_input_usd_per_million
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25)
+            "#,
+            params![
+                local_access_log_event_key(event),
+                event.timestamp,
+                event.request_id.trim(),
+                event.account_id.trim(),
+                event.email.trim(),
+                event.api_key_id.trim(),
+                event.api_key_label.trim(),
+                event.model_id.trim(),
+                event
+                    .gateway_mode
+                    .map(gateway_mode_to_db_value)
+                    .unwrap_or_default(),
+                request_kind_to_db_value(event.request_kind),
+                bool_to_db_value(event.success),
+                event.http_status.map(|value| value as i64),
+                event.error_category.trim(),
+                event.error_message.trim(),
+                event.latency_ms as i64,
+                event.input_tokens as i64,
+                event.output_tokens as i64,
+                event.total_tokens as i64,
+                event.cached_tokens as i64,
+                event.reasoning_tokens as i64,
+                event.estimated_cost_usd,
+                event.model_pricing_version as i64,
+                event.input_usd_per_million,
+                event.output_usd_per_million,
+                event.cached_input_usd_per_million,
+            ],
+        )
+        .map_err(|e| format!("写入 API 服务请求日志失败: {}", e))?;
+    }
+    Ok(())
+}
+
+fn persist_local_access_usage_event(event: &CodexLocalAccessUsageEvent) -> Result<(), String> {
+    let (_write_guard, conn) = open_local_access_logs_db_for_write()?;
+    insert_local_access_usage_event(&conn, event)
+}
+
+fn migrate_local_access_json_events(
+    events: &[CodexLocalAccessUsageEvent],
+    include_service_tier_column: bool,
+) -> Result<(), String> {
+    if events.is_empty() {
+        return Ok(());
+    }
+    let (_write_guard, mut conn) =
+        open_local_access_logs_db_with_schema_for_write(include_service_tier_column)?;
+    let tx = conn
+        .transaction()
+        .map_err(|e| format!("开始迁移 API 服务请求日志失败: {}", e))?;
+    for event in events {
+        insert_local_access_usage_event(&tx, event)?;
+    }
+    tx.commit()
+        .map_err(|e| format!("提交 API 服务请求日志迁移失败: {}", e))?;
+    Ok(())
+}
+
+fn count_request_logs_for_model_ids(
+    conn: &Connection,
+    model_ids: Option<&[String]>,
+) -> Result<u64, String> {
+    if matches!(model_ids, Some(items) if items.is_empty()) {
+        return Ok(0);
+    }
+    let model_filter = model_ids.filter(|items| !items.is_empty());
+    let mut params = Vec::<SqlValue>::new();
+    let count_sql = if let Some(model_ids) = model_filter {
+        let placeholders = std::iter::repeat("?")
+            .take(model_ids.len())
+            .collect::<Vec<_>>()
+            .join(", ");
+        params.extend(
+            model_ids
+                .iter()
+                .map(|item| SqlValue::Text(item.to_string())),
+        );
+        format!("SELECT COUNT(*) FROM request_logs WHERE model_id IN ({placeholders})")
+    } else {
+        "SELECT COUNT(*) FROM request_logs".to_string()
+    };
+    let total: i64 = conn
+        .query_row(count_sql.as_str(), params_from_iter(params), |row| {
+            row.get(0)
+        })
+        .map_err(|e| format!("统计 API 服务历史估算价值重算行数失败: {}", e))?;
+    Ok(total.max(0) as u64)
+}
+
+fn request_log_reprice_model_cursors(
+    conn: &Connection,
+    model_ids: Option<&[String]>,
+) -> Result<HashMap<String, i64>, String> {
+    if let Some(model_ids) = model_ids {
+        return Ok(model_ids
+            .iter()
+            .map(|model_id| model_id.trim())
+            .filter(|model_id| !model_id.is_empty())
+            .map(|model_id| (model_id.to_string(), 0_i64))
+            .collect());
+    }
+
+    let mut stmt = conn
+        .prepare(
+            "SELECT DISTINCT model_id FROM request_logs WHERE model_id != '' ORDER BY model_id",
+        )
+        .map_err(|e| format!("准备 API 服务历史估算价值模型游标失败: {}", e))?;
+    let rows = stmt
+        .query_map([], |row| row.get::<_, String>(0))
+        .map_err(|e| format!("读取 API 服务历史估算价值模型游标失败: {}", e))?;
+    let model_ids = rows
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| format!("解析 API 服务历史估算价值模型游标失败: {}", e))?;
+    Ok(model_ids
+        .into_iter()
+        .map(|model_id| (model_id, 0_i64))
+        .collect())
+}
+
+fn read_request_log_reprice_rows_for_model(
+    conn: &Connection,
+    model_id: &str,
+    after_id: i64,
+    limit: i64,
+    service_tier_select: &str,
+) -> Result<Vec<RequestLogRepriceRow>, String> {
+    let select_sql = format!(
+        r#"
+        SELECT
+            id,
+            event_key,
+            timestamp,
+            account_id,
+            api_key_id,
+            model_id,
+            input_tokens,
+            output_tokens,
+            total_tokens,
+            cached_tokens,
+            reasoning_tokens,
+            estimated_cost_usd,
+            model_pricing_version,
+            input_usd_per_million,
+            output_usd_per_million,
+            cached_input_usd_per_million,
+            {service_tier_select}
+        FROM request_logs
+        WHERE model_id = ?1 AND id > ?2
+        ORDER BY id ASC
+        LIMIT ?3
+        "#
+    );
+    let mut stmt = conn
+        .prepare(select_sql.as_str())
+        .map_err(|e| format!("准备 API 服务历史估算价值按模型读取失败: {}", e))?;
+    let rows = stmt
+        .query_map(params![model_id, after_id, limit.max(1)], |row| {
+            let read_u64 = |name: &str| -> rusqlite::Result<u64> {
+                let value: i64 = row.get(name)?;
+                Ok(value.max(0) as u64)
+            };
+            Ok(RequestLogRepriceRow {
+                id: row.get("id")?,
+                event_key: row.get("event_key")?,
+                timestamp: row.get("timestamp")?,
+                account_id: row.get("account_id")?,
+                api_key_id: row.get("api_key_id")?,
+                model_id: row.get("model_id")?,
+                usage: UsageCapture {
+                    input_tokens: read_u64("input_tokens")?,
+                    output_tokens: read_u64("output_tokens")?,
+                    total_tokens: read_u64("total_tokens")?,
+                    cached_tokens: read_u64("cached_tokens")?,
+                    reasoning_tokens: read_u64("reasoning_tokens")?,
+                },
+                previous_cost_usd: row.get("estimated_cost_usd")?,
+                previous_model_pricing_version: read_u64("model_pricing_version")?,
+                previous_input_usd_per_million: row.get("input_usd_per_million")?,
+                previous_output_usd_per_million: row.get("output_usd_per_million")?,
+                previous_cached_input_usd_per_million: row.get("cached_input_usd_per_million")?,
+                service_tier: row.get("service_tier")?,
+            })
+        })
+        .map_err(|e| format!("读取 API 服务历史估算价值按模型数据失败: {}", e))?;
+    rows.collect::<Result<Vec<_>, _>>()
+        .map_err(|e| format!("解析 API 服务历史估算价值按模型数据失败: {}", e))
+}
+
+fn read_request_log_reprice_batch(
+    conn: &Connection,
+    model_cursors: &mut HashMap<String, i64>,
+    limit: i64,
+) -> Result<Vec<RequestLogRepriceRow>, String> {
+    if model_cursors.is_empty() {
+        return Ok(Vec::new());
+    }
+    let has_service_tier_column = request_logs_has_service_tier_column(conn)
+        .map_err(|e| format!("检查 API 服务日志 service_tier 列失败: {}", e))?;
+    let service_tier_select = if has_service_tier_column {
+        "service_tier"
+    } else {
+        "'' AS service_tier"
+    };
+    let mut model_ids = model_cursors.keys().cloned().collect::<Vec<_>>();
+    model_ids.sort_unstable();
+    let mut rows = Vec::new();
+    let limit = limit.max(1) as usize;
+
+    for model_id in model_ids {
+        let remaining = limit.saturating_sub(rows.len());
+        if remaining == 0 {
+            break;
+        }
+        let after_id = model_cursors.get(&model_id).copied().unwrap_or_default();
+        let model_rows = read_request_log_reprice_rows_for_model(
+            conn,
+            model_id.as_str(),
+            after_id,
+            remaining as i64,
+            service_tier_select,
+        )?;
+        if let Some(last) = model_rows.last() {
+            if model_rows.len() < remaining {
+                model_cursors.remove(&model_id);
+            } else {
+                model_cursors.insert(model_id.clone(), last.id);
+            }
+        } else {
+            model_cursors.remove(&model_id);
+        }
+        rows.extend(model_rows);
+    }
+    Ok(rows)
+}
+
+fn compute_request_log_reprice_row(
+    collection: Option<&CodexLocalAccessCollection>,
+    row: &RequestLogRepriceRow,
+) -> Option<RequestLogRepriceUpdate> {
+    let pricing = resolve_effective_model_pricing(
+        collection,
+        Some(row.model_id.as_str()),
+        Some(&row.usage),
+        Some(row.service_tier.as_str()),
+    );
+    let pricing = pricing.as_ref()?;
+    let estimated_cost_usd = calculate_usage_cost_usd(Some(&row.usage), Some(pricing));
+    let model_pricing_version = collection
+        .map(|collection| collection.model_pricing_version)
+        .unwrap_or(DEFAULT_MODEL_PRICING_VERSION)
+        .max(DEFAULT_MODEL_PRICING_VERSION);
+    let pricing_snapshot_unchanged = row.previous_model_pricing_version == model_pricing_version
+        && row.previous_input_usd_per_million == pricing.input_usd_per_million
+        && row.previous_output_usd_per_million == pricing.output_usd_per_million
+        && row.previous_cached_input_usd_per_million == pricing.cached_input_usd_per_million;
+    if row.previous_cost_usd.is_finite()
+        && row.previous_cost_usd == estimated_cost_usd
+        && pricing_snapshot_unchanged
+    {
+        return None;
+    }
+    let previous_cost_for_delta = if row.previous_cost_usd.is_finite() {
+        row.previous_cost_usd
+    } else {
+        0.0
+    };
+    let estimated_cost_delta_usd = estimated_cost_usd - previous_cost_for_delta;
+    let change = if estimated_cost_delta_usd.is_finite() && estimated_cost_delta_usd != 0.0 {
+        Some(RequestLogRepriceChange {
+            event_key: row.event_key.clone(),
+            timestamp: row.timestamp,
+            account_id: row.account_id.clone(),
+            api_key_id: row.api_key_id.clone(),
+            model_id: row.model_id.clone(),
+            estimated_cost_delta_usd,
+        })
+    } else {
+        None
+    };
+    Some(RequestLogRepriceUpdate {
+        id: row.id,
+        estimated_cost_usd,
+        model_pricing_version,
+        input_usd_per_million: pricing.input_usd_per_million,
+        output_usd_per_million: pricing.output_usd_per_million,
+        cached_input_usd_per_million: pricing.cached_input_usd_per_million,
+        change,
+    })
+}
+
+fn compute_request_log_reprice_updates(
+    rows: Vec<RequestLogRepriceRow>,
+    collection: Option<&CodexLocalAccessCollection>,
+) -> Vec<RequestLogRepriceUpdate> {
+    if rows.len() < MODEL_PRICING_REPRICE_PARALLEL_MIN_ROWS {
+        return rows
+            .iter()
+            .filter_map(|row| compute_request_log_reprice_row(collection, row))
+            .collect();
+    }
+
+    let thread_count = std::thread::available_parallelism()
+        .map(|value| value.get())
+        .unwrap_or(1)
+        .min(rows.len());
+    if thread_count <= 1 {
+        return rows
+            .iter()
+            .filter_map(|row| compute_request_log_reprice_row(collection, row))
+            .collect();
+    }
+
+    let chunk_size = (rows.len() + thread_count - 1) / thread_count;
+    let chunks = rows.chunks(chunk_size).collect::<Vec<_>>();
+    std::thread::scope(|scope| {
+        let handles = chunks
+            .into_iter()
+            .map(|chunk| {
+                scope.spawn(move || {
+                    chunk
+                        .iter()
+                        .filter_map(|row| compute_request_log_reprice_row(collection, row))
+                        .collect::<Vec<_>>()
+                })
+            })
+            .collect::<Vec<_>>();
+        handles
+            .into_iter()
+            .flat_map(|handle| {
+                handle
+                    .join()
+                    .expect("model pricing reprice worker panicked")
+            })
+            .collect()
+    })
+}
+
+fn write_request_log_reprice_updates(
+    conn: &mut Connection,
+    updates: &[RequestLogRepriceUpdate],
+) -> Result<Vec<RequestLogRepriceChange>, String> {
+    if updates.is_empty() {
+        return Ok(Vec::new());
+    }
+    let tx = conn
+        .transaction()
+        .map_err(|e| format!("开始 API 服务历史估算价值批量写回失败: {}", e))?;
+    {
+        let mut update_stmt = tx
+            .prepare(
+                r#"
+                UPDATE request_logs
+                SET
+                    estimated_cost_usd = ?2,
+                    model_pricing_version = ?3,
+                    input_usd_per_million = ?4,
+                    output_usd_per_million = ?5,
+                    cached_input_usd_per_million = ?6
+                WHERE id = ?1
+                "#,
+            )
+            .map_err(|e| format!("准备 API 服务历史估算价值批量写回失败: {}", e))?;
+        for update in updates {
+            update_stmt
+                .execute(params![
+                    update.id,
+                    update.estimated_cost_usd,
+                    update.model_pricing_version as i64,
+                    update.input_usd_per_million,
+                    update.output_usd_per_million,
+                    update.cached_input_usd_per_million,
+                ])
+                .map_err(|e| {
+                    format!(
+                        "写回 API 服务历史估算价值失败: id={}, error={}",
+                        update.id, e
+                    )
+                })?;
+        }
+    }
+    tx.commit()
+        .map_err(|e| format!("提交 API 服务历史估算价值批量写回失败: {}", e))?;
+
+    Ok(updates
+        .iter()
+        .filter_map(|update| update.change.clone())
+        .collect())
+}
+
+fn emit_model_pricing_reprice_event(
+    app: &AppHandle,
+    job_id: u64,
+    phase: &str,
+    total: u64,
+    processed: u64,
+    updated: u64,
+    model_ids: &[String],
+    message: &str,
+) {
+    let _ = app.emit(
+        CODEX_LOCAL_ACCESS_MODEL_PRICING_REPRICE_EVENT,
+        json!({
+            "jobId": job_id,
+            "phase": phase,
+            "total": total,
+            "processed": processed,
+            "updated": updated,
+            "modelIds": model_ids,
+            "message": message,
+        }),
+    );
+}
+
+async fn model_pricing_reprice_has_newer_pending_job(job_id: u64) -> bool {
+    let worker = model_pricing_reprice_worker().lock().await;
+    worker
+        .pending
+        .as_ref()
+        .map(|pending| pending.job_id > job_id)
+        .unwrap_or(false)
+}
+
+async fn apply_reprice_changes_to_runtime_stats(changes: &[RequestLogRepriceChange]) {
+    if changes.is_empty() {
+        return;
+    }
+    {
+        let mut runtime = gateway_runtime().lock().await;
+        apply_reprice_changes_to_stats(&mut runtime.stats, changes);
+        runtime.stats_dirty = true;
+    }
+    schedule_stats_flush_if_needed().await;
+}
+
+async fn queue_model_pricing_reprice(
+    app: AppHandle,
+    collection: CodexLocalAccessCollection,
+    model_ids: Vec<String>,
+) {
+    let model_ids = normalize_reprice_model_ids(model_ids);
+    if model_ids.is_empty() {
+        return;
+    }
+
+    let should_spawn = {
+        let mut worker = model_pricing_reprice_worker().lock().await;
+        worker.next_job_id = worker.next_job_id.saturating_add(1);
+        let job_id = worker.next_job_id;
+        let mut pending_model_ids = model_ids;
+        if worker.running {
+            pending_model_ids.extend(worker.active_model_ids.iter().cloned());
+            if let Some(pending) = worker.pending.as_ref() {
+                pending_model_ids.extend(pending.model_ids.iter().cloned());
+            }
+        }
+        worker.pending = Some(ModelPricingRepriceJob {
+            job_id,
+            collection,
+            model_ids: normalize_reprice_model_ids(pending_model_ids),
+        });
+        if worker.running {
+            false
+        } else {
+            worker.running = true;
+            true
+        }
+    };
+
+    if should_spawn {
+        tokio::spawn(async move {
+            run_model_pricing_reprice_worker(app).await;
+        });
+    }
+}
+
+async fn run_model_pricing_reprice_worker(app: AppHandle) {
+    loop {
+        let job = {
+            let mut worker = model_pricing_reprice_worker().lock().await;
+            let Some(job) = worker.pending.take() else {
+                worker.running = false;
+                worker.active_model_ids.clear();
+                return;
+            };
+            worker.active_model_ids = job.model_ids.clone();
+            job
+        };
+
+        run_model_pricing_reprice_job(app.clone(), job).await;
+
+        let mut worker = model_pricing_reprice_worker().lock().await;
+        if worker.pending.is_none() {
+            worker.active_model_ids.clear();
+        }
+    }
+}
+
+async fn run_model_pricing_reprice_job(app: AppHandle, job: ModelPricingRepriceJob) {
+    let mut conn = match open_local_access_logs_db() {
+        Ok(conn) => conn,
+        Err(error) => {
+            logger::log_codex_api_warn(&format!(
+                "打开 API 服务日志数据库以后台重算历史估算价值失败: {}",
+                error
+            ));
+            emit_model_pricing_reprice_event(
+                &app,
+                job.job_id,
+                "failed",
+                0,
+                0,
+                0,
+                &job.model_ids,
+                &error,
+            );
+            return;
+        }
+    };
+    let total = match count_request_logs_for_model_ids(&conn, Some(&job.model_ids)) {
+        Ok(total) => total,
+        Err(error) => {
+            logger::log_codex_api_warn(&format!(
+                "统计 API 服务后台历史估算价值重算行数失败: {}",
+                error
+            ));
+            emit_model_pricing_reprice_event(
+                &app,
+                job.job_id,
+                "failed",
+                0,
+                0,
+                0,
+                &job.model_ids,
+                &error,
+            );
+            return;
+        }
+    };
+    let mut model_cursors = match request_log_reprice_model_cursors(&conn, Some(&job.model_ids)) {
+        Ok(cursors) => cursors,
+        Err(error) => {
+            logger::log_codex_api_warn(&format!(
+                "准备 API 服务后台历史估算价值模型游标失败: {}",
+                error
+            ));
+            emit_model_pricing_reprice_event(
+                &app,
+                job.job_id,
+                "failed",
+                0,
+                0,
+                0,
+                &job.model_ids,
+                &error,
+            );
+            return;
+        }
+    };
+
+    let mut processed = 0_u64;
+    let mut updated = 0_u64;
+    let mut all_changes = Vec::new();
+    emit_model_pricing_reprice_event(
+        &app,
+        job.job_id,
+        "started",
+        total,
+        processed,
+        updated,
+        &job.model_ids,
+        "",
+    );
+
+    loop {
+        if model_pricing_reprice_has_newer_pending_job(job.job_id).await {
+            apply_reprice_changes_to_runtime_stats(&all_changes).await;
+            emit_model_pricing_reprice_event(
+                &app,
+                job.job_id,
+                "superseded",
+                total,
+                processed,
+                updated,
+                &job.model_ids,
+                "",
+            );
+            return;
+        }
+
+        let rows = match read_request_log_reprice_batch(
+            &conn,
+            &mut model_cursors,
+            MODEL_PRICING_REPRICE_BATCH_SIZE,
+        ) {
+            Ok(rows) => rows,
+            Err(error) => {
+                logger::log_codex_api_warn(&format!(
+                    "API 服务后台历史估算价值分批重算失败: {}",
+                    error
+                ));
+                apply_reprice_changes_to_runtime_stats(&all_changes).await;
+                emit_model_pricing_reprice_event(
+                    &app,
+                    job.job_id,
+                    "failed",
+                    total,
+                    processed,
+                    updated,
+                    &job.model_ids,
+                    &error,
+                );
+                return;
+            }
+        };
+        let processed_rows = rows.len() as u64;
+        let updates = compute_request_log_reprice_updates(rows, Some(&job.collection));
+        let batch_changes_result = if updates.is_empty() {
+            Ok(Vec::new())
+        } else {
+            match lock_local_access_logs_db_write() {
+                Ok(_write_guard) => write_request_log_reprice_updates(&mut conn, &updates),
+                Err(error) => Err(error),
+            }
+        };
+        let mut batch_changes = match batch_changes_result {
+            Ok(changes) => changes,
+            Err(error) => {
+                logger::log_codex_api_warn(&format!(
+                    "API 服务后台历史估算价值分批写回失败: {}",
+                    error
+                ));
+                apply_reprice_changes_to_runtime_stats(&all_changes).await;
+                emit_model_pricing_reprice_event(
+                    &app,
+                    job.job_id,
+                    "failed",
+                    total,
+                    processed,
+                    updated,
+                    &job.model_ids,
+                    &error,
+                );
+                return;
+            }
+        };
+        processed = processed.saturating_add(processed_rows).min(total);
+        updated = updated.saturating_add(updates.len() as u64);
+        all_changes.append(&mut batch_changes);
+
+        if processed_rows == 0 {
+            break;
+        }
+
+        emit_model_pricing_reprice_event(
+            &app,
+            job.job_id,
+            "running",
+            total,
+            processed,
+            updated,
+            &job.model_ids,
+            "",
+        );
+
+        if model_cursors.is_empty() {
+            break;
+        }
+    }
+
+    apply_reprice_changes_to_runtime_stats(&all_changes).await;
+    emit_model_pricing_reprice_event(
+        &app,
+        job.job_id,
+        "completed",
+        total,
+        processed,
+        updated,
+        &job.model_ids,
+        "",
+    );
+}
+
+fn reprice_request_logs_with_model_ids(
+    conn: &mut Connection,
+    collection: Option<&CodexLocalAccessCollection>,
+    model_ids: Option<&[String]>,
+) -> Result<Vec<RequestLogRepriceChange>, String> {
+    if matches!(model_ids, Some(items) if items.is_empty()) {
+        return Ok(Vec::new());
+    }
+    let has_service_tier_column = request_logs_has_service_tier_column(conn)
+        .map_err(|e| format!("检查 API 服务日志 service_tier 列失败: {}", e))?;
+    let mut model_cursors = request_log_reprice_model_cursors(conn, model_ids)?;
+    let mut changes = Vec::new();
+    while !model_cursors.is_empty() {
+        let rows = read_request_log_reprice_batch(
+            conn,
+            &mut model_cursors,
+            MODEL_PRICING_REPRICE_BATCH_SIZE,
+        )?;
+        if rows.is_empty() {
+            break;
+        }
+        let updates = compute_request_log_reprice_updates(rows, collection);
+        if !updates.is_empty() {
+            let _write_guard = lock_local_access_logs_db_write()?;
+            changes.extend(write_request_log_reprice_updates(conn, &updates)?);
+        }
+    }
+
+    if !has_service_tier_column {
+        let _write_guard = lock_local_access_logs_db_write()?;
+        conn.execute(
+            "ALTER TABLE request_logs ADD COLUMN service_tier TEXT NOT NULL DEFAULT ''",
+            [],
+        )
+        .map_err(|e| format!("补齐 API 服务日志 service_tier 列失败: {}", e))?;
+    }
+    Ok(changes)
+}
+
+fn clear_local_access_usage_events_db() -> Result<(), String> {
+    let (_write_guard, conn) = open_local_access_logs_db_for_write()?;
+    conn.execute("DELETE FROM request_logs", [])
+        .map_err(|e| format!("清空 API 服务请求日志失败: {}", e))?;
+    Ok(())
+}
+
+fn usage_event_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<CodexLocalAccessUsageEvent> {
+    let request_kind: String = row.get("request_kind")?;
+    let service_tier: String = row.get("service_tier")?;
+    let success: i64 = row.get("success")?;
+    let http_status: Option<i64> = row.get("http_status")?;
+    let gateway_mode: String = row.get("gateway_mode")?;
+    let read_u64 = |name: &str| -> rusqlite::Result<u64> {
+        let value: i64 = row.get(name)?;
+        Ok(value.max(0) as u64)
+    };
+    Ok(CodexLocalAccessUsageEvent {
+        timestamp: row.get("timestamp")?,
+        request_id: row.get("request_id")?,
+        account_id: row.get("account_id")?,
+        email: row.get("email")?,
+        api_key_id: row.get("api_key_id")?,
+        api_key_label: row.get("api_key_label")?,
+        model_id: row.get("model_id")?,
+        gateway_mode: gateway_mode_from_db_value(gateway_mode.as_str()),
+        request_kind: request_kind_from_db_value(request_kind.as_str()),
+        service_tier: normalize_proxy_service_tier(service_tier.as_str()).map(str::to_string),
+        success: success != 0,
+        http_status: http_status.and_then(|value| u16::try_from(value).ok()),
+        error_category: row.get("error_category")?,
+        error_message: row.get("error_message")?,
+        latency_ms: read_u64("latency_ms")?,
+        input_tokens: read_u64("input_tokens")?,
+        output_tokens: read_u64("output_tokens")?,
+        total_tokens: read_u64("total_tokens")?,
+        cached_tokens: read_u64("cached_tokens")?,
+        reasoning_tokens: read_u64("reasoning_tokens")?,
+        estimated_cost_usd: row.get("estimated_cost_usd")?,
+        model_pricing_version: read_u64("model_pricing_version")?,
+        input_usd_per_million: row.get("input_usd_per_million")?,
+        output_usd_per_million: row.get("output_usd_per_million")?,
+        cached_input_usd_per_million: row.get("cached_input_usd_per_million")?,
+    })
+}
+
+fn load_local_access_usage_events_since(
+    since: i64,
+) -> Result<Vec<CodexLocalAccessUsageEvent>, String> {
+    let conn = open_local_access_logs_db()?;
+    let service_tier_select = if request_logs_has_service_tier_column(&conn)
+        .map_err(|e| format!("检查 API 服务日志 service_tier 列失败: {}", e))?
+    {
+        "service_tier"
+    } else {
+        "'' AS service_tier"
+    };
+    let load_sql = format!(
+        r#"
+            SELECT
+                timestamp,
+                request_id,
+                account_id,
+                email,
+                api_key_id,
+                api_key_label,
+                model_id,
+                gateway_mode,
+                request_kind,
+                {service_tier_select},
+                success,
+                http_status,
+                error_category,
+                error_message,
+                latency_ms,
+                input_tokens,
+                output_tokens,
+                total_tokens,
+                cached_tokens,
+                reasoning_tokens,
+                estimated_cost_usd,
+                model_pricing_version,
+                input_usd_per_million,
+                output_usd_per_million,
+                cached_input_usd_per_million
             FROM request_logs
             WHERE timestamp >= ?1
             ORDER BY timestamp ASC, id ASC
-            "#,
-        )
+            "#
+    );
+    let mut stmt = conn
+        .prepare(load_sql.as_str())
         .map_err(|e| format!("准备 API 服务日志读取失败: {}", e))?;
     let rows = stmt
         .query_map(params![since], usage_event_from_row)
@@ -5677,6 +7047,17 @@ pub async fn query_local_access_usage_events(
     let mut query_params = params;
     query_params.push(SqlValue::Integer(page_size as i64));
     query_params.push(SqlValue::Integer(offset));
+    let service_tier_select = match request_logs_has_service_tier_column(&conn) {
+        Ok(true) => "service_tier",
+        Ok(false) => "'' AS service_tier",
+        Err(error) => {
+            logger::log_codex_api_warn(&format!(
+                "检查 API 服务日志 service_tier 列失败，本次返回空日志列表: {}",
+                error
+            ));
+            return Ok(empty_usage_event_page(page, page_size));
+        }
+    };
     let list_sql = format!(
         r#"
         SELECT
@@ -5689,6 +7070,7 @@ pub async fn query_local_access_usage_events(
             model_id,
             gateway_mode,
             request_kind,
+            {service_tier_select},
             success,
             http_status,
             error_category,
@@ -5837,89 +7219,7 @@ fn reprice_request_logs_for_collection(
     conn: &mut Connection,
     collection: &CodexLocalAccessCollection,
 ) -> Result<usize, String> {
-    let rows = {
-        let mut stmt = conn
-            .prepare(
-                r#"
-                SELECT id, model_id, input_tokens, output_tokens, cached_tokens
-                FROM request_logs
-                "#,
-            )
-            .map_err(|e| format!("准备 API 服务日志价格重算失败: {}", e))?;
-        let rows = stmt
-            .query_map([], |row| {
-                let read_u64 = |index: usize| -> rusqlite::Result<u64> {
-                    let value: i64 = row.get(index)?;
-                    Ok(value.max(0) as u64)
-                };
-                Ok((
-                    row.get::<_, i64>(0)?,
-                    row.get::<_, String>(1)?,
-                    read_u64(2)?,
-                    read_u64(3)?,
-                    read_u64(4)?,
-                ))
-            })
-            .map_err(|e| format!("读取 API 服务日志价格重算行失败: {}", e))?;
-        rows.collect::<Result<Vec<_>, _>>()
-            .map_err(|e| format!("解析 API 服务日志价格重算行失败: {}", e))?
-    };
-
-    if rows.is_empty() {
-        return Ok(0);
-    }
-
-    let tx = conn
-        .transaction()
-        .map_err(|e| format!("开启 API 服务日志价格重算事务失败: {}", e))?;
-    let mut updated = 0usize;
-    for (row_id, model_id, input_tokens, output_tokens, cached_tokens) in rows {
-        let pricing = resolve_model_pricing(Some(collection), Some(&model_id));
-        let (estimated_cost_usd, input_price, output_price, cached_input_price) =
-            if let Some(pricing) = pricing.as_ref() {
-                (
-                    calculate_usage_cost_usd_from_tokens(
-                        input_tokens,
-                        output_tokens,
-                        cached_tokens,
-                        pricing,
-                    ),
-                    pricing.input_usd_per_million,
-                    pricing.output_usd_per_million,
-                    pricing.cached_input_usd_per_million,
-                )
-            } else {
-                (0.0, 0.0, 0.0, None)
-            };
-        let changed = tx
-            .execute(
-                r#"
-                UPDATE request_logs
-                SET
-                    estimated_cost_usd = ?1,
-                    model_pricing_version = ?2,
-                    input_usd_per_million = ?3,
-                    output_usd_per_million = ?4,
-                    cached_input_usd_per_million = ?5
-                WHERE id = ?6
-                "#,
-                params![
-                    estimated_cost_usd,
-                    collection
-                        .model_pricing_version
-                        .max(DEFAULT_MODEL_PRICING_VERSION) as i64,
-                    input_price,
-                    output_price,
-                    cached_input_price,
-                    row_id,
-                ],
-            )
-            .map_err(|e| format!("更新 API 服务日志价格重算行失败: {}", e))?;
-        updated = updated.saturating_add(changed);
-    }
-    tx.commit()
-        .map_err(|e| format!("提交 API 服务日志价格重算失败: {}", e))?;
-    Ok(updated)
+    reprice_request_logs_with_model_ids(conn, Some(collection), None).map(|changes| changes.len())
 }
 
 fn append_usage_event(
@@ -5933,6 +7233,7 @@ fn append_usage_event(
     model_id: Option<&str>,
     gateway_mode: Option<CodexLocalAccessGatewayMode>,
     request_kind: CodexLocalAccessRequestKind,
+    service_tier: Option<&str>,
     success: bool,
     http_status: Option<u16>,
     error_category: Option<&str>,
@@ -5954,6 +7255,9 @@ fn append_usage_event(
         model_id: model_id.unwrap_or_default().trim().to_string(),
         gateway_mode,
         request_kind,
+        service_tier: service_tier
+            .and_then(normalize_proxy_service_tier)
+            .map(str::to_string),
         success,
         http_status,
         error_category: error_category.unwrap_or_default().trim().to_string(),
@@ -6072,6 +7376,144 @@ fn recompute_time_windows(stats: &mut CodexLocalAccessStats, now: i64) {
     stats.daily = daily;
     stats.weekly = weekly;
     stats.monthly = monthly;
+}
+
+fn apply_cost_delta(target: &mut CodexLocalAccessUsageStats, delta: f64) {
+    if !delta.is_finite() || delta == 0.0 {
+        return;
+    }
+    target.estimated_cost_usd = (target.estimated_cost_usd + delta).max(0.0);
+}
+
+fn apply_cost_delta_to_stats_list<T, F, G>(
+    items: &mut [T],
+    key: &str,
+    delta: f64,
+    key_for: F,
+    usage_for: G,
+) where
+    F: Fn(&T) -> &str,
+    G: Fn(&mut T) -> &mut CodexLocalAccessUsageStats,
+{
+    let Some(item) = items.iter_mut().find(|item| key_for(item) == key) else {
+        return;
+    };
+    apply_cost_delta(usage_for(item), delta);
+}
+
+fn apply_cost_delta_to_window(
+    window: &mut CodexLocalAccessStatsWindow,
+    change: &RequestLogRepriceChange,
+) {
+    apply_cost_delta(&mut window.totals, change.estimated_cost_delta_usd);
+    apply_cost_delta_to_stats_list(
+        &mut window.accounts,
+        change.account_id.as_str(),
+        change.estimated_cost_delta_usd,
+        |item| item.account_id.as_str(),
+        |item| &mut item.usage,
+    );
+    apply_cost_delta_to_stats_list(
+        &mut window.models,
+        change.model_id.as_str(),
+        change.estimated_cost_delta_usd,
+        |item| item.model_id.as_str(),
+        |item| &mut item.usage,
+    );
+    apply_cost_delta_to_stats_list(
+        &mut window.api_keys,
+        change.api_key_id.as_str(),
+        change.estimated_cost_delta_usd,
+        |item| item.api_key_id.as_str(),
+        |item| &mut item.usage,
+    );
+}
+
+fn apply_reprice_changes_to_stats(
+    stats: &mut CodexLocalAccessStats,
+    changes: &[RequestLogRepriceChange],
+) {
+    if changes.is_empty() {
+        return;
+    }
+
+    let now = now_ms();
+    let day_since = now.saturating_sub(DAY_WINDOW_MS);
+    let week_since = now.saturating_sub(WEEK_WINDOW_MS);
+    let month_since = now.saturating_sub(MONTH_WINDOW_MS);
+    let event_indexes =
+        stats
+            .events
+            .iter()
+            .enumerate()
+            .fold(HashMap::new(), |mut indexes, (index, event)| {
+                indexes
+                    .entry(local_access_log_event_key(event))
+                    .or_insert(index);
+                indexes
+            });
+
+    for change in changes {
+        apply_cost_delta(&mut stats.totals, change.estimated_cost_delta_usd);
+        apply_cost_delta_to_stats_list(
+            &mut stats.accounts,
+            change.account_id.as_str(),
+            change.estimated_cost_delta_usd,
+            |item| item.account_id.as_str(),
+            |item| &mut item.usage,
+        );
+        apply_cost_delta_to_stats_list(
+            &mut stats.models,
+            change.model_id.as_str(),
+            change.estimated_cost_delta_usd,
+            |item| item.model_id.as_str(),
+            |item| &mut item.usage,
+        );
+        apply_cost_delta_to_stats_list(
+            &mut stats.api_keys,
+            change.api_key_id.as_str(),
+            change.estimated_cost_delta_usd,
+            |item| item.api_key_id.as_str(),
+            |item| &mut item.usage,
+        );
+
+        if change.timestamp >= month_since {
+            apply_cost_delta_to_window(&mut stats.monthly, change);
+        }
+        if change.timestamp >= week_since {
+            apply_cost_delta_to_window(&mut stats.weekly, change);
+        }
+        if change.timestamp >= day_since {
+            apply_cost_delta_to_window(&mut stats.daily, change);
+        }
+
+        if let Some(index) = event_indexes.get(change.event_key.as_str()) {
+            if let Some(event) = stats.events.get_mut(*index) {
+                apply_cost_delta_to_event(event, change.estimated_cost_delta_usd);
+            }
+        }
+    }
+
+    stats.updated_at = stats.updated_at.max(now);
+    sort_usage_accounts(&mut stats.accounts);
+    sort_usage_models(&mut stats.models);
+    sort_usage_api_keys(&mut stats.api_keys);
+    sort_usage_accounts(&mut stats.daily.accounts);
+    sort_usage_models(&mut stats.daily.models);
+    sort_usage_api_keys(&mut stats.daily.api_keys);
+    sort_usage_accounts(&mut stats.weekly.accounts);
+    sort_usage_models(&mut stats.weekly.models);
+    sort_usage_api_keys(&mut stats.weekly.api_keys);
+    sort_usage_accounts(&mut stats.monthly.accounts);
+    sort_usage_models(&mut stats.monthly.models);
+    sort_usage_api_keys(&mut stats.monthly.api_keys);
+}
+
+fn apply_cost_delta_to_event(event: &mut CodexLocalAccessUsageEvent, delta: f64) {
+    if !delta.is_finite() || delta == 0.0 {
+        return;
+    }
+    event.estimated_cost_usd = (event.estimated_cost_usd + delta).max(0.0);
 }
 
 fn build_api_port_url(port: u16) -> String {
@@ -6756,6 +8198,9 @@ struct SidecarUsageEvent {
     api_key_label: String,
     #[serde(default)]
     request_kind: String,
+    #[serde(default)]
+    #[serde(alias = "service_tier")]
+    service_tier: Option<String>,
     #[serde(default)]
     success: bool,
     #[serde(default)]
@@ -8373,6 +9818,7 @@ async fn record_sidecar_usage_event(event: SidecarUsageEvent) {
             request_id: request_id.as_deref(),
             http_status: event.status,
             error_message: event.error_message.as_deref(),
+            service_tier: event.service_tier.as_deref(),
         },
     )
     .await
@@ -9384,7 +10830,9 @@ fn recover_invalid_stats_file(
     empty
 }
 
-fn load_stats_from_disk() -> Result<CodexLocalAccessStats, String> {
+fn load_stats_from_disk(
+    collection: Option<&CodexLocalAccessCollection>,
+) -> Result<CodexLocalAccessStats, String> {
     let path = local_access_stats_file_path()?;
     let mut parsed = if path.exists() {
         let content =
@@ -9397,11 +10845,72 @@ fn load_stats_from_disk() -> Result<CodexLocalAccessStats, String> {
         empty_stats_snapshot()
     };
     let json_events = std::mem::take(&mut parsed.events);
-    if let Err(error) = migrate_local_access_json_events(&json_events) {
-        logger::log_codex_api_warn(&format!(
-            "API 服务请求日志迁移失败，继续使用统计快照中的最近事件: {}",
-            error
-        ));
+    let request_logs_schema_state = match inspect_request_logs_schema_state() {
+        Ok(state) => state,
+        Err(error) => {
+            logger::log_codex_api_warn(&format!(
+                "检查 API 服务日志 schema 失败，继续按旧库待迁移处理: {}",
+                error
+            ));
+            RequestLogsSchemaState::MissingTable
+        }
+    };
+    let bootstrap_without_service_tier = matches!(
+        request_logs_schema_state,
+        RequestLogsSchemaState::MissingTable
+    ) && !json_events.is_empty();
+    let json_events_migrated =
+        match migrate_local_access_json_events(&json_events, !bootstrap_without_service_tier) {
+            Ok(()) => true,
+            Err(error) => {
+                logger::log_codex_api_warn(&format!(
+                    "API 服务请求日志迁移失败，继续使用统计快照中的最近事件: {}",
+                    error
+                ));
+                false
+            }
+        };
+    let should_reprice_history = !matches!(
+        request_logs_schema_state,
+        RequestLogsSchemaState::MissingTable
+    ) || (bootstrap_without_service_tier && json_events_migrated);
+    if should_reprice_history {
+        let mut repricing_conn = match if bootstrap_without_service_tier {
+            open_local_access_logs_db_with_schema(false)
+        } else {
+            open_local_access_logs_db()
+        } {
+            Ok(conn) => conn,
+            Err(error) => {
+                logger::log_codex_api_warn(&format!(
+                    "打开 API 服务日志数据库以执行历史估算价值重算失败，继续使用统计快照中的最近事件: {}",
+                    error
+                ));
+                let month_since = now_ms().saturating_sub(MONTH_WINDOW_MS);
+                parsed.events = json_events
+                    .into_iter()
+                    .filter(|event| event.timestamp >= month_since)
+                    .collect();
+                normalize_stats(&mut parsed);
+                return Ok(parsed);
+            }
+        };
+        let model_ids = effective_price_book_model_ids(collection);
+        match reprice_request_logs_with_model_ids(
+            &mut repricing_conn,
+            collection,
+            Some(model_ids.as_slice()),
+        ) {
+            Ok(changes) => {
+                apply_reprice_changes_to_stats(&mut parsed, &changes);
+            }
+            Err(error) => {
+                logger::log_codex_api_warn(&format!(
+                    "API 服务历史估算价值重算失败，继续使用统计快照中的最近事件: {}",
+                    error
+                ));
+            }
+        }
     }
     let month_since = now_ms().saturating_sub(MONTH_WINDOW_MS);
     parsed.events = match load_local_access_usage_events_since(month_since) {
@@ -10423,7 +11932,6 @@ async fn ensure_runtime_loaded_without_start_with_profile_restore(
     }
 
     let loaded_collection = load_collection_from_disk()?;
-    let mut loaded_stats = load_stats_from_disk()?;
     let mut next_collection = loaded_collection;
     let mut persist_after_load = false;
 
@@ -10475,6 +11983,8 @@ async fn ensure_runtime_loaded_without_start_with_profile_restore(
             save_collection_to_disk(collection)?;
         }
     }
+
+    let mut loaded_stats = load_stats_from_disk(next_collection.as_ref())?;
 
     if let Some(collection) = next_collection.as_ref() {
         if restore_disabled_profiles && !collection.enabled {
@@ -11407,34 +12917,7 @@ struct RequestStatsMeta<'a> {
     request_id: Option<&'a str>,
     http_status: Option<u16>,
     error_message: Option<&'a str>,
-}
-
-async fn record_request_stats(
-    account_id: Option<&str>,
-    account_email: Option<&str>,
-    api_key_id: Option<&str>,
-    api_key_label: Option<&str>,
-    model_id: Option<&str>,
-    request_kind: CodexLocalAccessRequestKind,
-    success: bool,
-    error_category: Option<&str>,
-    latency_ms: u64,
-    usage: Option<UsageCapture>,
-) -> Result<(), String> {
-    record_request_stats_with_meta(
-        account_id,
-        account_email,
-        api_key_id,
-        api_key_label,
-        model_id,
-        request_kind,
-        success,
-        error_category,
-        latency_ms,
-        usage,
-        RequestStatsMeta::default(),
-    )
-    .await
+    service_tier: Option<&'a str>,
 }
 
 async fn record_request_stats_with_meta(
@@ -11454,7 +12937,12 @@ async fn record_request_stats_with_meta(
         let mut runtime = gateway_runtime().lock().await;
         let now = now_ms();
         let usage_ref = usage.as_ref();
-        let pricing = resolve_model_pricing(runtime.collection.as_ref(), model_id);
+        let pricing = resolve_effective_model_pricing(
+            runtime.collection.as_ref(),
+            model_id,
+            usage_ref,
+            meta.service_tier,
+        );
         let model_pricing_version = runtime
             .collection
             .as_ref()
@@ -11522,6 +13010,7 @@ async fn record_request_stats_with_meta(
             model_id,
             gateway_mode,
             request_kind,
+            meta.service_tier,
             success,
             meta.http_status,
             error_category,
@@ -14647,6 +16136,7 @@ pub async fn update_local_access_model_rules(
 }
 
 pub async fn update_local_access_model_pricings(
+    app: AppHandle,
     model_pricings: Vec<CodexLocalAccessModelPricing>,
 ) -> Result<CodexLocalAccessState, String> {
     ensure_runtime_loaded().await?;
@@ -14661,6 +16151,7 @@ pub async fn update_local_access_model_pricings(
     };
 
     let normalized_model_pricings = normalize_model_pricings(model_pricings);
+    let previous_model_pricings = collection.model_pricings.clone();
     if normalized_model_pricings != collection.model_pricings {
         collection.model_pricing_version = collection
             .model_pricing_version
@@ -14672,15 +16163,21 @@ pub async fn update_local_access_model_pricings(
             .max(DEFAULT_MODEL_PRICING_VERSION);
     }
     collection.model_pricings = normalized_model_pricings;
+    let changed_model_ids =
+        changed_model_pricing_ids(&previous_model_pricings, &collection.model_pricings);
     collection.updated_at = now_ms();
     save_collection_to_disk(&collection)?;
+    let reprice_collection = collection.clone();
 
     {
         let mut runtime = gateway_runtime().lock().await;
         sync_runtime_collection(&mut runtime, collection);
     }
 
-    snapshot_state().await
+    if !changed_model_ids.is_empty() {
+        queue_model_pricing_reprice(app, reprice_collection, changed_model_ids).await;
+    }
+    snapshot_state_without_gateway_reload().await
 }
 
 pub async fn reprice_local_access_request_logs() -> Result<CodexLocalAccessState, String> {
@@ -19412,6 +20909,7 @@ async fn handle_websocket_connection(
         api_key_id: resolved_api_key.id.clone(),
         api_key_label: resolved_api_key.label.clone(),
     };
+    let stats_service_tier = service_tier_from_request_body(&parsed.body);
     let routing_hint = build_request_routing_hint(&parsed);
 
     match proxy_websocket_with_account_pool(
@@ -19464,7 +20962,7 @@ async fn handle_websocket_connection(
                     Some(latency_ms),
                     upstream_error.body.as_str(),
                 );
-                if let Err(err) = record_request_stats(
+                if let Err(err) = record_request_stats_with_meta(
                     Some(account_id.as_str()),
                     Some(account_email.as_str()),
                     Some(stats_context.api_key_id.as_str()),
@@ -19475,6 +20973,10 @@ async fn handle_websocket_connection(
                     Some(upstream_error.category.as_str()),
                     latency_ms,
                     bridge_result.capture.usage,
+                    RequestStatsMeta {
+                        service_tier: stats_service_tier.as_deref(),
+                        ..RequestStatsMeta::default()
+                    },
                 )
                 .await
                 {
@@ -19501,7 +21003,7 @@ async fn handle_websocket_connection(
                 }
             }
             let latency_ms = started_at.elapsed().as_millis() as u64;
-            if let Err(err) = record_request_stats(
+            if let Err(err) = record_request_stats_with_meta(
                 Some(account_id.as_str()),
                 Some(account_email.as_str()),
                 Some(stats_context.api_key_id.as_str()),
@@ -19512,6 +21014,10 @@ async fn handle_websocket_connection(
                 None,
                 latency_ms,
                 bridge_result.capture.usage,
+                RequestStatsMeta {
+                    service_tier: stats_service_tier.as_deref(),
+                    ..RequestStatsMeta::default()
+                },
             )
             .await
             {
@@ -19534,7 +21040,7 @@ async fn handle_websocket_connection(
                 error.message.as_str(),
             );
             let _ = downstream.send(Message::Close(None)).await;
-            if let Err(err) = record_request_stats(
+            if let Err(err) = record_request_stats_with_meta(
                 error.account_id.as_deref(),
                 error.account_email.as_deref(),
                 Some(stats_context.api_key_id.as_str()),
@@ -19545,6 +21051,10 @@ async fn handle_websocket_connection(
                 error.error_category.as_deref(),
                 latency_ms,
                 None,
+                RequestStatsMeta {
+                    service_tier: stats_service_tier.as_deref(),
+                    ..RequestStatsMeta::default()
+                },
             )
             .await
             {
@@ -19799,7 +21309,8 @@ async fn handle_connection(
             Some(latency_ms),
         )
         .await?;
-        if let Err(err) = record_request_stats(
+        let stats_service_tier = service_tier_from_request_body(&parsed.body);
+        if let Err(err) = record_request_stats_with_meta(
             None,
             None,
             Some(resolved_api_key.id.as_str()),
@@ -19810,6 +21321,10 @@ async fn handle_connection(
             Some("image_generation_disabled"),
             latency_ms,
             None,
+            RequestStatsMeta {
+                service_tier: stats_service_tier.as_deref(),
+                ..RequestStatsMeta::default()
+            },
         )
         .await
         {
@@ -19843,7 +21358,8 @@ async fn handle_connection(
             Some(latency_ms),
         )
         .await?;
-        if let Err(stats_err) = record_request_stats(
+        let stats_service_tier = service_tier_from_request_body(&parsed.body);
+        if let Err(stats_err) = record_request_stats_with_meta(
             None,
             None,
             Some(resolved_api_key.id.as_str()),
@@ -19854,6 +21370,10 @@ async fn handle_connection(
             Some("model_not_available"),
             latency_ms,
             None,
+            RequestStatsMeta {
+                service_tier: stats_service_tier.as_deref(),
+                ..RequestStatsMeta::default()
+            },
         )
         .await
         {
@@ -19919,6 +21439,7 @@ async fn handle_connection(
     apply_codex_official_headers(&mut prepared_request);
     let stats_context =
         build_request_stats_context(&prepared_request, &response_adapter, &resolved_api_key);
+    let stats_service_tier = service_tier_from_request_body(&prepared_request.body);
     legacy_debug_log(
         collection.debug_logs,
         format!(
@@ -19978,7 +21499,7 @@ async fn handle_connection(
                             Some(latency_ms),
                             err.as_str(),
                         );
-                        if let Err(stats_err) = record_request_stats(
+                        if let Err(stats_err) = record_request_stats_with_meta(
                             Some(account_id.as_str()),
                             Some(account_email.as_str()),
                             Some(stats_context.api_key_id.as_str()),
@@ -19989,6 +21510,10 @@ async fn handle_connection(
                             Some(error_category),
                             latency_ms,
                             None,
+                            RequestStatsMeta {
+                                service_tier: stats_service_tier.as_deref(),
+                                ..RequestStatsMeta::default()
+                            },
                         )
                         .await
                         {
@@ -20013,7 +21538,7 @@ async fn handle_connection(
                 }
             }
             let latency_ms = started_at.elapsed().as_millis() as u64;
-            if let Err(err) = record_request_stats(
+            if let Err(err) = record_request_stats_with_meta(
                 Some(account_id.as_str()),
                 Some(account_email.as_str()),
                 Some(stats_context.api_key_id.as_str()),
@@ -20024,6 +21549,10 @@ async fn handle_connection(
                 None,
                 latency_ms,
                 response_capture.usage,
+                RequestStatsMeta {
+                    service_tier: stats_service_tier.as_deref(),
+                    ..RequestStatsMeta::default()
+                },
             )
             .await
             {
@@ -20087,7 +21616,7 @@ async fn handle_connection(
                 .write_all(&response)
                 .await
                 .map_err(|e| format!("写入错误响应失败: {}", e));
-            if let Err(err) = record_request_stats(
+            if let Err(err) = record_request_stats_with_meta(
                 account_id.as_deref(),
                 account_email.as_deref(),
                 Some(stats_context.api_key_id.as_str()),
@@ -20098,6 +21627,10 @@ async fn handle_connection(
                 error_category.as_deref(),
                 latency_ms,
                 None,
+                RequestStatsMeta {
+                    service_tier: stats_service_tier.as_deref(),
+                    ..RequestStatsMeta::default()
+                },
             )
             .await
             {
@@ -20129,7 +21662,8 @@ mod tests {
         build_request_routing_hint, build_upstream_websocket_url, calculate_usage_cost_usd,
         canonical_model_for_client_model, classify_upstream_error_category,
         cleanup_profile_takeover_without_backup, cleanup_provider_gateway_profile_model_overrides,
-        collect_local_access_profile_takeover_dirs_from_store, compare_routing_candidates,
+        codex_price, collect_local_access_profile_takeover_dirs_from_store,
+        compare_routing_candidates,
         default_codex_model_ids, extract_usage_capture, filter_bound_oauth_quota_reserve_account,
         insert_local_access_usage_event, inspect_local_access_profile_config,
         is_codex_local_access_auth_text, is_codex_local_access_config_for_api_key,
@@ -20152,13 +21686,15 @@ mod tests {
         provider_gateway_bound_oauth_account_id_for_account,
         provider_gateway_default_model_for_account,
         provider_gateway_image_generation_mode_for_account, provider_gateway_model_slots,
-        provider_gateway_models_for_account, read_http_request, recover_invalid_stats_file,
-        remove_account_refs_from_collection, remove_codex_local_access_config,
-        reprice_request_logs_for_collection, request_image_generation_mode, resolve_plan_rank,
-        resolve_supported_model_alias, resolve_upstream_target,
-        restore_config_toml_from_takeover_backup, sanitize_collection_with_accounts,
-        scutil_proxy_map, should_retry_single_account_upstream_status,
-        should_treat_response_as_stream, should_try_next_account, sidecar_account_manifest_value,
+        provider_gateway_models_for_account,
+        read_http_request, recover_invalid_stats_file, remove_account_refs_from_collection,
+        remove_codex_local_access_config, reprice_request_logs_for_collection,
+        request_image_generation_mode, resolve_effective_model_pricing, resolve_plan_rank,
+        resolve_supported_model_alias,
+        resolve_upstream_target, restore_config_toml_from_takeover_backup,
+        sanitize_collection_with_accounts, scutil_proxy_map,
+        should_retry_single_account_upstream_status, should_treat_response_as_stream,
+        should_try_next_account, sidecar_account_manifest_value,
         sidecar_api_key_account_scope_values, sidecar_auth_file_name,
         sidecar_auth_json_for_account, sidecar_auths_dir,
         sidecar_cached_account_usable_after_prepare_error, sidecar_codex_api_key_auth_id,
@@ -21803,7 +23339,14 @@ wire_api = "responses"
             cached_tokens: 400,
             reasoning_tokens: 0,
         };
-        let pricing = model_pricing("gpt-5.4", 1.25, Some(0.125), 10.0);
+        let pricing = model_pricing(
+            "gpt-5.4",
+            None,
+            codex_price(1.25, 0.125, 10.0),
+            None,
+            None,
+            None,
+        );
         let cost = calculate_usage_cost_usd(Some(&usage), Some(&pricing));
         let expected = ((600.0 * 1.25) + (400.0 * 0.125) + (2_000.0 * 10.0)) / 1_000_000.0;
         assert!((cost - expected).abs() < 0.000000001);
@@ -21813,7 +23356,7 @@ wire_api = "responses"
     fn request_log_db_preserves_api_key_label_error_and_pricing_version() {
         let dir = make_temp_dir("codex-local-access-logs");
         let db_path = dir.join("request_logs.sqlite");
-        let conn = open_local_access_logs_db_once(&db_path).expect("open logs db");
+        let conn = open_local_access_logs_db_once(&db_path, true).expect("open logs db");
         let long_error = format!(
             "upstream failed: {} tail-marker",
             "provider diagnostic ".repeat(128)
@@ -21830,13 +23373,21 @@ wire_api = "responses"
             Some("gpt-5.4"),
             Some(CodexLocalAccessGatewayMode::Sidecar),
             CodexLocalAccessRequestKind::Text,
+            None,
             false,
             Some(502),
             Some("upstream_bad_gateway"),
             Some(&long_error),
             42,
             None,
-            Some(&model_pricing("gpt-5.4", 1.0, None, 2.0)),
+            Some(&model_pricing(
+                "gpt-5.4",
+                None,
+                codex_price(1.0, 1.0, 2.0),
+                None,
+                None,
+                None,
+            )),
             7,
             0.0,
         );
@@ -21869,7 +23420,7 @@ wire_api = "responses"
     fn request_log_reprice_updates_cost_and_pricing_version() {
         let dir = make_temp_dir("codex-local-access-reprice");
         let db_path = dir.join("request_logs.sqlite");
-        let mut conn = open_local_access_logs_db_once(&db_path).expect("open logs db");
+        let mut conn = open_local_access_logs_db_once(&db_path, true).expect("open logs db");
         let mut events = Vec::new();
         let usage = UsageCapture {
             input_tokens: 1_000_000,
@@ -21889,13 +23440,21 @@ wire_api = "responses"
             Some("custom-model"),
             Some(CodexLocalAccessGatewayMode::Sidecar),
             CodexLocalAccessRequestKind::Text,
+            None,
             true,
             Some(200),
             None,
             None,
             42,
             Some(&usage),
-            Some(&model_pricing("custom-model", 1.0, Some(0.5), 2.0)),
+            Some(&model_pricing(
+                "custom-model",
+                None,
+                codex_price(1.0, 0.5, 2.0),
+                None,
+                None,
+                None,
+            )),
             2,
             1.0,
         );
@@ -21903,7 +23462,14 @@ wire_api = "responses"
 
         let mut collection = test_local_access_collection(vec!["acc-1".to_string()]);
         collection.model_pricing_version = 8;
-        collection.model_pricings = vec![model_pricing("custom-model", 3.0, Some(0.25), 9.0)];
+        collection.model_pricings = vec![model_pricing(
+            "custom-model",
+            None,
+            codex_price(3.0, 0.25, 9.0),
+            None,
+            None,
+            None,
+        )];
         let updated =
             reprice_request_logs_for_collection(&mut conn, &collection).expect("reprice logs");
         assert_eq!(updated, 1);
@@ -21941,6 +23507,48 @@ wire_api = "responses"
 
         drop(conn);
         let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn resolves_default_model_pricing_by_tier_and_context_band() {
+        let short_usage = UsageCapture {
+            input_tokens: 272_000,
+            output_tokens: 1,
+            total_tokens: 272_001,
+            cached_tokens: 0,
+            reasoning_tokens: 0,
+        };
+        let long_usage = UsageCapture {
+            input_tokens: 272_001,
+            ..short_usage.clone()
+        };
+
+        let short =
+            resolve_effective_model_pricing(None, Some("gpt-5.5"), Some(&short_usage), None)
+                .expect("gpt-5.5 standard short pricing");
+        assert_eq!(short.input_usd_per_million, 5.0);
+        assert_eq!(short.output_usd_per_million, 30.0);
+
+        let long = resolve_effective_model_pricing(None, Some("gpt-5.5"), Some(&long_usage), None)
+            .expect("gpt-5.5 standard long pricing");
+        assert_eq!(long.input_usd_per_million, 10.0);
+        assert_eq!(long.output_usd_per_million, 45.0);
+
+        let priority = resolve_effective_model_pricing(
+            None,
+            Some("gpt-5.5"),
+            Some(&long_usage),
+            Some("priority"),
+        )
+        .expect("gpt-5.5 priority long pricing");
+        assert_eq!(priority.input_usd_per_million, 12.5);
+        assert_eq!(priority.output_usd_per_million, 75.0);
+
+        let mini_long =
+            resolve_effective_model_pricing(None, Some("gpt-5.4-mini"), Some(&long_usage), None)
+                .expect("gpt-5.4-mini standard long pricing");
+        assert_eq!(mini_long.input_usd_per_million, 0.75);
+        assert_eq!(mini_long.output_usd_per_million, 4.5);
     }
 
     #[test]
@@ -22445,6 +24053,7 @@ data: {"type":"response.completed","response":{"id":"resp_123","usage":{"input_t
             api_key_id: "key-1".to_string(),
             api_key_label: "Default".to_string(),
             request_kind: "text".to_string(),
+            service_tier: None,
             success: false,
             status: Some(200),
             error_category: Some("request_failed".to_string()),

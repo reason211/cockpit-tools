@@ -3392,7 +3392,7 @@
         "pricingUnset": "Unset",
         "pricingReset": "Reset",
         "pricingSaved": "Pricing saved",
-        "pricingInvalid": "Prices must be numbers greater than or equal to 0",
+        "pricingInvalid": "Prices must be numbers greater than or equal to 0, and the token threshold must be a positive integer",
         "pricingReprice": "Reprice History",
         "pricingRepriced": "Historical estimates were recalculated with current prices"
       },

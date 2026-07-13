@@ -189,6 +189,7 @@ type usagePayload struct {
 	APIKeyID      string       `json:"apiKeyId,omitempty"`
 	APIKeyLabel   string       `json:"apiKeyLabel,omitempty"`
 	RequestKind   string       `json:"requestKind,omitempty"`
+	ServiceTier   string       `json:"serviceTier,omitempty"`
 	Success       bool         `json:"success"`
 	Status        int          `json:"status,omitempty"`
 	ErrorCategory string       `json:"errorCategory,omitempty"`
@@ -328,6 +329,17 @@ func (t *requestUsageTracker) recordSelectedAccount(requestID string, account *a
 		AuthID:       strings.TrimSpace(authID),
 	}
 	t.mu.Unlock()
+}
+
+func normalizedUsageServiceTier(value string) string {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "priority":
+		return "priority"
+	case "", "default", "standard":
+		return ""
+	default:
+		return ""
+	}
 }
 
 func (t *requestUsageTracker) finalize(requestID string, input usageFinalizeInput) (usagePayload, bool) {
@@ -2210,6 +2222,7 @@ func (p *usagePlugin) HandleUsage(ctx context.Context, record coreusage.Record) 
 		APIKeyID:      stringFromAPIKey(spec, "id"),
 		APIKeyLabel:   stringFromAPIKey(spec, "label"),
 		RequestKind:   requestKind,
+		ServiceTier:   normalizedUsageServiceTier(record.ServiceTier),
 		Success:       success,
 		Status:        status,
 		ErrorCategory: errorCategory(status, record.Fail.Body, success),

@@ -916,6 +916,7 @@ func TestRequestUsageTrackerFinalizesWithLastSuccessfulAttempt(t *testing.T) {
 		AccountEmail: "ok@example.com",
 		Model:        "gpt-5.5",
 		RequestKind:  "text",
+		ServiceTier:  "priority",
 		Success:      true,
 		Status:       http.StatusOK,
 		Usage: usageDetails{
@@ -945,6 +946,9 @@ func TestRequestUsageTrackerFinalizesWithLastSuccessfulAttempt(t *testing.T) {
 	}
 	if payload.LatencyMS != 446_000 || payload.APIKeyID != "key_1" {
 		t.Fatalf("final request metadata was not applied: %#v", payload)
+	}
+	if payload.ServiceTier != "priority" {
+		t.Fatalf("expected service tier to be preserved, got %#v", payload)
 	}
 }
 

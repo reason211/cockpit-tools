@@ -2993,9 +2993,10 @@ pub async fn codex_local_access_update_model_rules(
 
 #[tauri::command]
 pub async fn codex_local_access_update_model_pricings(
+    app: AppHandle,
     model_pricings: Vec<CodexLocalAccessModelPricing>,
 ) -> Result<CodexLocalAccessState, String> {
-    codex_local_access::update_local_access_model_pricings(model_pricings).await
+    codex_local_access::update_local_access_model_pricings(app, model_pricings).await
 }
 
 #[tauri::command]
