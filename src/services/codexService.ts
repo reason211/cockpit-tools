@@ -275,6 +275,11 @@ export async function refreshAllCodexQuotas(): Promise<number> {
   return await invoke('refresh_all_codex_quotas');
 }
 
+/** 按 ID 列表限流并发刷新配额（分组/本地访问批量）；后端统一限流并只做一次 tray 更新 */
+export async function refreshCodexQuotasBatch(accountIds: string[]): Promise<number> {
+  return await invoke('refresh_codex_quotas_batch', { accountIds });
+}
+
 /** 新 OAuth 流程：开始登录 */
 export async function startCodexOAuthLogin(): Promise<CodexOAuthLoginStartResponse> {
   return await invoke('codex_oauth_login_start');
