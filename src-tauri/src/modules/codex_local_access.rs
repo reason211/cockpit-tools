@@ -2538,7 +2538,7 @@ fn ensure_image_generation_tool_in_object(object: &mut Map<String, Value>) -> bo
     }
 }
 
-fn remove_image_generation_tool_from_object(object: &mut Map<String, Value>) -> bool {
+fn remove_hosted_image_generation_tool_from_object(object: &mut Map<String, Value>) -> bool {
     let mut changed = false;
     if let Some(Value::Array(tools)) = object.get_mut("tools") {
         let before = tools.len();
@@ -2558,6 +2558,117 @@ fn remove_image_generation_tool_from_object(object: &mut Map<String, Value>) -> 
     if remove_tool_choice {
         object.remove("tool_choice");
         changed = true;
+    }
+
+    changed
+}
+
+fn is_image_generation_capability_name(value: &str) -> bool {
+    matches!(
+        value.trim().to_ascii_lowercase().as_str(),
+        "image_generation" | "image_gen" | "image_gen.imagegen"
+    )
+}
+
+fn tool_declares_image_generation_capability(tool: &Value) -> bool {
+    let Some(tool) = tool.as_object() else {
+        return false;
+    };
+    if tool
+        .get("type")
+        .and_then(Value::as_str)
+        .is_some_and(|value| value.eq_ignore_ascii_case("image_generation"))
+    {
+        return true;
+    }
+    let is_image_namespace = tool
+        .get("type")
+        .and_then(Value::as_str)
+        .is_some_and(|value| value.eq_ignore_ascii_case("namespace"))
+        && ["name", "namespace"].iter().any(|key| {
+            tool.get(*key)
+                .and_then(Value::as_str)
+                .is_some_and(|value| value.trim().eq_ignore_ascii_case("image_gen"))
+        });
+    is_image_namespace
+        || tool
+            .get("name")
+            .and_then(Value::as_str)
+            .is_some_and(is_image_gen_function_name)
+        || tool
+            .get("function")
+            .and_then(Value::as_object)
+            .and_then(|function| function.get("name"))
+            .and_then(Value::as_str)
+            .is_some_and(is_image_gen_function_name)
+}
+
+fn tool_choice_selects_image_generation(choice: &Value) -> bool {
+    if choice
+        .as_str()
+        .is_some_and(is_image_generation_capability_name)
+    {
+        return true;
+    }
+    let Some(choice) = choice.as_object() else {
+        return false;
+    };
+    if ["type", "name", "namespace"].iter().any(|key| {
+        choice
+            .get(*key)
+            .and_then(Value::as_str)
+            .is_some_and(is_image_generation_capability_name)
+    }) {
+        return true;
+    }
+    ["tool", "function"].iter().any(|key| {
+        choice
+            .get(*key)
+            .is_some_and(tool_choice_selects_image_generation)
+    }) || ["tools", "allowed_tools"].iter().any(|key| {
+        choice
+            .get(*key)
+            .and_then(Value::as_array)
+            .is_some_and(|items| items.iter().any(tool_choice_selects_image_generation))
+    })
+}
+
+fn remove_image_generation_capabilities_from_object(object: &mut Map<String, Value>) -> bool {
+    let mut changed = false;
+    if let Some(Value::Array(tools)) = object.get_mut("tools") {
+        let before = tools.len();
+        tools.retain(|tool| !tool_declares_image_generation_capability(tool));
+        changed |= tools.len() != before;
+    }
+
+    if object
+        .get("tool_choice")
+        .is_some_and(tool_choice_selects_image_generation)
+    {
+        object.remove("tool_choice");
+        changed = true;
+    }
+
+    if let Some(Value::Array(input)) = object.get_mut("input") {
+        let before = input.len();
+        input.retain_mut(|item| {
+            let Some(item_object) = item.as_object_mut() else {
+                return true;
+            };
+            if item_object.get("type").and_then(Value::as_str) != Some("additional_tools") {
+                return true;
+            }
+            changed |= remove_image_generation_capabilities_from_object(item_object);
+            !item_object
+                .get("tools")
+                .and_then(Value::as_array)
+                .is_some_and(Vec::is_empty)
+        });
+        changed |= input.len() != before;
+    }
+
+    if let Some(Value::Object(response)) = object.get_mut("response") {
+        changed |= remove_image_generation_capabilities_from_object(response);
     }
 
     changed
@@ -19653,14 +19764,25 @@ fn build_account_scoped_upstream_body<'a>(
     let Some(body_obj) = body_value.as_object_mut() else {
         return Ok(Cow::Borrowed(body));
     };
+    let remove_all_image_capabilities =
+        !image_generation_tools_allowed(image_generation_mode, request_kind);
     let image_generation_mode = if account_uses_oauth_chat_image_generation_compat(account) {
         oauth_chat_image_generation_mode(image_generation_mode)
     } else {
         image_generation_mode
     };
 
+    if remove_all_image_capabilities {
+        if !remove_image_generation_capabilities_from_object(body_obj) {
+            return Ok(Cow::Borrowed(body));
+        }
+        return serde_json::to_vec(&body_value)
+            .map(Cow::Owned)
+            .map_err(|e| format!("序列化账号级 responses 请求体失败: {}", e));
+    }
+
     if has_hosted_image_generation_tool_conflict(body_obj) {
-        if !remove_image_generation_tool_from_object(body_obj) {
+        if !remove_hosted_image_generation_tool_from_object(body_obj) {
             return Ok(Cow::Borrowed(body));
         }
         return serde_json::to_vec(&body_value)
@@ -19669,12 +19791,7 @@ fn build_account_scoped_upstream_body<'a>(
     }
 
     if !image_generation_tools_allowed(image_generation_mode, request_kind) {
-        if !remove_image_generation_tool_from_object(body_obj) {
-            return Ok(Cow::Borrowed(body));
-        }
-        return serde_json::to_vec(&body_value)
-            .map(Cow::Owned)
-            .map_err(|e| format!("序列化账号级 responses 请求体失败: {}", e));
+        return Ok(Cow::Borrowed(body));
     }
 
     if is_free_plan_type(account.plan_type.as_deref())
@@ -21355,12 +21472,85 @@ fn parse_websocket_upstream_error(message: &Message) -> Option<WebSocketUpstream
     })
 }
 
+#[derive(Clone)]
+struct WebSocketImageGenerationFilter {
+    account: CodexAccount,
+    fallback_mode: CodexLocalAccessImageGenerationMode,
+    request_headers: HashMap<String, String>,
+}
+
+async fn current_websocket_image_generation_mode(
+    filter: &WebSocketImageGenerationFilter,
+) -> CodexLocalAccessImageGenerationMode {
+    let collection_mode = gateway_runtime()
+        .lock()
+        .await
+        .collection
+        .as_ref()
+        .map(|collection| collection.image_generation_mode)
+        .unwrap_or(filter.fallback_mode);
+    request_image_generation_mode(collection_mode, &filter.request_headers)
+}
+
+fn filter_websocket_client_message(
+    message: Message,
+    account: &CodexAccount,
+    image_generation_mode: CodexLocalAccessImageGenerationMode,
+) -> Result<Message, String> {
+    match message {
+        Message::Text(text) => {
+            let body = text.to_string().into_bytes();
+            let filtered = build_account_scoped_upstream_body(
+                "/responses",
+                &body,
+                account,
+                image_generation_mode,
+                CodexLocalAccessRequestKind::Text,
+            )?;
+            if matches!(&filtered, Cow::Borrowed(_)) {
+                return Ok(Message::Text(text));
+            }
+            let filtered = String::from_utf8(filtered.into_owned())
+                .map_err(|error| format!("过滤 WebSocket 文本图片工具后不是 UTF-8: {}", error))?;
+            Ok(Message::Text(filtered.into()))
+        }
+        Message::Binary(bytes) => {
+            let filtered = build_account_scoped_upstream_body(
+                "/responses",
+                bytes.as_ref(),
+                account,
+                image_generation_mode,
+                CodexLocalAccessRequestKind::Text,
+            )?;
+            if matches!(&filtered, Cow::Borrowed(_)) {
+                return Ok(Message::Binary(bytes));
+            }
+            Ok(Message::Binary(filtered.into_owned().into()))
+        }
+        other => Ok(other),
+    }
+}
+
 async fn bridge_websocket_streams(
     downstream: WebSocketStream<TcpStream>,
     mut upstream: WebSocketStream<MaybeTlsStream<TcpStream>>,
     first_payload: Vec<u8>,
     timeouts: CodexLocalAccessTimeouts,
+    image_filter: Option<WebSocketImageGenerationFilter>,
 ) -> Result<WebSocketBridgeResult, String> {
+    let first_payload = if let Some(filter) = image_filter.as_ref() {
+        let mode = current_websocket_image_generation_mode(filter).await;
+        build_account_scoped_upstream_body(
+            "/responses",
+            &first_payload,
+            &filter.account,
+            mode,
+            CodexLocalAccessRequestKind::Text,
+        )?
+        .into_owned()
+    } else {
+        first_payload
+    };
     let first_text = String::from_utf8(first_payload)
         .map_err(|e| format!("WebSocket response.create 不是合法 UTF-8: {}", e))?;
     upstream
@@ -21404,8 +21594,12 @@ async fn bridge_websocket_streams(
                 let Some(message_result) = downstream_next else {
                     break;
                 };
-                let message = message_result
+                let mut message = message_result
                     .map_err(|e| format!("读取 WebSocket 客户端消息失败: {}", e))?;
+                if let Some(filter) = image_filter.as_ref() {
+                    let mode = current_websocket_image_generation_mode(filter).await;
+                    message = filter_websocket_client_message(message, &filter.account, mode)?;
+                }
                 let should_close = matches!(message, Message::Close(_));
                 upstream_write
                     .send(message)
@@ -21498,6 +21692,11 @@ async fn handle_websocket_connection(
                 success.upstream,
                 parsed.body.clone(),
                 timeouts.clone(),
+                Some(WebSocketImageGenerationFilter {
+                    account: success.account.clone(),
+                    fallback_mode: collection.image_generation_mode,
+                    request_headers: parsed.headers.clone(),
+                }),
             )
             .await?;
             if let Some(upstream_error) = bridge_result.upstream_error {
@@ -22233,8 +22432,12 @@ mod tests {
     #[test]
     fn format_gateway_bind_error_mentions_reserved_when_matched() {
         let err = std::io::Error::from(std::io::ErrorKind::AddrInUse);
-        let msg = super::format_gateway_bind_error_message("127.0.0.1", 1455, &err, &[(1400, 1500)]);
-        assert!(msg.contains("保留") || msg.contains("excludedportrange") || msg.contains("Windows"), "msg={msg}");
+        let msg =
+            super::format_gateway_bind_error_message("127.0.0.1", 1455, &err, &[(1400, 1500)]);
+        assert!(
+            msg.contains("保留") || msg.contains("excludedportrange") || msg.contains("Windows"),
+            "msg={msg}"
+        );
     }
     use base64::{engine::general_purpose, Engine as _};
 
@@ -22253,14 +22456,15 @@ mod tests {
         canonical_model_for_client_model, classify_upstream_error_category,
         cleanup_profile_takeover_without_backup, cleanup_provider_gateway_profile_model_overrides,
         codex_price, collect_local_access_profile_takeover_dirs_from_store,
-        compare_routing_candidates,
-        default_codex_model_ids, extract_usage_capture, filter_bound_oauth_quota_reserve_account,
+        compare_routing_candidates, default_codex_model_ids, extract_usage_capture,
+        filter_bound_oauth_quota_reserve_account, filter_websocket_client_message,
         insert_local_access_usage_event, inspect_local_access_profile_config,
         is_codex_local_access_auth_text, is_codex_local_access_config_for_api_key,
         is_image_generation_capability_error, is_local_access_eligible_account,
-        is_provider_gateway_eligible_account, is_responses_completion_event,
-        is_stream_incomplete_error_message, is_upstream_response_failed_error_message,
-        legacy_stream_error_category, local_access_chat_completions_url,
+        is_local_access_gateway_base_url, is_provider_gateway_eligible_account,
+        is_responses_completion_event, is_stream_incomplete_error_message,
+        is_upstream_response_failed_error_message, legacy_stream_error_category,
+        local_access_chat_completions_url, lookup_codex_model_provider_base_url_in_dir,
         macos_proxy_url_from_scutil_map, max_credential_attempts_for_strategy,
         merge_collection_and_account_excluded_models, model_pricing,
         model_provider_direct_test_client_model, model_provider_test_uses_provider_gateway,
@@ -22270,17 +22474,14 @@ mod tests {
         pin_account_to_front_for_strategy, prepare_gateway_request,
         prepare_gateway_request_with_default_service_tier, prepare_sidecar_launch_config_in_dir,
         prepare_websocket_initial_request, profile_base_url_matches,
-        is_local_access_gateway_base_url, lookup_codex_model_provider_base_url_in_dir,
-        resolve_sidecar_upstream_base_url, resolve_sidecar_upstream_base_url_with,
-        sidecar_codex_key_config_value,
         provider_gateway_bound_oauth_account_id_for_account,
         provider_gateway_default_model_for_account,
         provider_gateway_image_generation_mode_for_account, provider_gateway_model_slots,
-        provider_gateway_models_for_account,
-        read_http_request, recover_invalid_stats_file, remove_account_refs_from_collection,
-        remove_codex_local_access_config, reprice_request_logs_for_collection,
-        request_image_generation_mode, resolve_effective_model_pricing, resolve_plan_rank,
-        resolve_supported_model_alias,
+        provider_gateway_models_for_account, read_http_request, recover_invalid_stats_file,
+        remove_account_refs_from_collection, remove_codex_local_access_config,
+        reprice_request_logs_for_collection, request_image_generation_mode,
+        resolve_effective_model_pricing, resolve_plan_rank, resolve_sidecar_upstream_base_url,
+        resolve_sidecar_upstream_base_url_with, resolve_supported_model_alias,
         resolve_upstream_target, restore_config_toml_from_takeover_backup,
         sanitize_collection_with_accounts, scutil_proxy_map,
         should_retry_single_account_upstream_status, should_treat_response_as_stream,
@@ -22288,10 +22489,12 @@ mod tests {
         sidecar_api_key_account_scope_values, sidecar_auth_file_name,
         sidecar_auth_json_for_account, sidecar_auths_dir,
         sidecar_cached_account_usable_after_prepare_error, sidecar_codex_api_key_auth_id,
-        sidecar_config_fingerprint, sidecar_payload_default_service_tier,
-        sidecar_quota_reserve_snapshot_value, sidecar_routing_strategy_value, sidecar_stable_id,
-        supported_codex_model_ids, system_proxy_target_scheme, system_proxy_value_url,
-        validate_client_model_visible, visible_codex_model_ids_for_api_key, websocket_accept_value,
+        sidecar_codex_key_config_value, sidecar_config_fingerprint,
+        sidecar_payload_default_service_tier, sidecar_quota_reserve_snapshot_value,
+        sidecar_routing_strategy_value, sidecar_stable_id, supported_codex_model_ids,
+        system_proxy_target_scheme, system_proxy_value_url,
+        tool_declares_image_generation_capability, validate_client_model_visible,
+        visible_codex_model_ids_for_api_key, websocket_accept_value,
         websocket_connect_error_from_http_response, windows_proxy_url_from_server,
         windows_reg_dword_enabled, windows_reg_query_map,
         write_local_access_profile_model_override, write_local_access_profile_takeover,
@@ -22302,8 +22505,8 @@ mod tests {
         SidecarUsageEvent, UsageCapture, BOUND_OAUTH_QUOTA_RESERVE_MAX_SNAPSHOT_AGE_SECONDS,
         CODEX_AUTO_REVIEW_MODEL_ID, CODEX_IMAGEGEN_ACTOR_HEADER,
         CODEX_LOCAL_ACCESS_TEST_DISABLE_IMAGE_GENERATION_HEADER, CODEX_PROFILE_AUTH_FILE,
-        CODEX_PROFILE_CONFIG_FILE, CODEX_PROVIDER_MODEL_BACKUP_FILE, CODEX_PROVIDER_MODEL_CATALOG_FILE,
-        DEFAULT_MAX_RETRY_INTERVAL_MS,
+        CODEX_PROFILE_CONFIG_FILE, CODEX_PROVIDER_MODEL_BACKUP_FILE,
+        CODEX_PROVIDER_MODEL_CATALOG_FILE, DEFAULT_MAX_RETRY_INTERVAL_MS,
         DEFAULT_MODEL_PRICING_VERSION, DEFAULT_SESSION_AFFINITY_TTL_MS, MAX_HTTP_REQUEST_BYTES,
     };
     use crate::models::codex::{
@@ -23856,6 +24059,7 @@ wire_api = "responses"
             upstream,
             br#"{"type":"response.create","payload":{}}"#.to_vec(),
             CodexLocalAccessTimeouts::default(),
+            None,
         ));
         let pong_result = pong_rx.await.unwrap();
 
@@ -23909,6 +24113,7 @@ wire_api = "responses"
             upstream,
             br#"{"type":"response.create","payload":{}}"#.to_vec(),
             CodexLocalAccessTimeouts::default(),
+            None,
         ));
         let (first_opcode, first_payload) =
             read_raw_client_websocket_frame(&mut raw_upstream).await;
@@ -25967,6 +26172,104 @@ data: {"type":"response.completed","response":{"id":"resp_123","usage":{"input_t
                 .iter()
                 .any(|tool| tool.get("type").and_then(Value::as_str) == Some("web_search_preview")))
             .unwrap_or(false));
+    }
+
+    #[test]
+    fn disabled_image_generation_mode_removes_responses_lite_capabilities() {
+        let account = test_account_with_plan("plus");
+        let body = br#"{
+            "model":"gpt-5.6-sol",
+            "tool_choice":{"tool":{"type":"namespace","name":"image_gen"}},
+            "tools":[
+                {"type":"namespace","name":"image_gen","tools":[{"type":"function","name":"imagegen"}]},
+                {"type":"function","name":"image_gen.imagegen"},
+                {"type":"namespace","name":"codex_app"},
+                {"type":"function","name":"lookup"}
+            ],
+            "input":[
+                {"type":"additional_tools","tools":[
+                    {"type":"namespace","namespace":"image_gen"},
+                    {"type":"function","name":"keep_me"}
+                ]},
+                {"role":"user","content":[{"type":"input_image","image_url":"data:image/png;base64,AA=="}]},
+                {"type":"image_generation_call","result":"AA=="}
+            ],
+            "response":{
+                "tools":[{"type":"image_generation"},{"type":"function","name":"nested_keep"}],
+                "tool_choice":{"type":"namespace","namespace":"image_gen"}
+            }
+        }"#;
+
+        let mapped_body = build_account_scoped_upstream_body(
+            "/responses",
+            body,
+            &account,
+            CodexLocalAccessImageGenerationMode::Disabled,
+            CodexLocalAccessRequestKind::Text,
+        )
+        .expect("disabled Responses Lite body should build");
+        let parsed: Value =
+            serde_json::from_slice(mapped_body.as_ref()).expect("body should remain json");
+
+        assert!(parsed.get("tool_choice").is_none());
+        assert!(parsed
+            .get("tools")
+            .and_then(Value::as_array)
+            .is_some_and(|tools| tools.len() == 2
+                && tools
+                    .iter()
+                    .all(|tool| !tool_declares_image_generation_capability(tool))));
+        assert!(parsed
+            .pointer("/input/0/tools")
+            .and_then(Value::as_array)
+            .is_some_and(|tools| tools.len() == 1
+                && tools[0].get("name").and_then(Value::as_str) == Some("keep_me")));
+        assert_eq!(
+            parsed
+                .pointer("/input/1/content/0/type")
+                .and_then(Value::as_str),
+            Some("input_image")
+        );
+        assert_eq!(
+            parsed.pointer("/input/2/type").and_then(Value::as_str),
+            Some("image_generation_call")
+        );
+        assert!(parsed.pointer("/response/tool_choice").is_none());
+        assert_eq!(
+            parsed
+                .pointer("/response/tools/0/name")
+                .and_then(Value::as_str),
+            Some("nested_keep")
+        );
+    }
+
+    #[test]
+    fn websocket_followup_messages_apply_the_same_image_generation_filter() {
+        let account = test_account_with_plan("plus");
+        let payload = r#"{"type":"response.create","response":{"tools":[{"type":"namespace","name":"image_gen"},{"type":"function","name":"keep"}]}}"#;
+
+        for message in [
+            Message::Text(payload.into()),
+            Message::Binary(payload.as_bytes().to_vec().into()),
+        ] {
+            let filtered = filter_websocket_client_message(
+                message,
+                &account,
+                CodexLocalAccessImageGenerationMode::Disabled,
+            )
+            .expect("WebSocket follow-up payload should filter");
+            let parsed = match filtered {
+                Message::Text(text) => serde_json::from_str::<Value>(&text).unwrap(),
+                Message::Binary(bytes) => serde_json::from_slice::<Value>(&bytes).unwrap(),
+                _ => panic!("expected data frame"),
+            };
+            assert_eq!(
+                parsed
+                    .pointer("/response/tools/0/name")
+                    .and_then(Value::as_str),
+                Some("keep")
+            );
+        }
     }
 
     #[test]

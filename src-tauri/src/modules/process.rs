@@ -424,7 +424,7 @@ fn powershell_output(args: &[&str]) -> std::io::Result<std::process::Output> {
 }
 
 #[cfg(target_os = "windows")]
-fn powershell_output_with_timeout(
+pub(crate) fn powershell_output_with_timeout(
     args: &[&str],
     timeout: Duration,
 ) -> std::io::Result<std::process::Output> {
@@ -945,6 +945,31 @@ fn push_app_launch_candidate(
 }
 
 #[cfg(target_os = "windows")]
+fn windows_fixed_drive_roots() -> Vec<std::path::PathBuf> {
+    use windows::core::PCWSTR;
+    use windows::Win32::Storage::FileSystem::{GetDriveTypeW, GetLogicalDrives};
+
+    const DRIVE_FIXED: u32 = 3;
+
+    let drive_mask = unsafe { GetLogicalDrives() };
+    let mut roots = Vec::new();
+    for index in 0..26u32 {
+        if drive_mask & (1 << index) == 0 {
+            continue;
+        }
+        let drive = format!("{}:\\", (b'A' + index as u8) as char);
+        let wide = drive
+            .encode_utf16()
+            .chain(std::iter::once(0))
+            .collect::<Vec<_>>();
+        if unsafe { GetDriveTypeW(PCWSTR(wide.as_ptr())) } == DRIVE_FIXED {
+            roots.push(std::path::PathBuf::from(drive));
+        }
+    }
+    roots
+}
+
+#[cfg(target_os = "windows")]
 fn normalize_windows_scan_root(raw: &str) -> Option<std::path::PathBuf> {
     let mut value = raw
         .trim()
@@ -975,9 +1000,8 @@ fn parse_windows_scan_roots(scan_roots: Option<&str>) -> Vec<std::path::PathBuf>
         return roots;
     }
 
-    ('C'..='Z')
-        .map(|drive| std::path::PathBuf::from(format!("{}:\\", drive)))
-        .filter(|root| root.is_dir())
+    windows_fixed_drive_roots()
+        .into_iter()
         .filter(|root| seen.insert(root.to_string_lossy().to_lowercase()))
         .collect()
 }
@@ -1448,16 +1472,18 @@ exit 0
 "#
     );
 
-    let output = match powershell_output(&["-Command", &script]) {
-        Ok(value) => value,
-        Err(err) => {
-            crate::modules::logger::log_warn(&format!(
-                "[Path Detect] {} PowerShell detect failed: {}",
-                app_label, err
-            ));
-            return None;
-        }
-    };
+    let output =
+        match powershell_output_with_timeout(&["-Command", &script], WINDOWS_PROCESS_PROBE_TIMEOUT)
+        {
+            Ok(value) => value,
+            Err(err) => {
+                crate::modules::logger::log_warn(&format!(
+                    "[Path Detect] {} PowerShell detect failed: {}",
+                    app_label, err
+                ));
+                return None;
+            }
+        };
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         let stdout = String::from_utf8_lossy(&output.stdout);
@@ -3176,14 +3202,14 @@ fn find_codex_windows_app_main_exe(app_dir: &std::path::Path) -> Option<std::pat
 fn detect_codex_exec_path_by_windowsapps_scan() -> Option<std::path::PathBuf> {
     let mut best: Option<(u8, Vec<u32>, std::path::PathBuf)> = None;
 
-    for drive in b'A'..=b'Z' {
-        let drive_letter = drive as char;
+    for drive_root in windows_fixed_drive_roots() {
+        let drive_letter = drive_root.to_string_lossy().chars().next().unwrap_or('C');
         let windows_apps_root = if drive_letter == 'C' {
-            format!(r"{}:\Program Files\WindowsApps", drive_letter)
+            drive_root.join("Program Files").join("WindowsApps")
         } else {
-            format!(r"{}:\WindowsApps", drive_letter)
+            drive_root.join("WindowsApps")
         };
-        let root_path = std::path::PathBuf::from(&windows_apps_root);
+        let root_path = windows_apps_root;
         if !root_path.exists() {
             continue;
         }
@@ -3260,7 +3286,9 @@ if ($pkg -and -not [string]::IsNullOrWhiteSpace($pkg.InstallLocation)) {
   Write-Output ([string]$pkg.InstallLocation.Trim())
 }"#;
 
-    let output = powershell_output(&["-Command", script]).ok()?;
+    let output =
+        powershell_output_with_timeout(&["-Command", script], WINDOWS_PROCESS_PROBE_TIMEOUT)
+            .ok()?;
     if !output.status.success() {
         return None;
     }

@@ -7,6 +7,8 @@ use std::process::Command;
 #[cfg(not(target_os = "macos"))]
 use std::process::Stdio;
 use std::sync::Mutex;
+#[cfg(target_os = "windows")]
+use std::time::Duration;
 
 use chrono::Utc;
 use serde::Serialize;
@@ -1081,20 +1083,17 @@ fn scan_windows_start_apps_for_claude(
     candidates: &mut Vec<ClaudeDesktopLaunchCandidate>,
     seen: &mut HashSet<String>,
 ) {
-    use std::os::windows::process::CommandExt;
-
-    let output = Command::new("powershell.exe")
-        .args([
+    let output = modules::process::powershell_output_with_timeout(
+        &[
             "-NoProfile",
             "-NonInteractive",
             "-ExecutionPolicy",
             "Bypass",
             "-Command",
             "Get-StartApps | Where-Object { $_.Name -like '*Claude*' -or $_.AppID -like 'Claude_*' } | ForEach-Object { \"$($_.Name)`t$($_.AppID)\" }",
-        ])
-        .creation_flags(0x08000000)
-        .stdin(Stdio::null())
-        .output();
+        ],
+        Duration::from_secs(5),
+    );
     let Ok(output) = output else {
         return;
     };
@@ -1130,8 +1129,6 @@ fn scan_windows_appx_packages_for_claude(
     candidates: &mut Vec<ClaudeDesktopLaunchCandidate>,
     seen: &mut HashSet<String>,
 ) -> bool {
-    use std::os::windows::process::CommandExt;
-
     let configured_roots = split_scan_roots(scan_roots);
     let normalized_roots = configured_roots
         .iter()
@@ -1139,18 +1136,17 @@ fn scan_windows_appx_packages_for_claude(
         .filter(|root| !root.is_empty())
         .collect::<Vec<_>>();
 
-    let output = Command::new("powershell.exe")
-        .args([
+    let output = modules::process::powershell_output_with_timeout(
+        &[
             "-NoProfile",
             "-NonInteractive",
             "-ExecutionPolicy",
             "Bypass",
             "-Command",
             "Get-AppxPackage | Where-Object { $_.Name -like '*Claude*' -or $_.PackageFamilyName -like '*Claude*' -or $_.PackageFullName -like '*Claude*' } | ForEach-Object { $_.InstallLocation }",
-        ])
-        .creation_flags(0x08000000)
-        .stdin(Stdio::null())
-        .output();
+        ],
+        Duration::from_secs(5),
+    );
     let Ok(output) = output else {
         return false;
     };

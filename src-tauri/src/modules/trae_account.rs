@@ -2058,12 +2058,66 @@ const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 #[cfg(target_os = "windows")]
 fn windows_cmd_output_utf16(args: &[&str]) -> Option<std::process::Output> {
+    use std::io::Read;
     use std::os::windows::process::CommandExt;
+    use std::process::Stdio;
+    use std::time::{Duration, Instant};
 
     let mut command = std::process::Command::new("cmd");
-    command.args(args);
-    command.creation_flags(CREATE_NO_WINDOW);
-    command.output().ok()
+    command
+        .args(args)
+        .creation_flags(CREATE_NO_WINDOW)
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
+    let mut child = command.spawn().ok()?;
+    let started_at = Instant::now();
+    let stdout_reader = child.stdout.take().map(|mut output| {
+        std::thread::spawn(move || {
+            let mut bytes = Vec::new();
+            let _ = output.read_to_end(&mut bytes);
+            bytes
+        })
+    });
+    let stderr_reader = child.stderr.take().map(|mut output| {
+        std::thread::spawn(move || {
+            let mut bytes = Vec::new();
+            let _ = output.read_to_end(&mut bytes);
+            bytes
+        })
+    });
+
+    let status = loop {
+        match child.try_wait() {
+            Ok(Some(status)) => break Some(status),
+            Ok(None) if started_at.elapsed() < Duration::from_secs(5) => {
+                std::thread::sleep(Duration::from_millis(50));
+            }
+            Ok(None) => {
+                let _ = child.kill();
+                let _ = child.wait();
+                logger::log_warn("[Trae] Windows 注册表扫描超时，已停止当前查询");
+                break None;
+            }
+            Err(err) => {
+                let _ = child.kill();
+                let _ = child.wait();
+                logger::log_warn(&format!("[Trae] Windows 注册表扫描失败: {}", err));
+                break None;
+            }
+        }
+    };
+    let stdout = stdout_reader
+        .and_then(|reader| reader.join().ok())
+        .unwrap_or_default();
+    let stderr = stderr_reader
+        .and_then(|reader| reader.join().ok())
+        .unwrap_or_default();
+    status.map(|status| std::process::Output {
+        status,
+        stdout,
+        stderr,
+    })
 }
 
 #[cfg(target_os = "windows")]
