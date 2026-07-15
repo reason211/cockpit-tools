@@ -289,7 +289,7 @@
     "settings": "الإعدادات",
     "codex": "Codex​",
     "githubCopilot": "GitHub Copilot​",
-    "windsurf": "Windsurf​",
+    "windsurf": "Devin​",
     "dashboard": "لوحة التحكم",
     "morePlatforms": "المزيد من المنصات",
     "instances": "مثيلات متعددة",
@@ -711,10 +711,10 @@
       "githubCopilotSettingsTitle": "إعدادات GitHub Copilot",
       "ghcpAutoRefresh": "تحديث حصة GitHub Copilot تلقائيا",
       "ghcpAutoRefreshDesc": "تكرار التحديث في الخلفية",
-      "windsurfSettingsTitle": "إعدادات Windsurf",
-      "windsurfAutoRefresh": "تحديث تلقائي لحصة Windsurf",
+      "windsurfSettingsTitle": "إعدادات Devin",
+      "windsurfAutoRefresh": "تحديث تلقائي لحصة Devin",
       "windsurfAutoRefreshDesc": "تردد التحديث التلقائي في الخلفية",
-      "windsurfAppPath": "مسار تطبيق Windsurf",
+      "windsurfAppPath": "مسار تطبيق Devin",
       "windsurfAppPathDesc": "اتركه فارغًا لاستخدام المسار الافتراضي",
       "windsurfAppPathPlaceholder": "المسار الافتراضي",
       "windsurfPathSelect": "اختيار",
@@ -3826,8 +3826,8 @@
     "inputPercent": "أدخل النسبة المئوية",
     "inputCredits": "أدخل الرصيد",
     "windsurf": {
-      "title": "إعدادات Windsurf",
-      "appPath": "مسار Windsurf"
+      "title": "إعدادات Devin",
+      "appPath": "مسار Devin"
     },
     "windsurfRefreshInterval": "تحديث الحصة تلقائياً",
     "kiro": {
@@ -3845,7 +3845,9 @@
       "appPath": "مسار Grok CLI",
       "cliPath": "مسار CLI",
       "cliDetected": "تم الاكتشاف: {{version}} · {{path}}",
-      "cliMissing": "لم يتم العثور على Grok CLI. أدخل مسارًا مخصصًا."
+      "cliMissing": "لم يتم العثور على Grok CLI. أدخل مسارًا مخصصًا.",
+      "syncOfficialAuthOnSwitch": "مزامنة تسجيل الدخول الرسمي",
+      "syncOfficialAuthOnSwitchDesc": "عند التفعيل، يؤدي تبديل حساب OAuth للمثيل الافتراضي إلى الكتابة في الملف الرسمي ~/.grok/auth.json. عند التعطيل، يُستخدم GROK_HOME مستقل. لا تستبدل مفاتيح API والمثيلات الإضافية تسجيل الدخول الرسمي."
     },
     "grokRefreshInterval": "تحديث الحصة تلقائيًا",
     "codebuddy": {
@@ -3929,21 +3931,21 @@
     }
   },
   "windsurf": {
-    "title": "إدارة حسابات Windsurf",
+    "title": "إدارة حسابات Devin",
     "instances": {
       "unsupported": {
-        "desc": "ميزة المثيلات المتعددة لـ Windsurf متاحة على macOS فقط."
+        "desc": "ميزة المثيلات المتعددة لـ Devin متاحة على macOS فقط."
       }
     },
     "empty": {
-      "description": "انقر على \"إضافة حساب\" لبدء إدارة حسابات Windsurf"
+      "description": "انقر على \"إضافة حساب\" لبدء إدارة حسابات Devin"
     },
     "addModal": {
-      "title": "إضافة حساب Windsurf",
+      "title": "إضافة حساب Devin",
       "password": "تسجيل البريد الإلكتروني"
     },
     "password": {
-      "desc": "سجّل الدخول ببريد حساب Windsurf الإلكتروني وكلمة المرور لجلب مفتاح API وبيانات الحساب تلقائيًا.",
+      "desc": "سجّل الدخول ببريد حساب Devin الإلكتروني وكلمة المرور لجلب مفتاح API وبيانات الحساب تلقائيًا.",
       "emailPlaceholder": "عنوان البريد الإلكتروني",
       "passwordPlaceholder": "كلمة المرور",
       "empty": "أدخل البريد الإلكتروني وكلمة المرور",
@@ -3990,14 +3992,14 @@
       "batchFailureMore": "فشل {{count}} أخرى"
     },
     "oauth": {
-      "desc": "انقر الزر أدناه وأكمل تفويض Windsurf في المتصفح."
+      "desc": "انقر الزر أدناه وأكمل تفويض Devin في المتصفح."
     },
     "token": {
-      "desc": "الصق رمز وصول Windsurf أو بيانات JSON المصدّرة."
+      "desc": "الصق رمز وصول Devin أو بيانات JSON المصدّرة."
     },
     "import": {
-      "localDesc": "استيراد بيانات حسابات Windsurf من ملف JSON.",
-      "localClient": "استيراد من Windsurf المحلي"
+      "localDesc": "استيراد بيانات حسابات Devin من ملف JSON.",
+      "localClient": "استيراد من Devin المحلي"
     },
     "credits": {
       "title": "الباقة",
@@ -4021,15 +4023,15 @@
       "autoRecharge": "إعادة الشحن التلقائي",
       "remaining": "متبقٍ {{value}}"
     },
-    "injectToVSCode": "التبديل إلى Windsurf",
-    "injectSuccess": "اكتمل التبديل. جارٍ تشغيل Windsurf.",
-    "injectRequireClose": "يرجى إغلاق Windsurf قبل التبديل.",
+    "injectToVSCode": "التبديل إلى Devin",
+    "injectSuccess": "اكتمل التبديل. جارٍ تشغيل Devin.",
+    "injectRequireClose": "يرجى إغلاق Devin قبل التبديل.",
     "flowNotice": {
-      "title": "دليل حسابات Windsurf (انقر للتوسيع/الطي)",
-      "desc": "يتطلب تبديل الحساب قراءة مخزن المصادقة المحلي في Windsurf واستخدام خدمة بيانات الاعتماد في النظام لفك التشفير وإعادة الكتابة؛ وتتم معالجة البيانات محليًا فقط.",
-      "inject": "تبديل بنقرة واحدة: تقرأ هذه الأداة مواد التشفير المحلية في Windsurf (DPAPI/Keychain/Secret Service)، وتفك تشفير جلسة المصادقة في state.vscdb، وتستبدل رمز Windsurf ثم تعيد التشفير — وكل ذلك محليًا على جهازك.",
-      "reason": "نطاق الأذونات: قراءة قاعدة بيانات مصادقة Windsurf ‏(state.vscdb) واستدعاء قدرات التشفير في النظام (Windows DPAPI / macOS Keychain / Linux Secret Service) لفك التشفير وإعادة الكتابة.",
-      "storage": "نطاق القراءة: تتم معالجة بيانات جلسات تسجيل الدخول المرتبطة بـ Windsurf فقط، وجميع العمليات تُنفّذ محليًا."
+      "title": "دليل حسابات Devin (انقر للتوسيع/الطي)",
+      "desc": "يتطلب تبديل الحساب قراءة مخزن المصادقة المحلي في Devin واستخدام خدمة بيانات الاعتماد في النظام لفك التشفير وإعادة الكتابة؛ وتتم معالجة البيانات محليًا فقط.",
+      "inject": "تبديل بنقرة واحدة: تقرأ هذه الأداة مواد التشفير المحلية في Devin (DPAPI/Keychain/Secret Service)، وتفك تشفير جلسة المصادقة في state.vscdb، وتستبدل رمز Devin ثم تعيد التشفير — وكل ذلك محليًا على جهازك.",
+      "reason": "نطاق الأذونات: قراءة قاعدة بيانات مصادقة Devin ‏(state.vscdb) واستدعاء قدرات التشفير في النظام (Windows DPAPI / macOS Keychain / Linux Secret Service) لفك التشفير وإعادة الكتابة.",
+      "storage": "نطاق القراءة: تتم معالجة بيانات جلسات تسجيل الدخول المرتبطة بـ Devin فقط، وجميع العمليات تُنفّذ محليًا."
     }
   },
   "kiro": {
@@ -4207,7 +4209,7 @@
       "goSettings": "اذهب إلى الإعدادات",
       "goVerification": "اذهب إلى تحقق الإيقاظ",
       "goWakeup": "اذهب إلى مهام الإيقاظ",
-      "goWindsurf": "اذهب إلى Windsurf",
+      "goWindsurf": "اذهب إلى Devin",
       "openLayout": "فتح تخطيط المنصات"
     },
     "antigravity": {
@@ -4324,11 +4326,11 @@
     "navTitle": "دليل الاستخدام",
     "providers": {
       "cautions": {
-        "0": "انسخ البيانات احتياطيًا قبل الإجراءات الخطرة أو المجمعة في Codex / GitHub Copilot / Windsurf / Kiro.",
-        "1": "تحقق من المرشحات والهدف قبل التنفيذ في Codex / GitHub Copilot / Windsurf / Kiro."
+        "0": "انسخ البيانات احتياطيًا قبل الإجراءات الخطرة أو المجمعة في Codex / GitHub Copilot / Devin / Kiro.",
+        "1": "تحقق من المرشحات والهدف قبل التنفيذ في Codex / GitHub Copilot / Devin / Kiro."
       },
       "keywords": {
-        "0": "منصات Codex / GitHub Copilot / Windsurf / Kiro",
+        "0": "منصات Codex / GitHub Copilot / Devin / Kiro",
         "1": "دليل",
         "2": "سير عمل",
         "3": "حساب",
@@ -4336,17 +4338,17 @@
         "5": "استكشاف أخطاء"
       },
       "outcomes": {
-        "0": "افهم ما الذي يمكن أن يقدمه Codex / GitHub Copilot / Windsurf / Kiro.",
-        "1": "استخدم التدفق المقترح في Codex / GitHub Copilot / Windsurf / Kiro لتقليل الأخطاء.",
-        "2": "تحقق من نجاح تشغيل واحد في Codex / GitHub Copilot / Windsurf / Kiro قبل التوسع."
+        "0": "افهم ما الذي يمكن أن يقدمه Codex / GitHub Copilot / Devin / Kiro.",
+        "1": "استخدم التدفق المقترح في Codex / GitHub Copilot / Devin / Kiro لتقليل الأخطاء.",
+        "2": "تحقق من نجاح تشغيل واحد في Codex / GitHub Copilot / Devin / Kiro قبل التوسع."
       },
       "steps": {
-        "0": "افتح صفحة Codex / GitHub Copilot / Windsurf / Kiro.",
-        "1": "أكمل الإعداد الأساسي والربط المطلوب في Codex / GitHub Copilot / Windsurf / Kiro.",
-        "2": "نفّذ عملية يدوية واحدة في Codex / GitHub Copilot / Windsurf / Kiro للتحقق من النتيجة."
+        "0": "افتح صفحة Codex / GitHub Copilot / Devin / Kiro.",
+        "1": "أكمل الإعداد الأساسي والربط المطلوب في Codex / GitHub Copilot / Devin / Kiro.",
+        "2": "نفّذ عملية يدوية واحدة في Codex / GitHub Copilot / Devin / Kiro للتحقق من النتيجة."
       },
-      "summary": "يوضح هذا القسم كيفية استخدام Codex / GitHub Copilot / Windsurf / Kiro ضمن سير العمل اليومي.",
-      "title": "منصات Codex / GitHub Copilot / Windsurf / Kiro"
+      "summary": "يوضح هذا القسم كيفية استخدام Codex / GitHub Copilot / Devin / Kiro ضمن سير العمل اليومي.",
+      "title": "منصات Codex / GitHub Copilot / Devin / Kiro"
     },
     "quickStart": {
       "cautions": {
@@ -5163,8 +5165,8 @@
     "search": "البحث في حسابات Grok CLI...",
     "flowNotice": {
       "title": "إدارة حسابات Grok CLI",
-      "desc": "يدير Cockpit الحسابات بتنسيق بيانات الاعتماد الرسمي لـ Grok CLI لتبديل الحساب الافتراضي فعليًا وربط النسخ المعزولة.",
-      "permission": "النطاق المحلي: قراءة ملف ~/.grok/auth.json الافتراضي وإدارة أدلة منفصلة لحسابات Grok وGROK_HOME ضمن بيانات Cockpit المحلية.",
+      "desc": "تُستخدم أدلة GROK_HOME مستقلة افتراضيًا. عند تفعيل المزامنة، يكتب تبديل OAuth للمثيل الافتراضي في ~/.grok/auth.json، بينما تبقى المثيلات الإضافية معزولة.",
+      "permission": "النطاق المحلي: يمكن قراءة ~/.grok/auth.json للاستيراد، ولا يُكتب إلا عند تفعيل المزامنة أثناء تبديل OAuth للمثيل الافتراضي. لا تستبدل مفاتيح API تسجيل الدخول الرسمي.",
       "network": "نطاق الشبكة: تفويض OAuth وتجديد بيانات الاعتماد والاستعلام عن استخدام الحساب. لا تُرفع بيانات الاعتماد إلى خدمات Cockpit."
     },
     "empty": "لا توجد حسابات Grok CLI بعد",

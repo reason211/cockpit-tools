@@ -242,7 +242,7 @@
     "settings": "設定",
     "codex": "Codex​",
     "githubCopilot": "GitHub Copilot​",
-    "windsurf": "Windsurf​",
+    "windsurf": "Devin​",
     "dashboard": "ダッシュボード",
     "morePlatforms": "その他のプラットフォーム",
     "instances": "マルチインスタンス",
@@ -667,10 +667,10 @@
       "githubCopilotSettingsTitle": "GitHub Copilot 設定",
       "ghcpAutoRefresh": "GitHub Copilot クォータの自動更新",
       "ghcpAutoRefreshDesc": "バックグラウンド更新頻度",
-      "windsurfSettingsTitle": "Windsurf 設定",
-      "windsurfAutoRefresh": "Windsurf 自動更新クォータ",
+      "windsurfSettingsTitle": "Devin 設定",
+      "windsurfAutoRefresh": "Devin 自動更新クォータ",
       "windsurfAutoRefreshDesc": "バックグラウンドでの更新頻度",
-      "windsurfAppPath": "Windsurf アプリのパス",
+      "windsurfAppPath": "Devin アプリのパス",
       "windsurfAppPathDesc": "空欄の場合は既定のパスを使用します",
       "windsurfAppPathPlaceholder": "既定のパス",
       "windsurfPathSelect": "選択",
@@ -3779,8 +3779,8 @@
     "inputPercent": "パーセントを入力",
     "inputCredits": "Credits を入力",
     "windsurf": {
-      "title": "Windsurf 設定",
-      "appPath": "Windsurf パス"
+      "title": "Devin 設定",
+      "appPath": "Devin パス"
     },
     "windsurfRefreshInterval": "クォータ自動更新",
     "kiro": {
@@ -3798,7 +3798,9 @@
       "appPath": "Grok CLI のパス",
       "cliPath": "CLI のパス",
       "cliDetected": "検出済み: {{version}} · {{path}}",
-      "cliMissing": "Grok CLI が見つかりません。任意のパスを入力してください。"
+      "cliMissing": "Grok CLI が見つかりません。任意のパスを入力してください。",
+      "syncOfficialAuthOnSwitch": "切替時に公式ログインへ同期",
+      "syncOfficialAuthOnSwitchDesc": "有効にすると、デフォルトインスタンスで OAuth アカウントを切り替えた際に公式の ~/.grok/auth.json へ書き込みます。無効時は個別の GROK_HOME を使用します。API Key と追加インスタンスは公式ログインを上書きしません。"
     },
     "grokRefreshInterval": "クォータ自動更新",
     "codebuddy": {
@@ -3882,21 +3884,21 @@
     }
   },
   "windsurf": {
-    "title": "Windsurf アカウント管理",
+    "title": "Devin アカウント管理",
     "instances": {
       "unsupported": {
-        "desc": "Windsurfマルチインスタンスは現在macOSでのみ利用可能です。"
+        "desc": "Devinマルチインスタンスは現在macOSでのみ利用可能です。"
       }
     },
     "empty": {
-      "description": "「アカウントを追加」から Windsurf アカウントを管理できます"
+      "description": "「アカウントを追加」から Devin アカウントを管理できます"
     },
     "addModal": {
-      "title": "Windsurf アカウントを追加",
+      "title": "Devin アカウントを追加",
       "password": "メールログイン"
     },
     "password": {
-      "desc": "Windsurf アカウントのメールアドレスとパスワードでログインし、API Key とアカウント情報を自動取得します。",
+      "desc": "Devin アカウントのメールアドレスとパスワードでログインし、API Key とアカウント情報を自動取得します。",
       "emailPlaceholder": "メールアドレス",
       "passwordPlaceholder": "パスワード",
       "empty": "メールアドレスとパスワードを入力してください",
@@ -3943,14 +3945,14 @@
       "batchFailureMore": "さらに {{count}} 件失敗"
     },
     "oauth": {
-      "desc": "下のボタンをクリックし、ブラウザで Windsurf の認可を完了してください。"
+      "desc": "下のボタンをクリックし、ブラウザで Devin の認可を完了してください。"
     },
     "token": {
-      "desc": "Windsurf のアクセストークン、またはエクスポートした JSON データを貼り付けてください。"
+      "desc": "Devin のアクセストークン、またはエクスポートした JSON データを貼り付けてください。"
     },
     "import": {
-      "localDesc": "ローカルでログイン済みのセッションから Windsurf アカウントをインポート。",
-      "localClient": "ローカル Windsurf からインポート"
+      "localDesc": "ローカルでログイン済みのセッションから Devin アカウントをインポート。",
+      "localClient": "ローカル Devin からインポート"
     },
     "credits": {
       "title": "プラン",
@@ -3974,15 +3976,15 @@
       "autoRecharge": "自動チャージ",
       "remaining": "残り {{value}}"
     },
-    "injectToVSCode": "Windsurfに切り替え",
-    "injectSuccess": "切り替えが完了しました。Windsurf を起動しています。",
-    "injectRequireClose": "切り替える前に Windsurf を閉じてください。",
+    "injectToVSCode": "Devinに切り替え",
+    "injectSuccess": "切り替えが完了しました。Devin を起動しています。",
+    "injectRequireClose": "切り替える前に Devin を閉じてください。",
     "flowNotice": {
-      "title": "Windsurf アカウントガイド（クリックで展開/折りたたみ）",
-      "desc": "アカウント切り替えでは、Windsurf のローカル認証ストレージを読み取り、システムの資格情報サービスを使って復号・再書き込みを行う必要があります。データは端末内のみで処理されます。",
-      "inject": "ワンクリック切り替え: このツールはローカルの Windsurf 暗号化情報（DPAPI/Keychain/Secret Service）を読み取り、state.vscdb 内の認証セッションを復号して Windsurf トークンを置き換え、再暗号化します。処理はすべて端末内で完結します。",
-      "reason": "必要な権限: Windsurf 認証データベース（state.vscdb）を読み取り、システム暗号化機能（Windows DPAPI / macOS Keychain / Linux Secret Service）を呼び出して復号・再書き込みを行います。",
-      "storage": "読み取り範囲: Windsurf ログインセッション関連データのみを処理し、すべての処理はローカルで実行されます。"
+      "title": "Devin アカウントガイド（クリックで展開/折りたたみ）",
+      "desc": "アカウント切り替えでは、Devin のローカル認証ストレージを読み取り、システムの資格情報サービスを使って復号・再書き込みを行う必要があります。データは端末内のみで処理されます。",
+      "inject": "ワンクリック切り替え: このツールはローカルの Devin 暗号化情報（DPAPI/Keychain/Secret Service）を読み取り、state.vscdb 内の認証セッションを復号して Devin トークンを置き換え、再暗号化します。処理はすべて端末内で完結します。",
+      "reason": "必要な権限: Devin 認証データベース（state.vscdb）を読み取り、システム暗号化機能（Windows DPAPI / macOS Keychain / Linux Secret Service）を呼び出して復号・再書き込みを行います。",
+      "storage": "読み取り範囲: Devin ログインセッション関連データのみを処理し、すべての処理はローカルで実行されます。"
     }
   },
   "kiro": {
@@ -4160,7 +4162,7 @@
       "goSettings": "設定へ",
       "goVerification": "起動検証へ",
       "goWakeup": "起動タスクへ",
-      "goWindsurf": "Windsurfへ",
+      "goWindsurf": "Devinへ",
       "openLayout": "プラットフォーム配置を開く"
     },
     "antigravity": {
@@ -4277,11 +4279,11 @@
     "navTitle": "機能マニュアル",
     "providers": {
       "cautions": {
-        "0": "Codex / GitHub Copilot / Windsurf / Kiro で一括・高リスク操作を行う前に必ずバックアップします。",
-        "1": "Codex / GitHub Copilot / Windsurf / Kiro 実行前にフィルタ条件と対象を再確認します。"
+        "0": "Codex / GitHub Copilot / Devin / Kiro で一括・高リスク操作を行う前に必ずバックアップします。",
+        "1": "Codex / GitHub Copilot / Devin / Kiro 実行前にフィルタ条件と対象を再確認します。"
       },
       "keywords": {
-        "0": "Codex / GitHub Copilot / Windsurf / Kiro プラットフォーム",
+        "0": "Codex / GitHub Copilot / Devin / Kiro プラットフォーム",
         "1": "ガイド",
         "2": "手順",
         "3": "アカウント",
@@ -4289,17 +4291,17 @@
         "5": "障害対応"
       },
       "outcomes": {
-        "0": "Codex / GitHub Copilot / Windsurf / Kiro で何ができるかを理解します。",
-        "1": "Codex / GitHub Copilot / Windsurf / Kiro の推奨フローでミスを減らします。",
-        "2": "Codex / GitHub Copilot / Windsurf / Kiro で1回成功を確認してから拡張します。"
+        "0": "Codex / GitHub Copilot / Devin / Kiro で何ができるかを理解します。",
+        "1": "Codex / GitHub Copilot / Devin / Kiro の推奨フローでミスを減らします。",
+        "2": "Codex / GitHub Copilot / Devin / Kiro で1回成功を確認してから拡張します。"
       },
       "steps": {
-        "0": "Codex / GitHub Copilot / Windsurf / Kiro のページを開きます。",
-        "1": "Codex / GitHub Copilot / Windsurf / Kiro の基本設定と必要な紐付けを完了します。",
-        "2": "Codex / GitHub Copilot / Windsurf / Kiro で手動操作を1回実行し、結果を確認します。"
+        "0": "Codex / GitHub Copilot / Devin / Kiro のページを開きます。",
+        "1": "Codex / GitHub Copilot / Devin / Kiro の基本設定と必要な紐付けを完了します。",
+        "2": "Codex / GitHub Copilot / Devin / Kiro で手動操作を1回実行し、結果を確認します。"
       },
-      "summary": "このセクションでは Codex / GitHub Copilot / Windsurf / Kiro の使い方を説明します。",
-      "title": "Codex / GitHub Copilot / Windsurf / Kiro プラットフォーム"
+      "summary": "このセクションでは Codex / GitHub Copilot / Devin / Kiro の使い方を説明します。",
+      "title": "Codex / GitHub Copilot / Devin / Kiro プラットフォーム"
     },
     "quickStart": {
       "cautions": {
@@ -5163,8 +5165,8 @@
     "search": "Grok CLI アカウントを検索...",
     "flowNotice": {
       "title": "Grok CLI アカウント管理",
-      "desc": "Cockpit は Grok CLI 公式の認証情報形式でアカウントを管理し、既定アカウントの実切り替えと分離インスタンスへの割り当てに使用します。",
-      "permission": "ローカル範囲: 既定の ~/.grok/auth.json を読み取り、Cockpit のローカルデータ内で個別の Grok アカウントと GROK_HOME ディレクトリを管理します。",
+      "desc": "通常は個別の GROK_HOME を使用します。公式ログイン同期を有効にすると、デフォルトインスタンスの OAuth 切替時に公式の ~/.grok/auth.json へ書き込み、追加インスタンスは分離されたままです。",
+      "permission": "ローカル範囲: 既定の ~/.grok/auth.json はインポート時に読み取れます。書き込みは同期が有効なデフォルトインスタンスの OAuth 切替時のみで、API Key は公式ログインを上書きしません。",
       "network": "ネットワーク範囲: OAuth 認証、認証情報の更新、アカウント使用量の照会。認証情報を Cockpit サービスへアップロードすることはありません。"
     },
     "empty": "Grok CLI アカウントはありません",

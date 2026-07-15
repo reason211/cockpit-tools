@@ -3847,7 +3847,7 @@ export function CodexApiServicePage() {
                   <span>
                     {t(
                       "codex.apiService.routing.immediateSseResponse",
-                      "SSE trả 200 ngay",
+                      "SSE 立即返回 200",
                     )}
                   </span>
                   <input

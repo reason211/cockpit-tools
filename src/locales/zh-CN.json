@@ -291,7 +291,7 @@
     "zed": "Zed 平台",
     "codebuddy": "CodeBuddy",
     "githubCopilot": "GitHub Copilot",
-    "windsurf": "Windsurf",
+    "windsurf": "Devin",
     "dashboard": "仪表盘",
     "morePlatforms": "更多平台",
     "collapseSidebar": "收起侧边栏",
@@ -1039,10 +1039,10 @@
       "githubCopilotSettingsTitle": "GitHub Copilot 设置",
       "ghcpAutoRefresh": "GitHub Copilot 自动刷新配额",
       "ghcpAutoRefreshDesc": "后台自动更新频率",
-      "windsurfSettingsTitle": "Windsurf 设置",
-      "windsurfAutoRefresh": "Windsurf 自动刷新配额",
+      "windsurfSettingsTitle": "Devin 设置",
+      "windsurfAutoRefresh": "Devin 自动刷新配额",
       "windsurfAutoRefreshDesc": "后台自动更新频率",
-      "windsurfAppPath": "Windsurf 启动路径",
+      "windsurfAppPath": "Devin 启动路径",
       "windsurfAppPathDesc": "留空则使用默认路径",
       "windsurfAppPathPlaceholder": "默认路径",
       "windsurfPathSelect": "选择",
@@ -4089,8 +4089,8 @@
     "inputPercent": "输入百分比",
     "inputCredits": "输入 Credits",
     "windsurf": {
-      "title": "Windsurf 设置",
-      "appPath": "Windsurf 路径"
+      "title": "Devin 设置",
+      "appPath": "Devin 路径"
     },
     "windsurfRefreshInterval": "配额自动刷新",
     "kiro": {
@@ -4112,7 +4112,9 @@
       "appPath": "Grok CLI 路径",
       "cliPath": "CLI 路径",
       "cliDetected": "已检测 {{version}} · {{path}}",
-      "cliMissing": "未检测到 Grok CLI，可填写自定义路径"
+      "cliMissing": "未检测到 Grok CLI，可填写自定义路径",
+      "syncOfficialAuthOnSwitch": "切号同步官方登录",
+      "syncOfficialAuthOnSwitchDesc": "开启后，默认实例切换 OAuth 账号会写入官方 ~/.grok/auth.json；关闭时使用独立 GROK_HOME。API Key 和多开实例不改写官方登录。"
     },
     "grokRefreshInterval": "配额自动刷新",
     "error": {
@@ -4187,24 +4189,24 @@
     }
   },
   "windsurf": {
-    "title": "Windsurf 账号管理",
+    "title": "Devin 账号管理",
     "instances": {
       "unsupported": {
-        "desc": "Windsurf 应用多开仅支持 macOS。"
+        "desc": "Devin 应用多开仅支持 macOS。"
       }
     },
     "empty": {
-      "description": "点击\"添加账号\"开始管理您的 Windsurf 账号"
+      "description": "点击\"添加账号\"开始管理您的 Devin 账号"
     },
     "addModal": {
-      "title": "添加 Windsurf 账号",
+      "title": "添加 Devin 账号",
       "password": "邮箱密码"
     },
     "oauth": {
-      "desc": "点击下方按钮，在浏览器中完成 Windsurf OAuth 授权。"
+      "desc": "点击下方按钮，在浏览器中完成 Devin OAuth 授权。"
     },
     "password": {
-      "desc": "使用 Windsurf 账号邮箱和密码登录，自动获取 API Key 与账号信息。",
+      "desc": "使用 Devin 账号邮箱和密码登录，自动获取 API Key 与账号信息。",
       "emailPlaceholder": "邮箱地址",
       "passwordPlaceholder": "密码",
       "empty": "请输入邮箱和密码",
@@ -4251,11 +4253,11 @@
       "batchFailureMore": "还有 {{count}} 项失败"
     },
     "token": {
-      "desc": "粘贴您的 Windsurf Access Token 或导出的 JSON 数据。"
+      "desc": "粘贴您的 Devin Access Token 或导出的 JSON 数据。"
     },
     "import": {
-      "localDesc": "从 JSON 文件导入 Windsurf 账号数据。",
-      "localClient": "从本机 Windsurf 导入"
+      "localDesc": "从 JSON 文件导入 Devin 账号数据。",
+      "localClient": "从本机 Devin 导入"
     },
     "credits": {
       "title": "计划",
@@ -4279,15 +4281,15 @@
       "autoRecharge": "自动充值",
       "remaining": "剩余 {{value}}"
     },
-    "injectToVSCode": "切换到 Windsurf",
-    "injectSuccess": "已完成切换，Windsurf 正在启动。",
-    "injectRequireClose": "请先关闭 Windsurf 再进行切换。",
+    "injectToVSCode": "切换到 Devin",
+    "injectSuccess": "已完成切换，Devin 正在启动。",
+    "injectRequireClose": "请先关闭 Devin 再进行切换。",
     "flowNotice": {
-      "title": "Windsurf 账号管理说明（点击展开/收起）",
-      "desc": "切换账号时需要读取 Windsurf 本地认证存储，并按客户端兼容规则调用系统凭据能力完成会话解密与写回；数据仅在本机处理。",
-      "inject": "一键切号：本工具读取本机 Windsurf 加密材料（DPAPI/Keychain/Secret Service），处理 state.vscdb 中的认证会话并写回 Windsurf 令牌 —— 全部在本机完成。",
-      "reason": "权限需求：读取 Windsurf 认证数据库（state.vscdb），并使用系统加密能力（Windows DPAPI / macOS Keychain / Linux Secret Service）处理登录会话的解密与写回。",
-      "storage": "读取范围：仅处理 Windsurf 登录会话相关数据，所有流程均在本地执行。"
+      "title": "Devin 账号管理说明（点击展开/收起）",
+      "desc": "切换账号时需要读取 Devin 本地认证存储，并按客户端兼容规则调用系统凭据能力完成会话解密与写回；数据仅在本机处理。",
+      "inject": "一键切号：本工具读取本机 Devin 加密材料（DPAPI/Keychain/Secret Service），处理 state.vscdb 中的认证会话并写回 Devin 令牌 —— 全部在本机完成。",
+      "reason": "权限需求：读取 Devin 认证数据库（state.vscdb），并使用系统加密能力（Windows DPAPI / macOS Keychain / Linux Secret Service）处理登录会话的解密与写回。",
+      "storage": "读取范围：仅处理 Devin 登录会话相关数据，所有流程均在本地执行。"
     }
   },
   "kiro": {
@@ -4465,7 +4467,7 @@
       "goSettings": "前往设置",
       "goVerification": "前往唤醒验证",
       "goWakeup": "前往唤醒任务",
-      "goWindsurf": "前往 Windsurf",
+      "goWindsurf": "前往 Devin",
       "openLayout": "打开平台布局"
     },
     "antigravity": {
@@ -4586,16 +4588,16 @@
         "1": "部分平台或能力受系统限制，请按页面提示处理。"
       },
       "keywords": {
-        "0": "Codex / GitHub Copilot / Windsurf / Kiro 平台",
+        "0": "Codex / GitHub Copilot / Devin / Kiro 平台",
         "1": "GitHub Copilot 平台",
-        "2": "Windsurf 平台",
+        "2": "Devin 平台",
         "3": "Kiro 平台",
         "4": "注入",
         "5": "切号"
       },
       "outcomes": {
         "0": "Codex：账号切换 + 配额刷新。",
-        "1": "GitHub Copilot/Windsurf/Kiro：支持注入到 VS Code 链路。",
+        "1": "GitHub Copilot/Devin/Kiro：支持注入到 VS Code 链路。",
         "2": "每个平台都可独立做筛选、分组、导入导出。"
       },
       "steps": {
@@ -4604,7 +4606,7 @@
         "2": "执行“切换/注入”并在客户端验证生效。"
       },
       "summary": "四个平台页结构一致：账号总览 + 应用多开，支持 OAuth、Token/JSON 导入与切换。",
-      "title": "Codex / GitHub Copilot / Windsurf / Kiro 平台"
+      "title": "Codex / GitHub Copilot / Devin / Kiro 平台"
     },
     "quickStart": {
       "cautions": {
@@ -5163,8 +5165,8 @@
     "search": "搜索 Grok CLI 账号...",
     "flowNotice": {
       "title": "Grok CLI 账号管理说明",
-      "desc": "Cockpit 按 Grok CLI 官方凭据格式管理账号，用于默认客户端真实切号和独立实例绑定。",
-      "permission": "本地范围：读取默认 ~/.grok/auth.json，并管理 Cockpit 本地数据中的独立 Grok 账号与 GROK_HOME 目录。",
+      "desc": "默认使用独立 GROK_HOME；开启“切号同步官方登录”后，默认实例切换 OAuth 账号会写入官方 ~/.grok/auth.json，多开实例仍保持隔离。",
+      "permission": "本地范围：可读取默认 ~/.grok/auth.json 用于导入；仅在开关开启且默认实例切换 OAuth 账号时写入该文件，API Key 不会覆盖官方登录。",
       "network": "网络范围：OAuth 授权、凭据刷新及账号用量查询；不会上传凭据到 Cockpit 服务。"
     },
     "empty": "暂无 Grok CLI 账号",
