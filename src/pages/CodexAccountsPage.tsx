@@ -79,12 +79,15 @@ import {
 } from "../components/CodexAccountGroupModal";
 import { CodexGroupAccountPickerModal } from "../components/CodexGroupAccountPickerModal";
 import { CodexLocalAccessModal } from "../components/CodexLocalAccessModal";
+import { CodexAccountPoolHealthModal } from "../components/CodexAccountPoolHealthModal";
 import {
   type CodexAccountGroup,
   assignAccountsToCodexGroup,
   cleanupDeletedCodexAccounts,
   deleteCodexGroup,
   getCodexAccountGroups,
+  isCodexGroupQuotaRefreshInherit,
+  resolveCodexGroupQuotaAutoRefreshMinutes,
   removeAccountsFromCodexGroup,
 } from "../services/codexAccountGroupService";
 import {
@@ -539,11 +542,12 @@ function isAbnormalLocalAccessAccountFailure(
 ): boolean {
   return Boolean(
     health &&
-      health.consecutiveFailures >= 3 &&
-      health.lastFailureCategory &&
-      ABNORMAL_LOCAL_ACCESS_ACCOUNT_FAILURE_CATEGORIES.has(
-        health.lastFailureCategory,
-      ),
+      ((health.schedulerAvailable === false && !health.cooldowns.length) ||
+        (health.consecutiveFailures >= 3 &&
+          health.lastFailureCategory &&
+          ABNORMAL_LOCAL_ACCESS_ACCOUNT_FAILURE_CATEGORIES.has(
+            health.lastFailureCategory,
+          ))),
   );
 }
 
@@ -1008,6 +1012,10 @@ export function CodexAccountsPage() {
     useState<CodexLocalAccessState | null>(null);
   const localAccessStateRequestSeqRef = useRef(0);
   const [showLocalAccessModal, setShowLocalAccessModal] = useState(false);
+  const [showLocalAccessHealthModal, setShowLocalAccessHealthModal] =
+    useState(false);
+  const [localAccessHealthActionBusy, setLocalAccessHealthActionBusy] =
+    useState(false);
   const [localAccessModalMode, setLocalAccessModalMode] = useState<
     "panel" | "members"
   >("panel");
@@ -8172,6 +8180,43 @@ export function CodexAccountsPage() {
     setShowLocalAccessHideConfirm(true);
   }, []);
 
+  const handleRecoverLocalAccessAccounts = useCallback(
+    async (accountIds: string[]) => {
+      if (localAccessHealthActionBusy || accountIds.length === 0) return;
+      setLocalAccessHealthActionBusy(true);
+      try {
+        const nextState =
+          await codexLocalAccessService.recoverCodexLocalAccessAccounts(
+            accountIds,
+          );
+        setLocalAccessState(nextState);
+        setMessage({
+          text: t("codex.localAccess.accountPoolHealth.recoverSuccess", {
+            count: accountIds.length,
+            defaultValue: "已提交 {{count}} 个账号的恢复操作",
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to recover local access accounts:", error);
+        const message = String(error).replace(/^Error:\s*/, "");
+        setMessage({
+          text: t("messages.actionFailed", {
+            action: t(
+              "codex.localAccess.accountPoolHealth.recover",
+              "恢复账号状态",
+            ),
+            error: message,
+          }),
+          tone: "error",
+        });
+        throw new Error(message);
+      } finally {
+        setLocalAccessHealthActionBusy(false);
+      }
+    },
+    [localAccessHealthActionBusy, setMessage, t],
+  );
+
   const confirmHideLocalAccessEntry = useCallback(async () => {
     if (localAccessHideSubmitting) return;
     setLocalAccessHideSubmitting(true);
@@ -9669,9 +9714,11 @@ export function CodexAccountsPage() {
 
       setRefreshingGroupId(group.id);
       try {
-        // 与 refresh_all 同源限流；避免 Promise.allSettled 无上限并发导致部分账号失败
-        const successCount =
-          await codexService.refreshCodexQuotasBatch(targetIds);
+        // 显式「刷新分组」：不遵守分组关闭策略，允许用户强制刷新
+        const successCount = await codexService.refreshCodexQuotasBatch(
+          targetIds,
+          { respectGroupQuotaRefresh: false },
+        );
 
         await fetchAccounts();
         await fetchCurrentAccount();
@@ -10038,6 +10085,7 @@ export function CodexAccountsPage() {
       const visibleTags = accountTags.slice(0, 8);
       const moreTagCount = Math.max(0, accountTags.length - visibleTags.length);
       const isInLocalAccess = localAccessAccountIdSet.has(account.id);
+      const canAddToLocalAccess = canDirectlyAddLocalAccessAccount(account);
       const subscriptionInfo = resolveSubscriptionPresentation(account);
       const isSubscriptionInfoMissing = subscriptionInfo.bucket === "missing";
       const isAccessTokenOnlySubscription =
@@ -10116,6 +10164,7 @@ export function CodexAccountsPage() {
           </div>
           {(meta.accountContextText ||
             isInLocalAccess ||
+            canAddToLocalAccess ||
             (!isApiKeyAccount && hasCodexAccountNoteDetails(account)) ||
             resetCreditControls) && (
             <div className="account-sub-line">
@@ -10131,6 +10180,21 @@ export function CodexAccountsPage() {
                 <span className="group-account-badge is-current">
                   {t("codex.localAccess.modal.selected", "已加入 API 服务")}
                 </span>
+              )}
+              {!isInLocalAccess && canAddToLocalAccess && (
+                <button
+                  type="button"
+                  className="group-account-badge codex-local-access-inline-add"
+                  onClick={() => void handleAddLocalAccessAccount(account.id)}
+                  disabled={addingLocalAccessAccountId === account.id}
+                  title={t(
+                    "codex.localAccess.entryAction",
+                    "添加至 API 服务",
+                  )}
+                >
+                  <Link2 size={11} />
+                  {t("codex.localAccess.entryAction", "添加至 API 服务")}
+                </button>
               )}
               {!isApiKeyAccount && renderAccountNoteButton(account)}
               {resetCreditControls}
@@ -10342,10 +10406,6 @@ export function CodexAccountsPage() {
                     <Terminal size={14} />
                   )}
                 </button>
-                {renderAddLocalAccessAccountButton(
-                  account,
-                  "card-action-btn",
-                )}
                 {isNewApiAccount && (
                   <button
                     className="card-action-btn"
@@ -10874,7 +10934,8 @@ export function CodexAccountsPage() {
             )}
 
             {localAccessAccountPoolHealthSummary.total > 0 && (
-              <div
+              <button
+                type="button"
                 className={`codex-local-access-health-summary${
                   localAccessAccountPoolHealthHasIssue ? " has-issue" : ""
                 }`}
@@ -10890,6 +10951,11 @@ export function CodexAccountsPage() {
                   defaultValue:
                     "可用 {{available}}/{{total}}，异常 {{abnormal}}，冷却 {{cooldown}}，缺失 {{missing}}，鉴权 {{authError}}，额度 {{quotaLimited}}",
                 })}
+                onClick={() => setShowLocalAccessHealthModal(true)}
+                aria-label={t(
+                  "codex.localAccess.accountPoolHealth.openDetails",
+                  "查看异常账号详情",
+                )}
               >
                 <span className="codex-local-access-health-summary-title">
                   {t("codex.localAccess.accountPoolHealth.title", "账号池")}
@@ -10919,7 +10985,7 @@ export function CodexAccountsPage() {
                     })}
                   </span>
                 )}
-              </div>
+              </button>
             )}
 
             {localAccessState?.lastError && (
@@ -11171,6 +11237,29 @@ export function CodexAccountsPage() {
                     {t("accounts.groups.accountCount", {
                       count: groupAccounts.length,
                     })}
+                    {(() => {
+                      const minutes =
+                        resolveCodexGroupQuotaAutoRefreshMinutes(group);
+                      if (minutes === null) return null;
+                      const label =
+                        minutes === -1
+                          ? t("accounts.groups.quotaRefreshOffBadge", "不刷新")
+                          : t("accounts.groups.quotaRefreshMinutesBadge", {
+                              count: minutes,
+                              defaultValue: "{{count}} 分钟",
+                            });
+                      return (
+                        <span
+                          className="folder-inline-quota-meta"
+                          title={t(
+                            "accounts.groups.quotaRefreshPolicyHint",
+                            "分组额度刷新为最高优先级；可继承平台设置、自定义间隔或不刷新",
+                          )}
+                        >
+                          · {label}
+                        </span>
+                      );
+                    })()}
                   </span>
                 </div>
                 <button
@@ -11181,7 +11270,12 @@ export function CodexAccountsPage() {
                           "accounts.groups.refreshEmpty",
                           "当前分组没有可刷新的账号",
                         )
-                      : t("accounts.groups.refresh", "刷新分组")
+                      : !isCodexGroupQuotaRefreshInherit(group)
+                        ? t(
+                            "accounts.groups.refreshForceHint",
+                            "本组自动额度策略非继承时，仍可手动刷新本组",
+                          )
+                        : t("accounts.groups.refresh", "刷新分组")
                   }
                   aria-label={t("accounts.groups.refresh", "刷新分组")}
                   disabled={groupRefreshDisabled}
@@ -11811,6 +11905,30 @@ export function CodexAccountsPage() {
                 {t("accounts.groups.accountCount", {
                   count: groupAccounts.length,
                 })}
+                {(() => {
+                  const minutes =
+                    resolveCodexGroupQuotaAutoRefreshMinutes(group);
+                  if (minutes === null) return null;
+                  const label =
+                    minutes === -1
+                      ? t("accounts.groups.quotaRefreshOffBadge", "不刷新")
+                      : t("accounts.groups.quotaRefreshMinutesBadge", {
+                          count: minutes,
+                          defaultValue: "{{count}} 分钟",
+                        });
+                  return (
+                    <span
+                      className="folder-inline-quota-meta"
+                      title={t(
+                        "accounts.groups.quotaRefreshPolicyHint",
+                        "分组额度刷新为最高优先级；可继承平台设置、自定义间隔或不刷新",
+                      )}
+                    >
+                      {" "}
+                      · {label}
+                    </span>
+                  );
+                })()}
               </span>
             </div>
           </td>
@@ -11824,7 +11942,12 @@ export function CodexAccountsPage() {
                         "accounts.groups.refreshEmpty",
                         "当前分组没有可刷新的账号",
                       )
-                    : t("accounts.groups.refresh", "刷新分组")
+                    : !isCodexGroupQuotaRefreshInherit(group)
+                      ? t(
+                          "accounts.groups.refreshForceHint",
+                          "本组自动额度策略非继承时，仍可手动刷新本组",
+                        )
+                      : t("accounts.groups.refresh", "刷新分组")
                 }
                 aria-label={t("accounts.groups.refresh", "刷新分组")}
                 disabled={groupRefreshDisabled}
@@ -17609,6 +17732,20 @@ export function CodexAccountsPage() {
             }
           />
 
+          <CodexAccountPoolHealthModal
+            isOpen={showLocalAccessHealthModal}
+            accountIds={localAccessCollection?.accountIds ?? []}
+            accounts={accounts}
+            accountHealth={localAccessState?.accountHealth ?? []}
+            actionBusy={localAccessHealthActionBusy}
+            maskAccountText={maskAccountText}
+            onClose={() => setShowLocalAccessHealthModal(false)}
+            onRecover={(accountId) =>
+              handleRecoverLocalAccessAccounts([accountId])
+            }
+            onRecoverAll={handleRecoverLocalAccessAccounts}
+          />
+
           <CodexLocalAccessModal
             isOpen={showLocalAccessModal}
             mode={localAccessModalMode}
@@ -17674,6 +17811,8 @@ export function CodexAccountsPage() {
             onRotateApiKey={handleRotateLocalAccessApiKey}
             onKillPort={handleKillLocalAccessPort}
             onToggleEnabled={handleToggleLocalAccessEnabled}
+            onRecoverAccounts={handleRecoverLocalAccessAccounts}
+            healthActionBusy={localAccessHealthActionBusy}
             onStreamTestMessage={({ sessionId, modelId, messages }) =>
               codexLocalAccessService.streamCodexLocalAccessChatTest(
                 sessionId,

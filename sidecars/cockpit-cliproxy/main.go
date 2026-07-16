@@ -118,6 +118,7 @@ type apiKeySpec struct {
 	Label               string               `json:"label"`
 	Key                 string               `json:"key"`
 	ProviderGateway     *providerGatewaySpec `json:"providerGateway,omitempty"`
+	BoundOAuth          bool                 `json:"boundOAuth,omitempty"`
 	AccountIDs          []string             `json:"accountIds"`
 	ModelPrefix         string               `json:"modelPrefix,omitempty"`
 	ResponsesWebsockets bool                 `json:"responsesWebsockets,omitempty"`
@@ -340,6 +341,9 @@ type requestDiagnosticPayload struct {
 	HTTPStatus      int    `json:"httpStatus,omitempty"`
 	Retryable       *bool  `json:"retryable,omitempty"`
 	RetryAfterMS    int64  `json:"retryAfterMs,omitempty"`
+	AuthAvailable   *bool  `json:"authAvailable,omitempty"`
+	NextRetryAtMS   int64  `json:"nextRetryAtMs,omitempty"`
+	AuthStateReason string `json:"authStateReason,omitempty"`
 }
 
 const executorWaitLogInterval = 30 * time.Second
@@ -1288,6 +1292,9 @@ func buildCodexClientModelsResponse(models []string, spec *apiKeySpec) gin.H {
 		preferWebsockets := spec != nil && spec.ProviderGateway == nil && spec.ResponsesWebsockets
 		for _, model := range data {
 			model["prefer_websockets"] = preferWebsockets
+			if spec != nil && spec.ProviderGateway != nil {
+				applyProviderGatewayCodexInputModalities(model, spec.ProviderGateway)
+			}
 			slug, _ := model["slug"].(string)
 			if isHiddenCodexClientModel(slug) {
 				model["visibility"] = "hide"
@@ -1314,6 +1321,20 @@ func buildCodexClientModelsResponse(models []string, spec *apiKeySpec) gin.H {
 		}
 	}
 	return response
+}
+
+func applyProviderGatewayCodexInputModalities(model map[string]any, gateway *providerGatewaySpec) {
+	slug, _ := model["slug"].(string)
+	slug = strings.TrimSpace(slug)
+	supportsImage := providerGatewayModelSupportsVision(gateway, slug) ||
+		strings.TrimSpace(providerGatewayVisionRoutingModel(gateway)) != ""
+	if supportsImage {
+		model["input_modalities"] = []any{"text", "image"}
+		model["supports_image_detail_original"] = true
+		return
+	}
+	model["input_modalities"] = []any{"text"}
+	delete(model, "supports_image_detail_original")
 }
 
 func intModelValueAny(value any) int {
@@ -1637,9 +1658,6 @@ func providerGatewayValueHasVisionInput(value any) bool {
 		if typ, _ := typed["type"].(string); strings.EqualFold(strings.TrimSpace(typ), "input_image") || strings.EqualFold(strings.TrimSpace(typ), "image_url") {
 			return true
 		}
-		if _, ok := typed["image_url"]; ok {
-			return true
-		}
 		for _, child := range typed {
 			if providerGatewayValueHasVisionInput(child) {
 				return true
@@ -1653,6 +1671,58 @@ func providerGatewayValueHasVisionInput(value any) bool {
 		}
 	}
 	return false
+}
+
+const providerGatewayOmittedImageText = "[Image omitted because the current model does not support image input.]"
+
+func omitProviderGatewayVisionInput(body []byte, sourceFormat sdktranslator.Format) ([]byte, int, error) {
+	var payload any
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return nil, 0, err
+	}
+	textType := "text"
+	if sourceFormatEqual(sourceFormat, sdktranslator.FormatOpenAIResponse) {
+		textType = "input_text"
+	}
+	omitted, count := omitProviderGatewayVisionValue(payload, textType)
+	if count == 0 {
+		return body, 0, nil
+	}
+	normalized, err := json.Marshal(omitted)
+	if err != nil {
+		return nil, 0, err
+	}
+	return normalized, count, nil
+}
+
+func omitProviderGatewayVisionValue(value any, textType string) (any, int) {
+	switch typed := value.(type) {
+	case map[string]any:
+		typ, _ := typed["type"].(string)
+		if strings.EqualFold(strings.TrimSpace(typ), "input_image") || strings.EqualFold(strings.TrimSpace(typ), "image_url") {
+			return map[string]any{
+				"type": textType,
+				"text": providerGatewayOmittedImageText,
+			}, 1
+		}
+		count := 0
+		for key, child := range typed {
+			next, childCount := omitProviderGatewayVisionValue(child, textType)
+			typed[key] = next
+			count += childCount
+		}
+		return typed, count
+	case []any:
+		count := 0
+		for index, child := range typed {
+			next, childCount := omitProviderGatewayVisionValue(child, textType)
+			typed[index] = next
+			count += childCount
+		}
+		return typed, count
+	default:
+		return value, 0
+	}
 }
 
 func stripModelPrefix(model string, spec *apiKeySpec) string {
@@ -2897,23 +2967,35 @@ func (h *authHook) OnResult(ctx context.Context, result coreauth.Result) {
 		retryAfterMS = result.RetryAfter.Milliseconds()
 	}
 	success := result.Success
+	var authAvailable *bool
+	if result.AuthStateKnown {
+		value := result.AuthAvailable
+		authAvailable = &value
+	}
+	nextRetryAtMS := int64(0)
+	if !result.NextRetryAt.IsZero() {
+		nextRetryAtMS = result.NextRetryAt.UnixMilli()
+	}
 	h.emitter.emit(requestDiagnosticPayload{
-		Type:         "auth_result",
-		RequestID:    internallogging.GetRequestID(ctx),
-		Provider:     result.Provider,
-		Model:        model,
-		AuthID:       result.AuthID,
-		AccountID:    stringFromAccount(account, "id"),
-		AccountEmail: stringFromAccount(account, "email"),
-		APIKeyID:     stringFromAPIKey(spec, "id"),
-		APIKeyLabel:  stringFromAPIKey(spec, "label"),
-		RequestKind:  requestKind,
-		Success:      &success,
-		HTTPStatus:   status,
-		ErrorCode:    errorCode,
-		ErrorMessage: errorMessage,
-		Retryable:    retryablePtr,
-		RetryAfterMS: retryAfterMS,
+		Type:            "auth_result",
+		RequestID:       internallogging.GetRequestID(ctx),
+		Provider:        result.Provider,
+		Model:           model,
+		AuthID:          result.AuthID,
+		AccountID:       stringFromAccount(account, "id"),
+		AccountEmail:    stringFromAccount(account, "email"),
+		APIKeyID:        stringFromAPIKey(spec, "id"),
+		APIKeyLabel:     stringFromAPIKey(spec, "label"),
+		RequestKind:     requestKind,
+		Success:         &success,
+		HTTPStatus:      status,
+		ErrorCode:       errorCode,
+		ErrorMessage:    errorMessage,
+		Retryable:       retryablePtr,
+		RetryAfterMS:    retryAfterMS,
+		AuthAvailable:   authAvailable,
+		NextRetryAtMS:   nextRetryAtMS,
+		AuthStateReason: result.AuthStateReason,
 	})
 }
 
@@ -3734,6 +3816,7 @@ type relayServer struct {
 	runtime            executorRuntime
 	cfg                *config.Config
 	manifest           *manifest
+	authManager        *coreauth.Manager
 	emitter            *eventEmitter
 	policy             *requestPolicy
 	responsesWebsocket gin.HandlerFunc
@@ -3745,6 +3828,7 @@ func (s *relayServer) router() *gin.Engine {
 	router.Use(corsMiddleware())
 	router.Use(s.policy.middleware())
 	router.GET("/v1/models", s.handleModels)
+	router.POST("/v1/cockpit/auth/reset", s.handleResetAuthState)
 	// Codex Responses WebSocket upgrade uses GET /v1/responses (not POST/SSE).
 	router.GET("/v1/responses", s.handleResponsesWebsocket)
 	router.POST("/v1/responses", s.handleResponses)
@@ -3771,6 +3855,71 @@ func (s *relayServer) router() *gin.Engine {
 		writeAPIError(c, http.StatusNotFound, "endpoint not supported", "not_found")
 	})
 	return router
+}
+
+type resetAuthStateRequest struct {
+	AccountIDs []string `json:"accountIds"`
+}
+
+func (s *relayServer) handleResetAuthState(c *gin.Context) {
+	spec, ok := s.requireAPIKey(c)
+	if !ok {
+		return
+	}
+	if s.authManager == nil || s.manifest == nil {
+		writeAPIError(c, http.StatusServiceUnavailable, "auth manager unavailable", "service_unavailable")
+		return
+	}
+
+	var req resetAuthStateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		writeAPIError(c, http.StatusBadRequest, "invalid request body", "invalid_request")
+		return
+	}
+
+	accountIDs := normalizeStringList(req.AccountIDs)
+	if len(accountIDs) == 0 {
+		writeAPIError(c, http.StatusBadRequest, "accountIds is required", "invalid_request")
+		return
+	}
+
+	allowed := make(map[string]struct{}, len(spec.AccountIDs))
+	for _, accountID := range spec.AccountIDs {
+		allowed[strings.TrimSpace(accountID)] = struct{}{}
+	}
+	type resetTarget struct {
+		accountID string
+		authID    string
+	}
+	targets := make([]resetTarget, 0, len(accountIDs))
+	for _, accountID := range accountIDs {
+		account := s.manifest.accountByID[accountID]
+		if account == nil || strings.TrimSpace(account.AuthID) == "" {
+			continue
+		}
+		if len(allowed) > 0 {
+			if _, ok := allowed[accountID]; !ok {
+				continue
+			}
+		}
+		targets = append(targets, resetTarget{accountID: accountID, authID: account.AuthID})
+	}
+	if len(targets) == 0 {
+		writeAPIError(c, http.StatusNotFound, "no resettable accounts found", "account_not_found")
+		return
+	}
+
+	resetAccountIDs := make([]string, 0, len(targets))
+	for _, target := range targets {
+		if auth, _ := s.authManager.ResetAuthState(c.Request.Context(), target.authID); auth != nil {
+			resetAccountIDs = append(resetAccountIDs, target.accountID)
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status":     "ok",
+		"reset":      len(resetAccountIDs),
+		"accountIds": resetAccountIDs,
+	})
 }
 
 func corsMiddleware() gin.HandlerFunc {
@@ -4856,22 +5005,39 @@ func (s *relayServer) handleProviderGatewayRequest(c *gin.Context, gateway *prov
 	if providerGatewayRequestHasVisionInput(body) && !supportsVision {
 		visionRoutingModel := providerGatewayVisionRoutingModel(gateway)
 		if strings.TrimSpace(visionRoutingModel) == "" {
-			writeAPIError(c, http.StatusBadRequest, fmt.Sprintf("model %s does not support image input", upstreamModel), "unsupported_image_input")
-			return
-		}
-		originalModel := upstreamModel
-		upstreamModel = visionRoutingModel
-		if s.emitter != nil {
-			s.emitter.emit(requestDiagnosticPayload{
-				Type:         "provider_gateway_vision_routed",
-				RequestID:    internallogging.GetRequestID(c.Request.Context()),
-				Method:       c.Request.Method,
-				Path:         requestPath(c.Request),
-				RequestKind:  requestKindFromPath(requestPath(c.Request)),
-				Model:        upstreamModel,
-				Transport:    diagnosticTransport(c.Request),
-				ErrorMessage: fmt.Sprintf("routed image input from %s to %s", originalModel, upstreamModel),
-			})
+			omittedBody, omittedCount, err := omitProviderGatewayVisionInput(body, sourceFormat)
+			if err != nil || omittedCount == 0 {
+				writeAPIError(c, http.StatusBadRequest, fmt.Sprintf("model %s does not support image input", upstreamModel), "unsupported_image_input")
+				return
+			}
+			body = omittedBody
+			if s.emitter != nil {
+				s.emitter.emit(requestDiagnosticPayload{
+					Type:         "provider_gateway_vision_omitted",
+					RequestID:    internallogging.GetRequestID(c.Request.Context()),
+					Method:       c.Request.Method,
+					Path:         requestPath(c.Request),
+					RequestKind:  requestKindFromPath(requestPath(c.Request)),
+					Model:        upstreamModel,
+					Transport:    diagnosticTransport(c.Request),
+					ErrorMessage: fmt.Sprintf("omitted %d image input item(s) for text-only model", omittedCount),
+				})
+			}
+		} else {
+			originalModel := upstreamModel
+			upstreamModel = visionRoutingModel
+			if s.emitter != nil {
+				s.emitter.emit(requestDiagnosticPayload{
+					Type:         "provider_gateway_vision_routed",
+					RequestID:    internallogging.GetRequestID(c.Request.Context()),
+					Method:       c.Request.Method,
+					Path:         requestPath(c.Request),
+					RequestKind:  requestKindFromPath(requestPath(c.Request)),
+					Model:        upstreamModel,
+					Transport:    diagnosticTransport(c.Request),
+					ErrorMessage: fmt.Sprintf("routed image input from %s to %s", originalModel, upstreamModel),
+				})
+			}
 		}
 	}
 	upstreamPath := "/v1/responses"
@@ -7440,6 +7606,7 @@ func main() {
 		runtime:            runtime,
 		cfg:                cfg,
 		manifest:           m,
+		authManager:        coreManager,
 		emitter:            emitter,
 		policy:             policy,
 		responsesWebsocket: responsesHandler.ResponsesWebsocket,

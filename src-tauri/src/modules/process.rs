@@ -1862,9 +1862,22 @@ fn spawn_open_app_with_options(
     args: &[String],
     force_new_instance: bool,
 ) -> Result<u32, String> {
+    spawn_open_app_with_options_and_env(app_root, args, force_new_instance, &[])
+}
+
+#[cfg(target_os = "macos")]
+fn spawn_open_app_with_options_and_env(
+    app_root: &str,
+    args: &[String],
+    force_new_instance: bool,
+    env_pairs: &[(&str, &str)],
+) -> Result<u32, String> {
     let mut cmd = Command::new("open");
     sanitize_macos_gui_launch_env(&mut cmd);
     append_managed_proxy_env_to_open_args(&mut cmd);
+    for (key, value) in env_pairs {
+        cmd.arg("--env").arg(format!("{}={}", key, value));
+    }
     if force_new_instance {
         cmd.arg("-n");
     }
@@ -6240,6 +6253,10 @@ pub fn resolve_codex_pid_from_entries(
         }
     }
 
+    // `ps`/`pgrep` may briefly retain zombie entries after a GUI child exits. Never
+    // resolve those stale PIDs back into an instance's running state.
+    matches.retain(|pid| is_pid_running(*pid));
+
     if let Some(pid) = last_pid {
         if is_pid_running(pid) && matches.contains(&pid) {
             return Some(pid);
@@ -9288,6 +9305,9 @@ pub fn collect_codex_process_entries() -> Vec<(u32, Option<String>)> {
         result.push((pid, codex_home));
     }
     filter_entries_by_expected_launch_path("Codex", result, expected_launch)
+        .into_iter()
+        .filter(|(pid, _)| is_pid_running(*pid))
+        .collect()
 }
 
 #[cfg(target_os = "windows")]
@@ -9652,11 +9672,12 @@ pub fn start_codex_with_args(codex_home: &str, extra_args: &[String]) -> Result<
         let codex_home_trimmed = codex_home.trim();
         let args = build_codex_app_launch_args(extra_args);
 
-        // 使用 open -a 启动，避免 macOS Responsible Process 归因
-        // 注意：CODEX_HOME 环境变量无法通过 open -a 传递，
-        // 如果指定了 codex_home 则需要回退到直接执行
+        // 通过 LaunchServices 启动 GUI 应用，避免直接执行 ChatGPT 主程序时
+        // 被 macOS 以 Cockpit Tools 为 responsible process，导致偶发长时间停在
+        // dyld/AppKit 初始化阶段。当前 macOS 的 `open` 支持 --env，因此
+        // CODEX_HOME 与独立 Electron user-data-dir 都可以随启动请求传入。
         if !codex_home_trimmed.is_empty() {
-            if let Ok(launch_path) = resolve_codex_launch_path() {
+            if resolve_codex_launch_path().is_ok() {
                 let app_user_data_dir =
                     crate::modules::codex_instance::get_macos_app_user_data_dir(Path::new(
                         codex_home_trimmed,
@@ -9669,25 +9690,25 @@ pub fn start_codex_with_args(codex_home: &str, extra_args: &[String]) -> Result<
                     )
                 })?;
 
-                let mut cmd = Command::new(&launch_path);
-                apply_managed_proxy_env_to_command(&mut cmd);
-                sanitize_macos_gui_launch_env(&mut cmd);
-                cmd.env("CODEX_HOME", codex_home_trimmed);
-                cmd.env("CODEX_ELECTRON_USER_DATA_PATH", &app_user_data_dir);
-                for arg in &args {
-                    cmd.arg(arg);
-                }
-                cmd.arg(format!(
-                    "--user-data-dir={}",
-                    app_user_data_dir.to_string_lossy()
-                ));
-                let child =
-                    spawn_detached_unix(&mut cmd).map_err(|e| format!("启动 Codex 失败: {}", e))?;
+                let app_user_data_dir_string = app_user_data_dir.to_string_lossy().to_string();
+                let mut launch_args = args.clone();
+                launch_args.push(format!("--user-data-dir={}", app_user_data_dir_string));
+                let open_pid = spawn_open_app_with_options_and_env(
+                    &app_root,
+                    &launch_args,
+                    true,
+                    &[
+                        ("CODEX_HOME", codex_home_trimmed),
+                        ("CODEX_ELECTRON_USER_DATA_PATH", &app_user_data_dir_string),
+                    ],
+                )
+                .map_err(|e| format!("启动 Codex 失败: {}", e))?;
                 crate::modules::logger::log_info(&format!(
-                    "[Codex Start] macOS managed instance using --user-data-dir and CODEX_ELECTRON_USER_DATA_PATH; codex_home={} electron_user_data={} launch_path={}",
+                    "[Codex Start] macOS managed instance using open -n -a with --env and --user-data-dir; launcher_pid={} codex_home={} electron_user_data={} app_root={}",
+                    open_pid,
                     summarize_text_for_process_log(codex_home_trimmed, 96),
-                    app_user_data_dir.to_string_lossy(),
-                    launch_path.to_string_lossy()
+                    app_user_data_dir_string,
+                    app_root
                 ));
                 // 轮询获取真实 PID
                 let probe_started = Instant::now();
@@ -9698,7 +9719,10 @@ pub fn start_codex_with_args(codex_home: &str, extra_args: &[String]) -> Result<
                     }
                     thread::sleep(Duration::from_millis(200));
                 }
-                return Ok(child.id());
+                return Err(format!(
+                    "Codex 实例启动超时，未找到真实主进程（open launcher pid={}）",
+                    open_pid
+                ));
             }
             return Err(app_path_missing_error("codex"));
         }
@@ -9900,10 +9924,13 @@ fn start_codex_default_internal(
             thread::sleep(Duration::from_millis(200));
         }
         crate::modules::logger::log_warn(&format!(
-            "[Codex Start] 启动后 6s 内未匹配到默认实例 PID，回退 open pid={}",
+            "[Codex Start] 启动后 6s 内未匹配到默认实例真实 PID，open launcher pid={} 不会写入实例状态",
             open_pid
         ));
-        return Ok(open_pid);
+        return Err(format!(
+            "Codex 默认实例启动超时，未找到真实主进程（open launcher pid={}）",
+            open_pid
+        ));
     }
 
     #[cfg(target_os = "windows")]
