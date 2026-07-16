@@ -7160,7 +7160,41 @@ func responsesSSECanEmitWithoutDelimiter(chunk []byte) bool {
 	if responsesSSENeedsMoreData(trimmed) {
 		return false
 	}
-	return isSSEFieldChunk(trimmed) || bytes.HasPrefix(trimmed, []byte("{")) || bytes.HasPrefix(trimmed, []byte("["))
+	if payload, ok := responsesSSEDataPayload(trimmed); ok {
+		if bytes.Equal(bytes.TrimSpace(payload), []byte("[DONE]")) {
+			return true
+		}
+		return json.Valid(payload)
+	}
+	return isSSEFieldChunk(trimmed)
+}
+
+func responsesSSEDataPayload(chunk []byte) ([]byte, bool) {
+	trimmed := bytes.TrimSpace(chunk)
+	if len(trimmed) == 0 {
+		return nil, false
+	}
+	if bytes.HasPrefix(trimmed, []byte("{")) || bytes.HasPrefix(trimmed, []byte("[")) {
+		return trimmed, true
+	}
+
+	lines := bytes.Split(bytes.ReplaceAll(trimmed, []byte("\r\n"), []byte("\n")), []byte("\n"))
+	dataLines := make([][]byte, 0, 1)
+	for _, line := range lines {
+		line = bytes.TrimSpace(line)
+		if !bytes.HasPrefix(line, []byte("data:")) {
+			continue
+		}
+		value := line[len("data:"):]
+		if len(value) > 0 && value[0] == ' ' {
+			value = value[1:]
+		}
+		dataLines = append(dataLines, value)
+	}
+	if len(dataLines) == 0 {
+		return nil, false
+	}
+	return bytes.Join(dataLines, []byte("\n")), true
 }
 
 func responsesSSENeedsMoreData(chunk []byte) bool {

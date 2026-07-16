@@ -25,6 +25,32 @@ import (
 	sdktranslator "github.com/router-for-me/CLIProxyAPI/v7/sdk/translator"
 )
 
+func TestResponsesSSEFramerBuffersPartialJSONAcrossChunks(t *testing.T) {
+	framer := newRelayStreamFramer(sdktranslator.FormatOpenAIResponse, "/v1/responses")
+	var output strings.Builder
+
+	first := []byte("event: response.completed\ndata: {\"type\":\"response.comp")
+	if err := framer.Write(&output, first); err != nil {
+		t.Fatalf("write first chunk: %v", err)
+	}
+	if output.Len() != 0 {
+		t.Fatalf("partial JSON should remain buffered, got %q", output.String())
+	}
+
+	second := []byte("leted\",\"response\":{\"id\":\"resp_1\"}}")
+	if err := framer.Write(&output, second); err != nil {
+		t.Fatalf("write second chunk: %v", err)
+	}
+	if err := framer.Close(&output); err != nil {
+		t.Fatalf("close framer: %v", err)
+	}
+
+	want := "event: response.completed\ndata: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\"}}\n\n"
+	if got := output.String(); got != want {
+		t.Fatalf("framed output = %q, want %q", got, want)
+	}
+}
+
 func TestCodexClientModelsResponseShape(t *testing.T) {
 	response := buildCodexClientModelsResponse([]string{"gpt-5.4", "gpt-image-2", codexAutoReviewModel}, &apiKeySpec{})
 	models, ok := response["models"].([]map[string]any)
